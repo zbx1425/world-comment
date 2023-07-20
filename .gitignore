@@ -37,6 +37,7 @@ checkouts
 
 # OpenBVE images
 *.bmp
+/test.sqlite
 
 # manifold
 build.properties
