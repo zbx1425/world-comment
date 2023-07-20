@@ -1,0 +1,45 @@
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+
+# eclipse
+
+*.launch
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# macos
+
+*.DS_Store
+
+# fabric
+
+run/
+mappings
+checkouts
+.architectury-transformer
+
+# OpenBVE images
+*.bmp
+
+# manifold
+build.properties
+
+# BuildConfig
+common/src/main/java/cn/zbx1425/worldcomment/BuildConfig.java

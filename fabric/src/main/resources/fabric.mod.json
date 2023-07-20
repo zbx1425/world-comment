@@ -1,0 +1,35 @@
+{
+	"schemaVersion": 1,
+	"id": "worldcomment",
+	"version": "${version}",
+	"name": "Subnoteica World Comment",
+	"description": "Subnoteica World Comment",
+	"authors": [
+		"Zbx1425"
+	],
+	"contact": {
+		"homepage": "https://github.com/zbx1425/world-comment",
+		"sources": "https://github.com/zbx1425/world-comment"
+	},
+	"license": "GPLv2",
+	"icon": "icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"cn.zbx1425.worldcomment.fabric.MainFabric"
+		],
+		"client": [
+			"cn.zbx1425.worldcomment.fabric.MainFabricClient"
+		],
+		"modmenu": [
+			"cn.zbx1425.worldcomment.fabric.ModMenuApiImpl"
+		]
+	},
+	"mixins": [
+		"worldcomment.mixins.json"
+	],
+	"depends": {
+		"fabric": "*",
+		"minecraft": "${minecraft_version}"
+	}
+}

@@ -1,0 +1,167 @@
+import groovy.json.JsonSlurper
+import org.apache.tools.ant.filters.ReplaceTokens
+
+import java.nio.file.Files
+
+plugins {
+	id "architectury-plugin" version "3.4-SNAPSHOT"
+	id "dev.architectury.loom" version "1.1-SNAPSHOT" apply false
+	id "de.undercouch.download" version "4.1.2"
+	id "com.github.johnrengelman.shadow" version "7.1.0"
+	id "io.github.pacifistmc.forgix" version "1.2.6"
+	id "base"
+}
+
+String default_minecraft_version = "1.20.1"
+Properties localProperties = new Properties()
+String minecraft_version
+if (project.rootProject.file('build.properties').exists()) {
+	localProperties.load(project.rootProject.file('build.properties').newDataInputStream())
+}
+if (localProperties.containsKey("MC_VERSION")) {
+	String notDotted = localProperties.get("MC_VERSION")
+	String dotted = notDotted.substring(0, 1) + "." +
+		Integer.toString(Integer.parseInt(notDotted.substring(1, 3))) + "." +
+		Integer.toString(Integer.parseInt(notDotted.substring(3, 5)))
+	minecraft_version = dotted
+	System.out.println(minecraft_version)
+} else {
+	minecraft_version = rootProject.properties.containsKey("buildVersion") ? rootProject.properties.get("buildVersion") : default_minecraft_version
+}
+int minecraft_main_version = minecraft_version.split("\\.")[1] as int
+String minecraft_version_int = minecraft_version.split("\\.")[0] +
+    minecraft_version.split("\\.")[1].padLeft(2, '0') +
+    (minecraft_version.split("\\.").length > 2 ? minecraft_version.split("\\.")[2].padLeft(2, '0') : "00")
+boolean parchment_not_avail = false
+String parchment_version = parchment_not_avail ? "N/A" : new XmlSlurper().parse("https://ldtteam.jfrog.io/artifactory/parchmentmc-internal/org/parchmentmc/data/parchment-${minecraft_version}/maven-metadata.xml").versioning.release
+
+
+rootProject.ext.fabric_loader_version = new JsonSlurper().parse(("https://meta.fabricmc.net/v2/versions/loader/" + minecraft_version).toURL())[0]["loader"]["version"]
+rootProject.ext.forge_version = minecraft_version + "-" + new JsonSlurper().parse(("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json").toURL())["promos"][minecraft_version + "-latest"]
+rootProject.ext.fabric_api_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
+rootProject.ext.mod_menu_version = getModrinthVersion("fabric", minecraft_version, "modmenu")
+rootProject.ext.architectury_version = getModrinthVersion("forge", minecraft_version, "architectury-api").split("\\+")[0]
+
+rootProject.ext.architectury_id = minecraft_main_version == 16 ? "me.shedaniel" : "dev.architectury"
+
+rootProject.ext.supports_minecraft_version = [
+		"1.16.5": "1.16.x",
+		"1.17.1": "1.17.x", "1.18.2": "1.18.x",
+		"1.19.2": "1.19.2", "1.19.4": "1.19.4",
+		"1.20.1": "1.20.x"
+][minecraft_version]
+rootProject.ext.supports_minecraft_version_range = [
+		"1.16.5": "[1.16, 1.17)",
+		"1.17.1": "[1.17, 1.18)", "1.18.2": "[1.18, 1.19)",
+		"1.19.2": "1.19.2", "1.19.4": "1.19.4",
+		"1.20.1": "[1.20, 1.21)"
+][minecraft_version]
+
+architectury {
+	minecraft = minecraft_version
+}
+
+subprojects {
+	apply plugin: "dev.architectury.loom"
+
+	loom {
+		silentMojangMappingsLicense()
+	}
+
+	dependencies {
+		annotationProcessor 'systems.manifold:manifold-preprocessor:2023.1.10'
+		minecraft "com.mojang:minecraft:${minecraft_version}"
+		mappings parchment_not_avail ? loom.officialMojangMappings() : loom.layered() {
+			officialMojangMappings()
+			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+		}
+		implementation files("../checkouts/mtr-common.jar")
+	}
+}
+
+task setupLibrary() {
+	/* TODO... */
+}
+
+task setupFiles() {
+	copy {
+		outputs.upToDateWhen { false }
+		from "common/src/main/BuildConfigTemplate.java"
+		into "common/src/main/java/cn/zbx1425/worldcomment"
+		filter(ReplaceTokens, tokens: ["version": minecraft_version + "-" + rootProject.mod_version])
+		rename "(.+)Template.java", "\$1.java"
+	}
+}
+
+allprojects {
+	apply plugin: "architectury-plugin"
+
+	version = project.mod_version + "+" + minecraft_version
+	group = project.maven_group
+
+	repositories {
+		maven { url = "https://jitpack.io/" }
+		maven { url = "https://maven.terraformersmc.com/" }
+		maven { url = "https://maven.parchmentmc.org/" }
+	}
+
+	tasks.withType(JavaCompile) {
+		options.encoding = "UTF-8"
+
+		if (minecraft_main_version == 16) {
+			def targetVersion = 8
+			if (JavaVersion.current().isJava9Compatible()) {
+				options.release.set(targetVersion)
+			}
+		} else if (minecraft_main_version == 17) {
+			options.release.set(16)
+		} else {
+			options.release.set(17)
+		}
+
+        options.compilerArgs += ['-Xplugin:Manifold', '-AMC_VERSION=' + minecraft_version_int]
+	}
+
+	afterEvaluate {
+		for (def task in it.tasks) {
+			if (task != rootProject.tasks.setupFiles) {
+				task.dependsOn rootProject.tasks.setupFiles
+			}
+		}
+	}
+
+	build.finalizedBy(mergeJars)
+	assemble.finalizedBy(mergeJars)
+}
+
+static def getModrinthVersion(loader, minecraftVersion, projectId) {
+	def versionsArray = new JsonSlurper().parse(("https://api.modrinth.com/v2/project/" + projectId + "/version").toURL())
+	for (def versionElement : versionsArray) {
+		if (versionElement["loaders"].contains(loader) && versionElement["game_versions"].contains(minecraftVersion)) {
+			return versionElement["version_number"]
+		}
+	}
+	return ""
+}
+
+static def getParchmentVersion(minecraftVersion) {
+	def url = "https://ldtteam.jfrog.io/artifactory/parchmentmc-internal/org/parchmentmc/data/parchment-" + minecraftVersion + "/maven-metadata.xml"
+	def data = new XmlParser().parse(url)
+	return data.versioning.latest.text()
+}
+
+forgix {
+	group = "cn.zbx1425"
+	mergedJarName = "WorldComment" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+	outputDir = "build/"
+
+	forge {
+		projectName = "forge"
+		jarLocation = "build/libs/forge" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+	}
+
+	fabric {
+		projectName = "fabric"
+		jarLocation = "build/libs/fabric" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+	}
+}

@@ -1,0 +1,79 @@
+plugins {
+	id "com.github.johnrengelman.shadow"
+}
+
+architectury {
+	platformSetupLoomIde()
+	fabric()
+}
+
+repositories {
+	maven {
+		name = "TerraformersMC"
+		url = uri("https://maven.terraformersmc.com/releases")
+	}
+}
+
+loom {
+	mixin {
+		defaultRefmapName = "mixins.worldcomment.refmap.json"
+	}
+}
+
+configurations {
+	common
+	shadowCommon
+	compileClasspath.extendsFrom common
+	runtimeClasspath.extendsFrom common
+	developmentFabric.extendsFrom common
+}
+
+dependencies {
+	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+	modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+
+	modApi "com.terraformersmc:modmenu:${rootProject.ext.mod_menu_version}"
+
+	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand (
+			"version": project.version,
+			"minecraft_version": rootProject.supports_minecraft_version
+		)
+	}
+}
+
+shadowJar {
+	exclude "*.bmp"
+
+	configurations = [project.configurations.shadowCommon]
+	classifier "dev-shadow"
+}
+
+remapJar {
+	input.set shadowJar.archiveFile
+	dependsOn shadowJar
+	classifier null
+}
+
+components.java {
+	withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+		skip()
+	}
+}
+
+afterEvaluate {
+	for (def task in it.tasks) {
+		if (task == tasks.build) {
+			if (System.env.GITHUB_ACTIONS) {
+				task.dependsOn rootProject.tasks.setupLibrary
+			}
+		}
+	}
+}
