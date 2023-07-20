@@ -170,3 +170,30 @@ forgix {
 		jarLocation = "build/libs/fabric" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
 	}
 }
+
+import org.gradle.api.internal.file.copy.CopyAction;
+import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
+
+class DummyArchiveTask extends AbstractArchiveTask {
+
+	protected CopyAction createCopyAction() {
+		return new DummyCopyAction();
+	}
+
+	class DummyCopyAction implements CopyAction {
+
+		@Override
+		WorkResult execute(CopyActionProcessingStream stream) {
+			return WorkResults.didWork(true);
+		}
+	}
+}
+
+task dummyForgixOutput(type: DummyArchiveTask) {
+	// Forgix's mergeJars task doesn't extend AbstractArchiveTask.
+	// This is to make github.com/teaconmc/longjing happy.
+	destinationDirectory = file("build/")
+	archiveBaseName = "WorldComment"
+	archiveVersion = rootProject.mod_version + "+" + minecraft_version
+	archiveExtension = "jar"
+}
