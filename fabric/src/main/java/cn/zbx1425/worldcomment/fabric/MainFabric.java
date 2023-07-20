@@ -7,7 +7,7 @@ public class MainFabric implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		Main.init();
+		Main.init(new RegistriesWrapperImpl());
 	}
 
 }

@@ -58,7 +58,7 @@ public interface RegistryUtilities {
         return SoundEvent.createVariableRangeEvent(resourceLocation);
     }
 
-    static Item.Properties createItemProperties(Supplier<CreativeModeTab> creativeModeTab) {
+    static Item.Properties createItemProperties() {
         return new Item.Properties();
     }
 
