@@ -78,11 +78,6 @@ subprojects {
 			officialMojangMappings()
 			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
 		}
-
-		implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
-		if (!rootProject.properties.containsKey("noShadowSqlite")) {
-			shadowCommon 'org.xerial:sqlite-jdbc:3.42.0.0'
-		}
 	}
 }
 

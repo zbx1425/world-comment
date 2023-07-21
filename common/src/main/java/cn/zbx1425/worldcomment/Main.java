@@ -9,13 +9,14 @@ import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
+import java.io.IOException;
 
 public class Main {
 
 	public static final String MOD_ID = "worldcomment";
-
 	public static final Logger LOGGER = LoggerFactory.getLogger("Subnoteica");
+
+	public static Database DATABASE;
 
 	public static final RegistryObject<Item> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
@@ -24,17 +25,10 @@ public class Main {
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {
-				Database.loadDatabase(server);
-			} catch (SQLException e) {
-				LOGGER.error("Failed to open database", e);
-				throw new RuntimeException(e);
-			}
-		});
-		ServerPlatform.registerServerStoppingEvent(server -> {
-			try {
-				Database.INSTANCE.close();
-			} catch (SQLException e) {
-				LOGGER.error("Failed to close database", e);
+				DATABASE = new Database(server);
+				DATABASE.load();
+			} catch (IOException e) {
+				LOGGER.error("Failed to open data storage", e);
 				throw new RuntimeException(e);
 			}
 		});
