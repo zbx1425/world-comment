@@ -1,0 +1,19 @@
+{
+  "item.worldcomment.comment_tool": "§l§6随处随笔§r 快速评论工具",
+
+  "gui.worldcomment.comment_type.r1": "您的宝贵意见",
+  "gui.worldcomment.comment_type.1": "好惊艳",
+  "gui.worldcomment.comment_type.2": "挺不错",
+  "gui.worldcomment.comment_type.3": "小建议",
+  "gui.worldcomment.comment_type.4": "要提高",
+  "gui.worldcomment.comment_type.r2": "建筑工作实用标记",
+  "gui.worldcomment.comment_type.5": "待办",
+  "gui.worldcomment.comment_type.6": "警告",
+  "gui.worldcomment.comment_type.7": "提示",
+  "gui.worldcomment.comment_type.8": "留言",
+
+  "gui.worldcomment.message": "请在此处留言 (非必须)",
+  "gui.worldcomment.message.placeholder": "(示例) 我要吃吃吃吃吃吃吃吃吃吃吃吃吃吃吃茶点啊啊啊啊啊",
+  "gui.worldcomment.include_screenshot": "包含截图",
+  "gui.worldcomment.submit": "提交!"
+}

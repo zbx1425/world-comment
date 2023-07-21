@@ -1,7 +1,12 @@
 package cn.zbx1425.worldcomment.data;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.ChunkPos;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommentTable {
 
@@ -15,7 +20,7 @@ public class CommentTable {
     public void init() throws SQLException {
         db.execute("""
             CREATE TABLE IF NOT EXISTS comments (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                id            INTEGER PRIMARY KEY,
                 timestamp     INTEGER,
                 deleted       INTEGER,
                 level         INTEGER,
@@ -39,13 +44,32 @@ public class CommentTable {
             """);
     }
 
-    public void fetchMaxId() throws SQLException {
-        try (ResultSet result = db.executeQuery("SELECT id FROM comments ORDER BY id DESC LIMIT 1;")) {
-            if (!result.next()) {
-                maxId = 0;
-            } else {
-                maxId = result.getInt(1);
+    public List<CommentEntry> queryInRegion(ResourceLocation level, ChunkPos region) throws SQLException {
+        ArrayList<CommentEntry> entries = new ArrayList<>();
+        try (ResultSet result = db.executeQuery(
+            "SELECT * FROM comments WHERE level = ? AND region = ?", params -> {
+                params.setInt(1, db.dimensions.getDimensionId(level));
+                params.setLong(2, region.toLong());
+            }
+        )) {
+            while (result.next()) {
+                entries.add(new CommentEntry(this, result));
             }
         }
+        return entries;
+    }
+
+    public List<CommentEntry> queryInTime(long from) throws SQLException {
+        ArrayList<CommentEntry> entries = new ArrayList<>();
+        try (ResultSet result = db.executeQuery(
+                "SELECT * FROM comments WHERE timestamp > ?", params -> {
+                    params.setLong(1, from);
+                }
+        )) {
+            while (result.next()) {
+                entries.add(new CommentEntry(this, result));
+            }
+        }
+        return entries;
     }
 }

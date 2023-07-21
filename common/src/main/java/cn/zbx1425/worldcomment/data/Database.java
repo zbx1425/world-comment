@@ -12,10 +12,11 @@ public class Database {
 
     public static Database INSTANCE;
 
+    public static final Snowflake SNOWFLAKE = new Snowflake();
+
     private final Connection dbConn;
 
     public final CommentTable comments;
-
     public final DimensionTable dimensions;
 
     public Database(Path dbPath) throws SQLException {

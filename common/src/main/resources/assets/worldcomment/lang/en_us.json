@@ -1,0 +1,19 @@
+{
+  "item.worldcomment.comment_tool": "§l§6Subnoteica§r Comment Tool",
+
+  "gui.worldcomment.comment_type.r1": "Your valuable opinion",
+  "gui.worldcomment.comment_type.1": "Great",
+  "gui.worldcomment.comment_type.2": "Good",
+  "gui.worldcomment.comment_type.3": "Advice",
+  "gui.worldcomment.comment_type.4": "NoGood",
+  "gui.worldcomment.comment_type.r2": "Markers for builder",
+  "gui.worldcomment.comment_type.5": "ToDo",
+  "gui.worldcomment.comment_type.6": "Warn",
+  "gui.worldcomment.comment_type.7": "Tip",
+  "gui.worldcomment.comment_type.8": "Memo",
+
+  "gui.worldcomment.message": "Enter feedback here (Optional)",
+  "gui.worldcomment.message.placeholder": "(Example) I WANNA EAAAAAAAAAT TEA CAKE AHHHHHHH",
+  "gui.worldcomment.include_screenshot": "Include screenshot",
+  "gui.worldcomment.submit": "Submit!"
+}
