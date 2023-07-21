@@ -4,7 +4,7 @@ plugins {
 
 loom {
 	forge {
-		mixinConfig "heatmap.mixins.json"
+		mixinConfig "worldcomment.mixins.json"
 	}
 }
 

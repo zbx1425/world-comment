@@ -1,0 +1,6 @@
+{
+  "shutter": {
+    "category": "player",
+    "sounds": [ "worldcomment:shutter" ]
+  }
+}

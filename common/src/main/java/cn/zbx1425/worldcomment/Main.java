@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.Database;
-import cn.zbx1425.worldcomment.item.ItemCommentTool;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -17,7 +17,7 @@ public class Main {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger("Subnoteica");
 
-	public static final RegistryObject<Item> ITEM_COMMENT_TOOL = new RegistryObject<>(ItemCommentTool::new);
+	public static final RegistryObject<Item> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL, CreativeModeTabs.TOOLS_AND_UTILITIES);
