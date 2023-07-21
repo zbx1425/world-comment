@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class CommentToolScreen extends Screen {
 
@@ -47,7 +46,8 @@ public class CommentToolScreen extends Screen {
 
     private List<CommentTypeButton> radioButtons = new ArrayList<>();
     private MultiLineEditBox textBoxMessage;
-    private Checkbox checkBoxIncludeImage;
+    private Checkbox checkBoxNoImage;
+    private Checkbox checkBoxAnonymous;
     private Button btnSendFeedback;
     private int selectedCommentType = 0;
 
@@ -107,12 +107,19 @@ public class CommentToolScreen extends Screen {
         float imgWidth = (width / 3f - SQ_SIZE * 2);
         float imgHeight = imgWidth / glTexture.getPixels().getWidth() * glTexture.getPixels().getHeight();
         baseY = (int) (SQ_SIZE + imgHeight + SQ_SIZE / 2);
-        checkBoxIncludeImage = new Checkbox(
+        checkBoxNoImage = new Checkbox(
                 width - (int)imgWidth - SQ_SIZE, baseY, (int)imgWidth, SQ_SIZE,
-                Component.translatable("gui.worldcomment.include_screenshot"),
-                true, true
+                Component.translatable("gui.worldcomment.exclude_screenshot"),
+                false, true
         );
-        addRenderableWidget(checkBoxIncludeImage);
+        addRenderableWidget(checkBoxNoImage);
+        baseY += SQ_SIZE;
+        checkBoxAnonymous = new Checkbox(
+                width - (int)imgWidth - SQ_SIZE, baseY, (int)imgWidth, SQ_SIZE,
+                Component.translatable("gui.worldcomment.anonymous"),
+                false, true
+        );
+        addRenderableWidget(checkBoxAnonymous);
     }
 
     private void sendReport() {
