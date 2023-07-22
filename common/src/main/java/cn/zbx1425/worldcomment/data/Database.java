@@ -13,6 +13,8 @@ public class Database {
     public final MinecraftServer server;
     public final Path basePath;
 
+    public boolean isHost = true;
+
     public final CommentTable comments;
 
     public Database(MinecraftServer server) {
