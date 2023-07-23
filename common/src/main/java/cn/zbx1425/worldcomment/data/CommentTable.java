@@ -2,10 +2,7 @@ package cn.zbx1425.worldcomment.data;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.longs.Long2ObjectAVLTreeMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
+import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -31,17 +28,20 @@ public class CommentTable {
     }
 
     public void load() throws IOException {
+        regionIndex.clear();
+        playerIndex.clear();
+        timeIndex.clear();
         if (db.isHost) {
             Files.createDirectories(db.basePath.resolve("regions"));
-            for (Level level : db.server.getAllLevels()) {
-                ResourceLocation dimension = level.dimension().location();
-                Path levelPath = getLevelPath(dimension);
-                Files.createDirectory(levelPath);
-                try (Stream<Path> files = Files.list(levelPath)) {
-                    for (Path file : files.toList()) {
-                        long region = Long.parseUnsignedLong(file.getFileName().toString().substring(1, 9), 16);
-                        byte[] fileContent = Files.readAllBytes(file);
-                        loadRegion(dimension, region, fileContent);
+            try (Stream<Path> levelFiles = Files.list(db.basePath.resolve("regions"))) {
+                for (Path levelPath : levelFiles.toList()) {
+                    ResourceLocation dimension = new ResourceLocation(levelPath.getFileName().toString().replace("+", ":"));
+                    try (Stream<Path> files = Files.list(levelPath)) {
+                        for (Path file : files.toList()) {
+                            long region = Long.parseUnsignedLong(file.getFileName().toString().substring(1, 9), 16);
+                            byte[] fileContent = Files.readAllBytes(file);
+                            loadRegion(dimension, region, fileContent);
+                        }
                     }
                 }
             }
@@ -79,13 +79,16 @@ public class CommentTable {
 
     public List<CommentEntry> queryRegion(ResourceLocation level, ChunkPos region) {
         synchronized (this) {
-            return regionIndex.get(level).get(region.toLong());
+            return regionIndex
+                    .getOrDefault(level, Long2ObjectMaps.emptyMap())
+                    .getOrDefault(region.toLong(), List.of());
         }
     }
 
     public List<CommentEntry> queryPlayer(UUID player) {
         synchronized (this) {
-            return playerIndex.get(player);
+            return playerIndex
+                    .getOrDefault(player, List.of());
         }
     }
 
@@ -97,7 +100,12 @@ public class CommentTable {
 
     public void insert(CommentEntry newEntry) throws IOException {
         synchronized (this) {
+            boolean createLevelFolder = !regionIndex.containsKey(newEntry.level);
+            if (createLevelFolder) regionIndex.put(newEntry.level, new Long2ObjectOpenHashMap<>());
             if (db.isHost) {
+                if (createLevelFolder) {
+                    Files.createDirectory(getLevelPath(newEntry.level));
+                }
                 Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
                 try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), true)) {
                     newEntry.writeFileStream(oStream);
