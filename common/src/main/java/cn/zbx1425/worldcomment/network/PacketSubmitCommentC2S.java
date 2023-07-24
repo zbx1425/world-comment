@@ -40,6 +40,17 @@ public class PacketSubmitCommentC2S {
         }
         try {
             Main.DATABASE.comments.insert(comment);
+
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                /*
+                int playerCX = player.blockPosition().getX() >> 4;
+                int playerCZ = player.blockPosition().getX() >> 4;
+                if (Math.abs(comment.region.x - playerCX) <= 1 && Math.abs(comment.region.z - playerCZ) <= 1) {
+
+                }
+                 */
+                PacketRegionUpdateS2C.send(player, comment, false);
+            }
         } catch (IOException e) {
             Main.LOGGER.error("Failed to create comment", e);
         }
