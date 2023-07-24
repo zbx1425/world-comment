@@ -26,14 +26,14 @@ public class PacketSubmitCommentC2S {
         public static void send(CommentEntry comment) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeResourceLocation(comment.level);
-            comment.writeBuffer(buffer);
+            comment.writeBuffer(buffer, false);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
     }
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         ResourceLocation level = buffer.readResourceLocation();
-        CommentEntry comment = new CommentEntry(level, buffer);
+        CommentEntry comment = new CommentEntry(level, buffer, false);
         if (!comment.initiator.equals(Util.NIL_UUID)
                 && !comment.initiator.equals(initiator.getGameProfile().getId())) {
             return;

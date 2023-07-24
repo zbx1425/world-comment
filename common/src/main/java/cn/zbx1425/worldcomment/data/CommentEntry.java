@@ -46,8 +46,8 @@ public class CommentEntry {
         this.imageUrl = imageUrl;
     }
 
-    public CommentEntry(ResourceLocation level, FriendlyByteBuf src) {
-        fileOffset = src.readerIndex();
+    public CommentEntry(ResourceLocation level, FriendlyByteBuf src, boolean fromFile) {
+        if (fromFile) fileOffset = src.readerIndex();
         id = src.readLong();
         timestamp = src.readLong();
         this.level = level;
@@ -59,7 +59,7 @@ public class CommentEntry {
         message = src.readUtf();
         deleted = src.readBoolean();
         imageUrl = src.readUtf();
-        src.skipBytes(16 - (src.readerIndex() % 16));
+        if (fromFile) src.skipBytes(16 - (src.readerIndex() % 16));
     }
 
     private static UUID uuidFromByteArray(byte[] bytes) {
@@ -67,7 +67,7 @@ public class CommentEntry {
         return new UUID(bb.getLong(), bb.getLong());
     }
 
-    public void writeBuffer(FriendlyByteBuf dst) {
+    public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
         dst.writeLong(id);
         dst.writeLong(timestamp);
         dst.writeBlockPos(location);
@@ -77,12 +77,12 @@ public class CommentEntry {
         dst.writeUtf(message);
         dst.writeBoolean(deleted);
         dst.writeUtf(imageUrl);
-        dst.writeZero(16 - (dst.writerIndex() % 16));
+        if (toFile) dst.writeZero(16 - (dst.writerIndex() % 16));
     }
 
     public void writeFileStream(FileOutputStream oStream) throws IOException {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer(256));
-        writeBuffer(buf);
+        writeBuffer(buf, true);
         fileOffset = oStream.getChannel().position();
         oStream.write(buf.array(), 0, buf.writerIndex());
     }

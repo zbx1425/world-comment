@@ -28,9 +28,8 @@ public class PacketRegionDataS2C {
         for (Map.Entry<ChunkPos, List<CommentEntry>> entry : data.entrySet()) {
             buffer.writeChunkPos(entry.getKey());
             buffer.writeInt(entry.getValue().size());
-            buffer.writeZero(16 - (buffer.writerIndex() % 16));
             for (CommentEntry comment : entry.getValue()) {
-                comment.writeBuffer(buffer);
+                comment.writeBuffer(buffer, false);
             }
         }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
@@ -45,10 +44,9 @@ public class PacketRegionDataS2C {
             for (int i = 0; i < regionSize; i++) {
                 ChunkPos region = buffer.readChunkPos();
                 int commentSize = buffer.readInt();
-                buffer.skipBytes(16 - (buffer.readerIndex() % 16));
                 ArrayList<CommentEntry> comments = new ArrayList<>(commentSize);
                 for (int j = 0; j < commentSize; j++) {
-                    CommentEntry comment = new CommentEntry(level, buffer);
+                    CommentEntry comment = new CommentEntry(level, buffer, false);
                     comments.add(comment);
                 }
                 regions.put(region.toLong(), comments);

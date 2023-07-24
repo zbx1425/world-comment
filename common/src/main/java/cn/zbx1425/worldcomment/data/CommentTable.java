@@ -40,7 +40,7 @@ public class CommentTable {
                         for (Path file : files.toList()) {
                             long region = Long.parseUnsignedLong(file.getFileName().toString().substring(1, 9), 16);
                             byte[] fileContent = Files.readAllBytes(file);
-                            loadRegion(dimension, region, fileContent);
+                            loadRegion(dimension, region, fileContent, true);
                         }
                     }
                 }
@@ -50,12 +50,12 @@ public class CommentTable {
         }
     }
 
-    public void loadRegion(ResourceLocation dimension, long region, byte[] data) {
+    public void loadRegion(ResourceLocation dimension, long region, byte[] data, boolean fromFile) {
         synchronized (this) {
             List<CommentEntry> regionEntries = new ArrayList<>();
             FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
             while (src.readerIndex() < data.length) {
-                CommentEntry entry = new CommentEntry(dimension, src);
+                CommentEntry entry = new CommentEntry(dimension, src, fromFile);
                 regionEntries.add(entry);
                 playerIndex.computeIfAbsent(entry.initiator, ignored -> new ArrayList<>())
                         .add(entry);
