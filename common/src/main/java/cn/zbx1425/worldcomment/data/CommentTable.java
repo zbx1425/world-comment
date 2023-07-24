@@ -32,15 +32,17 @@ public class CommentTable {
         playerIndex.clear();
         timeIndex.clear();
         if (db.isHost) {
-            Files.createDirectories(db.basePath.resolve("regions"));
-            try (Stream<Path> levelFiles = Files.list(db.basePath.resolve("regions"))) {
+            Files.createDirectories(db.basePath.resolve("region"));
+            try (Stream<Path> levelFiles = Files.list(db.basePath.resolve("region"))) {
                 for (Path levelPath : levelFiles.toList()) {
                     ResourceLocation dimension = new ResourceLocation(levelPath.getFileName().toString().replace("+", ":"));
                     try (Stream<Path> files = Files.list(levelPath)) {
                         for (Path file : files.toList()) {
-                            long region = Long.parseUnsignedLong(file.getFileName().toString().substring(1, 9), 16);
+                            String[] fileNameParts = file.getFileName().toString().split("\\.");
+                            if (fileNameParts.length != 4 || !fileNameParts[3].equals("bin")) continue;
+                            ChunkPos region = new ChunkPos(Integer.parseInt(fileNameParts[1]), Integer.parseInt(fileNameParts[2]));
                             byte[] fileContent = Files.readAllBytes(file);
-                            loadRegion(dimension, region, fileContent, true);
+                            loadRegion(dimension, region.toLong(), fileContent, true);
                         }
                     }
                 }
@@ -67,14 +69,14 @@ public class CommentTable {
     }
 
     private Path getLevelPath(ResourceLocation dimension) {
-        return db.basePath.resolve("regions")
+        return db.basePath.resolve("region")
                 .resolve(dimension.getNamespace() + "+" + dimension.getPath());
     }
 
     private Path getLevelRegionPath(ResourceLocation dimension, ChunkPos region) {
-        return db.basePath.resolve("regions")
+        return db.basePath.resolve("region")
                 .resolve(dimension.getNamespace() + "+" + dimension.getPath())
-                .resolve("r" + Long.toHexString(region.toLong()) + ".bin");
+                .resolve("r." + region.x + "." + region.z + ".bin");
     }
 
     public List<CommentEntry> queryRegion(ResourceLocation level, ChunkPos region) {

@@ -16,5 +16,9 @@
   "gui.worldcomment.message.placeholder": "(Example) I WANNA EAAAAAAAAAT TEA CAKE AHHHHHHH",
   "gui.worldcomment.exclude_screenshot": "Exclude Screenshot",
   "gui.worldcomment.anonymous": "Anonymous",
-  "gui.worldcomment.submit": "Submit!"
+  "gui.worldcomment.submit": "Submit!",
+
+  "gui.worldcomment.send_pending": "Your message is being processed. Meanwhile, place your message down somewhere.",
+  "gui.worldcomment.send_finish": "Your message is sent successfully.",
+  "gui.worldcomment.send_fail": "Error occurred when processing your message: %s"
 }

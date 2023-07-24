@@ -1,5 +1,8 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -13,6 +16,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 
 import java.io.FileInputStream;
@@ -23,7 +27,7 @@ import java.util.List;
 
 public class CommentToolScreen extends Screen {
 
-    private Path imagePath;
+    private final Path imagePath;
 
     private final DynamicTexture glTexture;
 
@@ -31,6 +35,7 @@ public class CommentToolScreen extends Screen {
 
     public CommentToolScreen(Path imagePath) {
         super(Component.literal("Comment Tool"));
+        this.imagePath = imagePath;
         try (FileInputStream fis = new FileInputStream(imagePath.toFile())) {
             glTexture = new DynamicTexture(NativeImage.read(fis));
         } catch (IOException e) {
@@ -125,7 +130,28 @@ public class CommentToolScreen extends Screen {
     private void sendReport() {
         if (selectedCommentType == 0) return;
         Minecraft.getInstance().execute(() -> {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("TODO ..."), true);
+            CommentEntry comment = new CommentEntry(
+                    Minecraft.getInstance().player, checkBoxAnonymous.selected(),
+                    selectedCommentType, textBoxMessage.getValue()
+            );
+            long jobId = SubmitDispatcher.addJob(
+                    comment, checkBoxNoImage.selected() ? null : imagePath,
+                    exception -> Minecraft.getInstance().execute(() -> {
+                        if (exception == null) {
+                            Minecraft.getInstance().player.displayClientMessage(
+                                    Component.translatable("gui.worldcomment.send_finish"), false);
+                        } else {
+                            Minecraft.getInstance().player.displayClientMessage(
+                                    Component.translatable("gui.worldcomment.send_fail", exception.getMessage()), true);
+                        }
+                    }
+            ));
+            Minecraft.getInstance().player.displayClientMessage(
+                    Component.translatable("gui.worldcomment.send_pending"), false);
+            ItemStack item = Minecraft.getInstance().player.getMainHandItem();
+            if (item.is(Main.ITEM_COMMENT_TOOL.get())) {
+                item.getOrCreateTag().putLong("uploadJobId", jobId);
+            }
         });
         onClose();
     }

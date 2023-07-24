@@ -35,8 +35,8 @@ public class ClientDatabase {
         lastTickTime = currentTime;
 
         BlockPos playerPos = minecraft.player.blockPosition();
-        int cx = playerPos.getX() >> CommentEntry.REGION_SHIFT;
-        int cz = playerPos.getZ() >> CommentEntry.REGION_SHIFT;
+        int cx = playerPos.getX() >> (4 + CommentEntry.REGION_SHIFT);
+        int cz = playerPos.getZ() >> (4 + CommentEntry.REGION_SHIFT);
 
         List<ChunkPos> regionsToRequest = new ArrayList<>();
         for (int x = cx - 1; x <= cx + 1; x++) {

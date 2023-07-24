@@ -16,5 +16,9 @@
   "gui.worldcomment.message.placeholder": "(示例) 我要吃吃吃吃吃吃吃吃吃吃吃吃吃吃吃茶点啊啊啊啊啊",
   "gui.worldcomment.exclude_screenshot": "不包含截图",
   "gui.worldcomment.anonymous": "匿名评论",
-  "gui.worldcomment.submit": "提交!"
+  "gui.worldcomment.submit": "提交!",
+
+  "gui.worldcomment.send_pending": "正在处理您的消息。与此同时，请选择放置评论的位置。",
+  "gui.worldcomment.send_finish": "您的评论已成功发送。",
+  "gui.worldcomment.send_fail": "处理您的评论时发生了错误: %s"
 }

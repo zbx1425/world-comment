@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.data;
 
+import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import io.netty.buffer.Unpooled;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -28,22 +30,24 @@ public class CommentEntry {
     public int messageType;
     public String message;
     public boolean deleted;
-    public String imageUrl;
+    public ThumbImage image;
 
     public long fileOffset;
 
-    public CommentEntry(Player initiator, BlockPos placedAt, int messageType, String message, String imageUrl) {
+    public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message) {
         id = Database.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
         level = initiator.level().dimension().location();
-        location = placedAt;
-        region = new ChunkPos(location.getX() >> REGION_SHIFT, location.getZ() >> REGION_SHIFT);
-        this.initiator = initiator.getGameProfile().getId();
-        initiatorName = initiator.getGameProfile().getName();
+        if (isAnonymous) {
+            this.initiator = Util.NIL_UUID;
+            initiatorName = "";
+        } else {
+            this.initiator = initiator.getGameProfile().getId();
+            initiatorName = initiator.getGameProfile().getName();
+        }
         this.messageType = messageType;
         this.message = message;
         deleted = false;
-        this.imageUrl = imageUrl;
     }
 
     public CommentEntry(ResourceLocation level, FriendlyByteBuf src, boolean fromFile) {
@@ -52,19 +56,19 @@ public class CommentEntry {
         timestamp = src.readLong();
         this.level = level;
         location = src.readBlockPos();
-        region = new ChunkPos(location.getX() >> REGION_SHIFT, location.getZ() >> REGION_SHIFT);
+        region = new ChunkPos(location.getX() >> (4 + REGION_SHIFT), location.getZ() >> (4 + REGION_SHIFT));
         initiator = src.readUUID();
         initiatorName = src.readUtf();
         messageType = src.readInt();
         message = src.readUtf();
         deleted = src.readBoolean();
-        imageUrl = src.readUtf();
+        image = new ThumbImage(src.readUtf(), src.readUtf());
         if (fromFile) src.skipBytes(16 - (src.readerIndex() % 16));
     }
 
-    private static UUID uuidFromByteArray(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        return new UUID(bb.getLong(), bb.getLong());
+    public void setLocation(BlockPos location) {
+        this.location = location;
+        this.region = new ChunkPos(location.getX() >> (4 + REGION_SHIFT), location.getZ() >> (4 + REGION_SHIFT));
     }
 
     public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
@@ -76,7 +80,8 @@ public class CommentEntry {
         dst.writeInt(messageType);
         dst.writeUtf(message);
         dst.writeBoolean(deleted);
-        dst.writeUtf(imageUrl);
+        dst.writeUtf(image.url);
+        dst.writeUtf(image.thumbUrl);
         if (toFile) dst.writeZero(16 - (dst.writerIndex() % 16));
     }
 
