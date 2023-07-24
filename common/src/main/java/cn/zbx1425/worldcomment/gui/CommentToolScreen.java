@@ -64,9 +64,9 @@ public class CommentToolScreen extends Screen {
 
         radioButtons.clear();
         for (int r = 0; r < 2; r++) {
-            addRenderableWidget(new WidgetLabel(
-                    SQ_SIZE, baseY,
-                    SQ_SIZE * 4, Component.translatable("gui.worldcomment.comment_type.r" + (r + 1))
+            addRenderableWidget(new WidgetFlagLabel(
+                    SQ_SIZE - 4, baseY, CommentTypeButton.BTN_WIDTH * 4 + 10, SQ_SIZE / 2,
+                    0xFF2196F3, Component.translatable("gui.worldcomment.comment_type.r" + (r + 1))
             ));
             for (int c = 0; c < 4; c++) {
                 CommentTypeButton selectBtn = new CommentTypeButton(
@@ -86,11 +86,11 @@ public class CommentToolScreen extends Screen {
             }
             baseY += CommentTypeButton.BTN_HEIGHT + SQ_SIZE / 2;
         }
-        baseY += SQ_SIZE / 2;
+        // baseY += SQ_SIZE / 2;
 
-        addRenderableWidget(new WidgetLabel(
-                SQ_SIZE, baseY,
-                CommentTypeButton.BTN_WIDTH * 4, Component.translatable("gui.worldcomment.message")
+        addRenderableWidget(new WidgetFlagLabel(
+                SQ_SIZE - 4, baseY, CommentTypeButton.BTN_WIDTH * 4 + 10, SQ_SIZE / 2,
+                0xFF00BCD4, Component.translatable("gui.worldcomment.message")
         ));
         baseY += SQ_SIZE / 2;
         textBoxMessage = new MultiLineEditBox(
@@ -103,8 +103,11 @@ public class CommentToolScreen extends Screen {
         baseY += textBoxMessage.getHeight();
         baseY += SQ_SIZE / 2;
 
-        btnSendFeedback = Button.builder(Component.translatable("gui.worldcomment.submit"),
-                sender -> sendReport()).pos(SQ_SIZE, baseY).width(CommentTypeButton.BTN_WIDTH * 4).build();
+        btnSendFeedback = new WidgetColorButton(
+                SQ_SIZE, baseY, CommentTypeButton.BTN_WIDTH * 4, SQ_SIZE,
+                Component.translatable("gui.worldcomment.submit"), 0xFFC5E1A5,
+                sender -> sendReport()
+        );
         btnSendFeedback.active = selectedCommentType != 0;
         addRenderableWidget(btnSendFeedback);
 

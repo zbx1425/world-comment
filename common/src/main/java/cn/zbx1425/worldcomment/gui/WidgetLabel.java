@@ -18,15 +18,17 @@ public class WidgetLabel extends AbstractWidget {
 
     public boolean alignR = false;
 
+    public int padding = 0;
+
     private final Runnable onClick;
 
-    public WidgetLabel(int x, int y, int width, Component text) {
-        super(x, y, width, 10, text);
+    public WidgetLabel(int x, int y, int width, int height, Component text) {
+        super(x, y, width, height, text);
         this.onClick = null;
     }
 
-    public WidgetLabel(int x, int y, int width, Component text, Runnable onClick) {
-        super(x, y, width, 10, text);
+    public WidgetLabel(int x, int y, int width, int height, Component text, Runnable onClick) {
+        super(x, y, width, height, text);
         this.onClick = onClick;
     }
 
@@ -41,19 +43,20 @@ public class WidgetLabel extends AbstractWidget {
                 if (!visible) return;
                 String[] lines = this.getMessage().getString().split("\n");
                 this.height = lines.length * 10;
+                int textStart = Math.max(getY(), getY() + (getHeight() - 10 * lines.length) / 2);
                 for (int i = 0; i < lines.length; ++i) {
                     int textWidth = Minecraft.getInstance().font.width(lines[i]);
 #if MC_VERSION >= "11903"
-                    int x = alignR ? this.getX() + this.getWidth() - textWidth : this.getX();
-                    int y = this.getY() + 10 * i;
+                    int x = alignR ? this.padX() + this.padWidth() - textWidth : this.padX();
+                    int y = textStart + 10 * i;
 #else
-                    int x = alignR ? this.getX() + this.width - textWidth : this.getX();
-                    int y = this.getY() + 10 * i;
+                    int x = alignR ? this.padX() + this.width - textWidth : this.padX();
+                    int y = textStart + 10 * i;
 #endif
-                    if (textWidth > this.width) {
+                    if (textWidth > this.padWidth()) {
                         int offset = (int)(System.currentTimeMillis() / 25 % (textWidth + 40));
 #if MC_VERSION >= "12000"
-                        guiGraphics.enableScissor(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height);
+                        guiGraphics.enableScissor(this.padX(), this.getY(), this.padX() + this.padWidth(), this.getY() + this.height);
                         guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x - offset, y, -1);
                         guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
                         guiGraphics.disableScissor();
@@ -102,4 +105,13 @@ public class WidgetLabel extends AbstractWidget {
                 return y;
             }
 #endif
-        }
+
+
+    private int padX() {
+        return this.getX() + padding;
+    }
+
+    private int padWidth() {
+        return this.getWidth() - padding * 2;
+    }
+}

@@ -4,7 +4,7 @@
   "package": "cn.zbx1425.worldcomment.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-
+    "InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
