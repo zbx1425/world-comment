@@ -36,24 +36,12 @@ public class ClientRayPicking {
 
         ImageDownload.purgeUnused();
         blocksOnRay.clear();
-        /*
-        Vec3 startPos = minecraft.player.getEyePosition(partialTicks);
-        Vec3 dir = minecraft.player.getViewVector(partialTicks);
-        Vec3 endPos = startPos.add(dir.x * hitDistance, dir.y * hitDistance, dir.z * hitDistance);
-        BlockGetter.traverseBlocks(startPos, endPos, null, (ctx, blockPos) -> {
-            blocksOnRay.add(blockPos);
-            if (minecraft.level.getBlockState(blockPos).blocksMotion()) {
-                return 1;
-            } else {
-                return null;
-            }
-        }, ctx -> null);
-         */
+        HitResult hitResult = minecraft.player.pick(hitDistance, partialTicks, true);
         BlockPos hitPos = null;
-        if (minecraft.hitResult.getType() == HitResult.Type.BLOCK) {
+        if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockHitResult blockHitResult = (BlockHitResult)minecraft.hitResult;
             hitPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-        } else if (minecraft.hitResult.getType() == HitResult.Type.ENTITY) {
+        } else if (hitResult.getType() == HitResult.Type.ENTITY) {
             EntityHitResult entityHitResult = (EntityHitResult)minecraft.hitResult;
             hitPos = entityHitResult.getEntity().blockPosition();
         }

@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.mixin;
 
 import cn.zbx1425.worldcomment.render.CommentOverlayRenderer;
+import cn.zbx1425.worldcomment.render.ControlTipRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,10 +17,11 @@ public class InGameHudMixin {
 
     @Shadow @Final private Minecraft minecraft;
 
-    @Inject(method = "render", at = @At(value = "HEAD"))
+    @Inject(method = "render", at = @At(value = "TAIL"))
     public void render(GuiGraphics guiGraphics, float partialTick, CallbackInfo callbackInfo) {
-        if (minecraft.options.getCameraType().isFirstPerson()) {
+        if (!minecraft.options.hideGui && minecraft.options.getCameraType().isFirstPerson()) {
             CommentOverlayRenderer.render(guiGraphics, partialTick);
+            ControlTipRenderer.render(guiGraphics);
         }
     }
 }

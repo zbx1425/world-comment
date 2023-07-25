@@ -18,6 +18,12 @@
   "gui.worldcomment.anonymous": "匿名评论",
   "gui.worldcomment.submit": "提交!",
 
+  "gui.worldcomment.control_tip.create": "截图并评论",
+  "gui.worldcomment.control_tip.place_comment": "在喜欢的位置放下评论",
+  "gui.worldcomment.control_tip.view_manage": "查看或管理所有评论",
+  "gui.worldcomment.control_tip.detail": "查看详情",
+  "gui.worldcomment.control_tip.scroll": "滚动",
+
   "gui.worldcomment.send_pending": "正在处理您的消息。与此同时，请选择放置评论的位置。",
   "gui.worldcomment.send_finish": "您的评论已成功发送。",
   "gui.worldcomment.send_fail": "处理您的评论时发生了错误: %s"
