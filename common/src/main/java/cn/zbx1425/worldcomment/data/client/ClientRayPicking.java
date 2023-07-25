@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.client;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.mixin.LevelRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -41,6 +42,7 @@ public class ClientRayPicking {
         for (Map<BlockPos, List<CommentEntry>> region : ClientDatabase.INSTANCE.regions.values()) {
             for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
                 AABB blockHitArea = new AABB(blockData.getKey(), blockData.getKey().offset(1, 2, 1));
+                if (!((LevelRendererAccessor)minecraft.levelRenderer).getCullingFrustum().isVisible(blockHitArea)) continue;
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;
                 for (CommentEntry comment : blockData.getValue()) {

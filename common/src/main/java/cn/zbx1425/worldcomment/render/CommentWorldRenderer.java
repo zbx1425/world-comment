@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Map;
@@ -26,70 +27,115 @@ public class CommentWorldRenderer {
 
     private static final Random RANDOM = new Random();
 
-    public static void renderComment(VertexConsumer vertices, PoseStack matrices, CommentEntry comment, int light, boolean jumpy) {
+    public static void renderComment(VertexConsumer vertices, PoseStack matrices, CommentEntry comment, boolean jumpy) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Vec3 cameraPos = minecraft.cameraEntity.position();
+
         RANDOM.setSeed(comment.id);
         matrices.pushPose();
-        matrices.translate(comment.location.getX() + 0.5f, comment.location.getY(),
+        matrices.translate(comment.location.getX() + 0.5f, comment.location.getY() + 0.8f,
                 comment.location.getZ() + 0.5f);
-        float cycleLength = jumpy ? 1000 : 2000;
-        float cycleX = ((System.currentTimeMillis() + RANDOM.nextLong(0, (long)cycleLength)) % (long)cycleLength) / cycleLength;
-        float cycleY = jumpy ? (-4 * cycleX * (cycleX - 1)) : (float)Math.sin(cycleX * Math.PI * 2) / 2 + 0.5f;
+        float cycleRotateLength = 8000;
+        float cycleRotateX = ((System.currentTimeMillis() + RANDOM.nextLong(0, (long)cycleRotateLength)) % (long)cycleRotateLength) / cycleRotateLength;
+        float cycleRotateY = (float)Math.sin(cycleRotateX * Math.PI * 2) / 2 + 0.5f;
+        float cycleHoverLength = jumpy ? 1000 : 8000;
+        float cycleHoverX = ((System.currentTimeMillis() + RANDOM.nextLong(0, (long)cycleHoverLength)) % (long)cycleHoverLength) / cycleHoverLength;
+        float cycleHoverY = (float)Math.sin(cycleHoverX * Math.PI * 2) / 2 + 0.5f;
         matrices.translate(
                 RANDOM.nextFloat(-0.3f, 0.3f),
-                cycleY * 0.6,
+                cycleHoverY * 0.1,
                 RANDOM.nextFloat(-0.3f, 0.3f)
         );
-        matrices.mulPose(Axis.YP.rotation(cycleX * Mth.PI * 2 + RANDOM.nextFloat(0, Mth.PI * 2)));
-        matrices.scale(0.4f, 0.4f, 0.4f);
-        float u1 = ((comment.messageType - 1) % 4) * 0.25f;
-        float v1 = (int)((comment.messageType - 1) / 4) * 0.25f + 0.5f;
-        float u2 = u1 + 0.25f, v2 = v1 + 0.25f;
-        PoseStack.Pose pose = matrices.last();
-        vertices
-                .vertex(pose.pose(), -0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u1, v1)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, 1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), -0.5f, 0f, 0f).color(0xFFFFFFFF).uv(u1, v2)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, 1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), 0.5f, 0f, 0f).color(0xFFFFFFFF).uv(u2, v2)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, 1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), 0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u2, v1)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, 1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), 0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u1, v1)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, -1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), 0.5f, 0f, 0f).color(0xFFFFFFFF).uv(u1, v2)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, -1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), -0.5f, 0f, 0f).color(0xFFFFFFFF).uv(u2, v2)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, -1)
-                .endVertex();
-        vertices
-                .vertex(pose.pose(), -0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u2, v1)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 0, -1)
-                .endVertex();
+        float yaw = (float)Mth.atan2(comment.location.getX() - cameraPos.x(), comment.location.getZ() - cameraPos.z());
+        matrices.mulPose(Axis.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
+
+        int light = LightTexture.FULL_BRIGHT;
+        {
+            matrices.scale(0.8f, 0.8f, 0.8f);
+            float u1 = 0.5f, v1 = 0f, u2 = u1 + 0.125f, v2 = v1 + 0.25f;
+            PoseStack.Pose pose = matrices.last();
+            vertices
+                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u1, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), -0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u1, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u2, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u2, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u1, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u1, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), -0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u2, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u2, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+        }
+
+        {
+            matrices.translate(0, 0.25f, 0);
+            matrices.scale(0.5f, 0.5f, 0.5f);
+            float u1 = ((comment.messageType - 1) % 4) * 0.25f;
+            float v1 = (int)((comment.messageType - 1) / 4) * 0.25f + 0.5f;
+            float u2 = u1 + 0.25f, v2 = v1 + 0.25f;
+            PoseStack.Pose pose = matrices.last();
+            vertices
+                    .vertex(pose.pose(), -0.5f, 1f, 0.05f).color(0xFFFFFFFF).uv(u1, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), -0.5f, 0f, 0.05f).color(0xFFFFFFFF).uv(u1, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, 0f, 0.05f).color(0xFFFFFFFF).uv(u2, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, 1f, 0.05f).color(0xFFFFFFFF).uv(u2, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, 1f, -0.05f).color(0xFFFFFFFF).uv(u1, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), 0.5f, 0f, -0.05f).color(0xFFFFFFFF).uv(u1, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), -0.5f, 0f, -0.05f).color(0xFFFFFFFF).uv(u2, v2)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+            vertices
+                    .vertex(pose.pose(), -0.5f, 1f, -0.05f).color(0xFFFFFFFF).uv(u2, v1)
+                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
+                    .endVertex();
+        }
         matrices.popPose();
     }
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
-        Minecraft minecraft = Minecraft.getInstance();
+        VertexConsumer vertices = buffers.getBuffer(RenderType.entityTranslucentCull(ATLAS_LOCATION));
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
             for (CommentEntry comment : blockData.getValue()) {
-                VertexConsumer vertices = buffers.getBuffer(RenderType.entityCutout(ATLAS_LOCATION));
-                int light = LightTexture.pack(
-                        minecraft.level.getBrightness(LightLayer.BLOCK, comment.location),
-                        minecraft.level.getBrightness(LightLayer.SKY, comment.location)
-                );
-                renderComment(vertices, matrices, comment, light, ClientRayPicking.pickedComments.contains(comment));
+                renderComment(vertices, matrices, comment, ClientRayPicking.pickedComments.contains(comment));
             }
         }
     }
