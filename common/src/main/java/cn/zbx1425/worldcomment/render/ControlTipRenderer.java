@@ -94,7 +94,7 @@ public class ControlTipRenderer {
             if (critical) {
                 int innerWidth = 20 + 4 + font.width(text);
                 long currentTime = System.currentTimeMillis();
-                if (currentTime % 800 < 400) {
+                if (currentTime % 400 < 200) {
                     guiGraphics.fill(x + 1, y + 1, x + innerWidth + 4 + 1, y + 20 + 1, 0xFF444444);
                     guiGraphics.fill(x, y, x + innerWidth + 4, y + 20, 0xFFDDDD66);
                 }

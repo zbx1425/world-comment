@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -14,11 +15,12 @@ import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ClientDatabase {
 
     public ResourceLocation level;
-    public Long2ObjectMap<List<CommentEntry>> regions = new Long2ObjectOpenHashMap<>();
+    public Long2ObjectMap<Map<BlockPos, List<CommentEntry>>> regions = new Long2ObjectOpenHashMap<>();
     public Long2LongMap regionExpiry = new Long2LongOpenHashMap();
 
     public static ClientDatabase INSTANCE = new ClientDatabase();
@@ -76,7 +78,12 @@ public class ClientDatabase {
             this.level = level;
             long currentTime = System.currentTimeMillis();
             for (Long2ObjectMap.Entry<List<CommentEntry>> entry : regions.long2ObjectEntrySet()) {
-                this.regions.put(entry.getLongKey(), entry.getValue());
+                this.regions.computeIfAbsent(entry.getLongKey(), ignored -> new Object2ObjectArrayMap<>()).clear();
+                for (CommentEntry comment : entry.getValue()) {
+                    this.regions.get(entry.getLongKey())
+                            .computeIfAbsent(comment.location, ignored -> new ArrayList<>())
+                            .add(comment);
+                }
                 regionExpiry.put(entry.getLongKey(), currentTime + REGION_TTL);
             }
         }
@@ -86,17 +93,18 @@ public class ClientDatabase {
         synchronized (this) {
             if (!level.equals(comment.level)) clear();
             this.level = comment.level;
-            List<CommentEntry> regionData = regions.get(comment.region.toLong());
+            Map<BlockPos, List<CommentEntry>> regionData = regions.get(comment.region.toLong());
             if (regionData != null) {
                 if (update) {
-                    for (int i = 0; i < regionData.size(); i++) {
-                        if (regionData.get(i).id == comment.id) {
-                            regionData.set(i, comment);
+                    List<CommentEntry> blockData = regionData.get(comment.location);
+                    for (int i = 0; i < blockData.size(); i++) {
+                        if (blockData.get(i).id == comment.id) {
+                            blockData.set(i, comment);
                             break;
                         }
                     }
                 } else {
-                    regionData.add(comment);
+                    regionData.computeIfAbsent(comment.location, ignored -> new ArrayList<>()).add(comment);
                 }
             }
         }

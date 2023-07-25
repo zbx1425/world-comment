@@ -11,10 +11,13 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class CommentWorldRenderer {
@@ -79,13 +82,15 @@ public class CommentWorldRenderer {
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
         Minecraft minecraft = Minecraft.getInstance();
-        for (CommentEntry comment : ClientRayPicking.visibleComments) {
-            VertexConsumer vertices = buffers.getBuffer(RenderType.entityCutout(ATLAS_LOCATION));
-            int light = LightTexture.pack(
-                    minecraft.level.getBrightness(LightLayer.BLOCK, comment.location),
-                    minecraft.level.getBrightness(LightLayer.SKY, comment.location)
-            );
-            renderComment(vertices, matrices, comment, light, ClientRayPicking.pickedComments.contains(comment));
+        for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
+            for (CommentEntry comment : blockData.getValue()) {
+                VertexConsumer vertices = buffers.getBuffer(RenderType.entityCutout(ATLAS_LOCATION));
+                int light = LightTexture.pack(
+                        minecraft.level.getBrightness(LightLayer.BLOCK, comment.location),
+                        minecraft.level.getBrightness(LightLayer.SKY, comment.location)
+                );
+                renderComment(vertices, matrices, comment, light, ClientRayPicking.pickedComments.contains(comment));
+            }
         }
     }
 }
