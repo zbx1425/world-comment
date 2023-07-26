@@ -6,6 +6,7 @@
   "client": [
     "InGameHudMixin",
     "InventoryMixin",
+    "KeyMappingMixin",
     "LevelRendererAccessor",
     "LevelRendererMixin"
   ],

@@ -21,9 +21,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-public class WidgetCommentEntry extends AbstractWidget {
-
-    private static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(Main.MOD_ID, "textures/gui/comment-tool.png");
+public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
     private final CommentEntry comment;
     private final Font font;
@@ -55,41 +53,10 @@ public class WidgetCommentEntry extends AbstractWidget {
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.blit(ATLAS_LOCATION,
-            getX(), getY(), 28, 24,
-            0, 0, 28, 24, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX() + 28, getY(), width - 28 - 4, 24,
-                28, 0, 96, 24, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX() + getWidth() - 4, getY(), 4, 24,
-                124, 0, 4, 24, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX(), getY() + 24, 28, height - 24 - 4,
-                0, 24, 28, 20, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX() + 28, getY() + 24, width - 28 - 4, height - 24 - 4,
-                28, 24, 96, 20, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX() + getWidth() - 4, getY() + 24, 4, height - 24 - 4,
-                124, 24, 4, 20, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX(), getY() + getHeight() - 4, 28, 4,
-                0, 44, 28, 4, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX() + 28, getY() + getHeight() - 4, width - 28 - 4, 4,
-                28, 44, 96, 4, 256, 256
-        );
-        guiGraphics.blit(ATLAS_LOCATION,
-                getX() + getWidth() - 4, getY() + getHeight() - 4, 4, 4,
-                124, 44, 4, 4, 256, 256
+        graphicsBlit9(
+                guiGraphics, getX(), getY(), getWidth(), getHeight(),
+                0, 0, 128, 48, 256, 256,
+                24, 4, 4, 28
         );
 
         if (!comment.message.isEmpty()) {

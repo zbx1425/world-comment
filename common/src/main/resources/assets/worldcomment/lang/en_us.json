@@ -24,6 +24,14 @@
   "gui.worldcomment.control_tip.detail": "See Detail",
   "gui.worldcomment.control_tip.scroll": "Scroll",
 
+  "gui.worldcomment.list.title": "Subnoteica Comment Management",
+  "gui.worldcomment.list.nearby_posts": "Nearby Posts",
+  "gui.worldcomment.list.recent_posts": "Recent Posts",
+  "gui.worldcomment.list.my_posts": "My Posts",
+  "gui.worldcomment.list.detail": "Detail",
+  "gui.worldcomment.list.remove": "Remove",
+  "gui.worldcomment.list.like": "Like",
+
   "gui.worldcomment.send_pending": "Your message is being processed. Meanwhile, place your message down somewhere.",
   "gui.worldcomment.send_finish": "Your message is sent successfully.",
   "gui.worldcomment.send_fail": "Error occurred when processing your message: %s"

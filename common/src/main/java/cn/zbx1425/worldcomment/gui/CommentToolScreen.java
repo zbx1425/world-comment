@@ -37,7 +37,7 @@ public class CommentToolScreen extends Screen {
         super(Component.literal("Comment Tool"));
         this.imagePath = imagePath;
         try (FileInputStream fis = new FileInputStream(imagePath.toFile())) {
-            widgetImage = new WidgetImage(new DynamicTexture(NativeImage.read(fis)));
+            widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(fis)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -50,7 +50,7 @@ public class CommentToolScreen extends Screen {
     }
 
     private List<CommentTypeButton> radioButtons = new ArrayList<>();
-    private WidgetImage widgetImage;
+    private WidgetUnmanagedImage widgetImage;
     private MultiLineEditBox textBoxMessage;
     private Checkbox checkBoxNoImage;
     private Checkbox checkBoxAnonymous;

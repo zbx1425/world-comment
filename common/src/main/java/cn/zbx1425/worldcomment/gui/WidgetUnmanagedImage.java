@@ -10,11 +10,11 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 
-public class WidgetImage extends AbstractWidget implements AutoCloseable {
+public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseable {
 
     private final DynamicTexture texture;
 
-    public WidgetImage(DynamicTexture texture) {
+    public WidgetUnmanagedImage(DynamicTexture texture) {
         super(0, 0, 0, 0, Component.empty());
         this.texture = texture;
     }

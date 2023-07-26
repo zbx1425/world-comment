@@ -68,6 +68,7 @@ public class ImageDownload {
         }
         synchronized (images) {
             ImageState state = images.get(url);
+            state.onQuery();
             if (state.texture != null) return state.texture;
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             if (state.failed) return textureManager.getTexture(

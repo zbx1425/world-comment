@@ -24,6 +24,14 @@
   "gui.worldcomment.control_tip.detail": "查看详情",
   "gui.worldcomment.control_tip.scroll": "滚动",
 
+  "gui.worldcomment.list.title": "§l随处随笔§r 评论管理",
+  "gui.worldcomment.list.nearby_posts": "附近评论",
+  "gui.worldcomment.list.recent_posts": "最新评论",
+  "gui.worldcomment.list.my_posts": "我的评论",
+  "gui.worldcomment.list.detail": "详情",
+  "gui.worldcomment.list.remove": "移除",
+  "gui.worldcomment.list.like": "点赞",
+
   "gui.worldcomment.send_pending": "正在处理您的消息。与此同时，请选择放置评论的位置。",
   "gui.worldcomment.send_finish": "您的评论已成功发送。",
   "gui.worldcomment.send_fail": "处理您的评论时发生了错误: %s"

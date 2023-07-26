@@ -5,9 +5,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class WidgetFlagLabel extends WidgetLabel {
-
-    private static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(Main.MOD_ID, "textures/gui/comment-tool.png");
+public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
 
     public int color;
 

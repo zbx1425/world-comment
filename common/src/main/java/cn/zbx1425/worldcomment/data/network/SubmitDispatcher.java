@@ -63,26 +63,4 @@ public class SubmitDispatcher {
             removeJob(jobId);
         }
     }
-
-    public static void grabScreenshot(Consumer<Path> callback) {
-        Minecraft.getInstance().execute(() -> {
-            File targetFile = getAvailableFile();
-            Screenshot.grab(Minecraft.getInstance().gameDirectory, targetFile.getName(),
-                    Minecraft.getInstance().getMainRenderTarget(),
-                    ignored -> {
-                        callback.accept(targetFile.toPath());
-            });
-        });
-    }
-
-    private static File getAvailableFile() {
-        File screenShotDirectory = new File(Minecraft.getInstance().gameDirectory, Screenshot.SCREENSHOT_DIR);
-        String s = "WorldComment-" + Util.getFilenameFormattedDateTime();
-        int i = 1;
-        File file1;
-        while ((file1 = new File(screenShotDirectory, s + (i == 1 ? "" : "_" + i) + ".png")).exists()) {
-            ++i;
-        }
-        return file1;
-    }
 }

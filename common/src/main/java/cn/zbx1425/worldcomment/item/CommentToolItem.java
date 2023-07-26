@@ -28,10 +28,6 @@ public class CommentToolItem extends Item {
         super(new Properties().stacksTo(1));
     }
 
-    private static final SoundEvent shutterSoundEvent = SoundEvent.createFixedRangeEvent(
-            new ResourceLocation("worldcomment:shutter"), 16
-    );
-
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         ItemStack item = player.getItemInHand(usedHand);
@@ -50,22 +46,10 @@ public class CommentToolItem extends Item {
                 return InteractionResultHolder.fail(item);
             }
         } else {
-            SubmitDispatcher.grabScreenshot(path -> {
-                Minecraft.getInstance().execute(() -> {
-                    player.playSound(shutterSoundEvent);
-                    ClientLogics.openCommentToolScreen(path);
-                });
-            });
+
         }
 
         return InteractionResultHolder.success(item);
-    }
-
-    private static class ClientLogics {
-
-        public static void openCommentToolScreen(Path path) {
-            Minecraft.getInstance().setScreen(new CommentToolScreen(path));
-        }
     }
 
     @Override

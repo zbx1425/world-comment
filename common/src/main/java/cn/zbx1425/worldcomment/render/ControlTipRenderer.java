@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.render;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -12,9 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-public class ControlTipRenderer {
-
-    private static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(Main.MOD_ID, "textures/gui/comment-tool.png");
+public class ControlTipRenderer implements IGuiCommon {
 
     public static final ControlTip TIP_CREATE = new ControlTip(
             Component.translatable("gui.worldcomment.control_tip.create"), 2,

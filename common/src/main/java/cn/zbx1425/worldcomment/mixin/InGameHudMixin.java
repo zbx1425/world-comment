@@ -19,7 +19,8 @@ public class InGameHudMixin {
 
     @Inject(method = "render", at = @At(value = "TAIL"))
     public void render(GuiGraphics guiGraphics, float partialTick, CallbackInfo callbackInfo) {
-        if (!minecraft.options.hideGui && minecraft.options.getCameraType().isFirstPerson()) {
+        if (!minecraft.options.hideGui && minecraft.screen == null
+                && minecraft.options.getCameraType().isFirstPerson()) {
             CommentOverlayRenderer.render(guiGraphics, partialTick);
             ControlTipRenderer.render(guiGraphics);
         }

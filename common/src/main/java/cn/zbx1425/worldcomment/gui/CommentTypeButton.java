@@ -11,9 +11,7 @@ import net.minecraft.util.Mth;
 
 import java.util.function.Supplier;
 
-public class CommentTypeButton extends Button {
-
-    private static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(Main.MOD_ID, "textures/gui/comment-tool.png");
+public class CommentTypeButton extends Button implements IGuiCommon {
 
     private static final int[] COMMENT_TYPE_COLOR = {
         0xFF8BC34A, 0xFFCDDC39, 0xFFFFEB3B, 0xFFFF9800,

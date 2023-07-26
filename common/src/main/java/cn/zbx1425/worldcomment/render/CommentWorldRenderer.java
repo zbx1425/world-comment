@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -21,24 +22,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class CommentWorldRenderer {
-
-    private static final ResourceLocation ATLAS_LOCATION = new ResourceLocation(Main.MOD_ID, "textures/gui/comment-tool.png");
+public class CommentWorldRenderer implements IGuiCommon {
 
     private static final Random RANDOM = new Random();
 
-    public static void renderComment(VertexConsumer vertices, PoseStack matrices, CommentEntry comment, boolean jumpy) {
+    public static void renderComment(VertexConsumer vertices, PoseStack matrices, CommentEntry comment,
+                                     boolean focused, boolean showIcon) {
         Minecraft minecraft = Minecraft.getInstance();
         Vec3 cameraPos = minecraft.cameraEntity.position();
 
         RANDOM.setSeed(comment.id);
         matrices.pushPose();
-        matrices.translate(comment.location.getX() + 0.5f, comment.location.getY() + 0.8f,
+        matrices.translate(comment.location.getX() + 0.5f, comment.location.getY() + 1.8f,
                 comment.location.getZ() + 0.5f);
         float cycleRotateLength = 8000;
         float cycleRotateX = ((System.currentTimeMillis() + RANDOM.nextLong(0, (long)cycleRotateLength)) % (long)cycleRotateLength) / cycleRotateLength;
         float cycleRotateY = (float)Math.sin(cycleRotateX * Math.PI * 2) / 2 + 0.5f;
-        float cycleHoverLength = jumpy ? 1000 : 8000;
+        float cycleHoverLength = focused ? 1000 : 8000;
         float cycleHoverX = ((System.currentTimeMillis() + RANDOM.nextLong(0, (long)cycleHoverLength)) % (long)cycleHoverLength) / cycleHoverLength;
         float cycleHoverY = (float)Math.sin(cycleHoverX * Math.PI * 2) / 2 + 0.5f;
         matrices.translate(
@@ -51,44 +51,45 @@ public class CommentWorldRenderer {
 
         int light = LightTexture.FULL_BRIGHT;
         {
-            matrices.scale(0.8f, 0.8f, 0.8f);
-            float u1 = 0.5f, v1 = 0f, u2 = u1 + 0.125f, v2 = v1 + 0.25f;
+            int bgColor = 0xFFFFFFFF;
+            matrices.scale(0.9f, 0.9f, 0.9f);
+            float u1 = 0.5f, v1 = 0f, u2 = u1 + 0.125f, v2 = v1 + 0.375f;
             PoseStack.Pose pose = matrices.last();
             vertices
-                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u1, v1)
+                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(bgColor).uv(u1, v1)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), -0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u1, v2)
+                    .vertex(pose.pose(), -0.5f, -2f, 0f).color(bgColor).uv(u1, v2)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), 0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u2, v2)
+                    .vertex(pose.pose(), 0.5f, -2f, 0f).color(bgColor).uv(u2, v2)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u2, v1)
+                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(bgColor).uv(u2, v1)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u1, v1)
+                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(bgColor).uv(u1, v1)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), 0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u1, v2)
+                    .vertex(pose.pose(), 0.5f, -2f, 0f).color(bgColor).uv(u1, v2)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), -0.5f, -1f, 0f).color(0xFFFFFFFF).uv(u2, v2)
+                    .vertex(pose.pose(), -0.5f, -2f, 0f).color(bgColor).uv(u2, v2)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
             vertices
-                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(0xFFFFFFFF).uv(u2, v1)
+                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(bgColor).uv(u2, v1)
                     .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
                     .endVertex();
         }
 
-        {
+        if (showIcon) {
             matrices.translate(0, 0.25f, 0);
             matrices.scale(0.5f, 0.5f, 0.5f);
             float u1 = ((comment.messageType - 1) % 4) * 0.25f;
@@ -132,10 +133,14 @@ public class CommentWorldRenderer {
     }
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
+        long currentTime = System.currentTimeMillis();
         VertexConsumer vertices = buffers.getBuffer(RenderType.entityTranslucentCull(ATLAS_LOCATION));
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
-            for (CommentEntry comment : blockData.getValue()) {
-                renderComment(vertices, matrices, comment, ClientRayPicking.pickedComments.contains(comment));
+            for (int i = 0; i < blockData.getValue().size(); i++) {
+                CommentEntry comment = blockData.getValue().get(i);
+                boolean showIcon = blockData.getValue().size() < 2 ||
+                        ((currentTime / 1000) % blockData.getValue().size() == i);
+                renderComment(vertices, matrices, comment, ClientRayPicking.pickedComments.contains(comment), showIcon);
             }
         }
     }
