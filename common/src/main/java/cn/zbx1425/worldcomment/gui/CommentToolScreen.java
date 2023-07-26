@@ -50,11 +50,6 @@ public class CommentToolScreen extends Screen {
     @Override
     public void onClose() {
         widgetImage.close();
-        try {
-            Files.delete(imagePath);
-        } catch (IOException e) {
-            Main.LOGGER.warn("Delete image", e);
-        }
         super.onClose();
     }
 

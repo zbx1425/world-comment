@@ -33,8 +33,8 @@
   "gui.worldcomment.list.remove": "Remove",
   "gui.worldcomment.list.like": "Like",
 
-  "gui.worldcomment.send_pending": "Please place your message down.",
-  "gui.worldcomment.send_upload_incomplete": "Your image is still being uploaded. Please wait.",
-  "gui.worldcomment.send_finish": "Your message is sent successfully.",
-  "gui.worldcomment.send_fail": "Error occurred when processing your message: %s\nError occurred when processing your message."
+  "gui.worldcomment.send_pending": "§6§lPlease place your message down.",
+  "gui.worldcomment.send_upload_incomplete": "§bYour image is still being uploaded. Please wait.",
+  "gui.worldcomment.send_finish": "§aYour message is sent successfully.",
+  "gui.worldcomment.send_fail": "§c§lError occurred when processing your message: %s\n  §c§lError occurred when processing your message."
 }

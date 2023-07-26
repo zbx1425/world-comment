@@ -6,8 +6,6 @@ import java.math.BigInteger;
 import java.net.http.HttpRequest;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class MimeMultipartData {
@@ -33,8 +31,8 @@ public class MimeMultipartData {
             return this;
         }
 
-        public Builder addFile(String name, Path path, String mimeType) {
-            this.files.add(new MimedFile(name, path, mimeType));
+        public Builder addFile(String name, String path, byte[] data, String mimeType) {
+            this.files.add(new MimedFile(name, path, data, mimeType));
             return this;
         }
 
@@ -52,12 +50,12 @@ public class MimeMultipartData {
             for (var f : files) {
                 byteArrayOutputStream.write(("--" + boundary).getBytes(charset));
                 byteArrayOutputStream.write(newline);
-                byteArrayOutputStream.write(("Content-Disposition: form-data; name=\"" + f.name + "\"; filename=\"" + f.path.getFileName() + "\"").getBytes(charset));
+                byteArrayOutputStream.write(("Content-Disposition: form-data; name=\"" + f.name + "\"; filename=\"" + f.fileName + "\"").getBytes(charset));
                 byteArrayOutputStream.write(newline);
                 byteArrayOutputStream.write(("Content-Type: " + f.mimeType).getBytes(charset));
                 byteArrayOutputStream.write(newline);
                 byteArrayOutputStream.write(newline);
-                byteArrayOutputStream.write(Files.readAllBytes(f.path));
+                byteArrayOutputStream.write(f.data);
                 byteArrayOutputStream.write(newline);
             }
             for (var entry: texts.entrySet()) {
@@ -78,12 +76,14 @@ public class MimeMultipartData {
         public class MimedFile {
 
             public final String name;
-            public final Path path;
+            public final String fileName;
+            public final byte[] data;
             public final String mimeType;
 
-            public MimedFile(String name, Path path, String mimeType) {
+            public MimedFile(String name, String fileName, byte[] data, String mimeType) {
                 this.name = name;
-                this.path = path;
+                this.fileName = fileName;
+                this.data = data;
                 this.mimeType = mimeType;
             }
         }

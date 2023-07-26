@@ -8,6 +8,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -26,13 +28,19 @@ public class SubmitDispatcher {
             if (imagePath != null) {
                 NETWORK_EXECUTOR.execute(() -> {
                     try {
-                        job.setImage(ImageUpload.uploadImage(imagePath));
+                        job.setImage(ImageUpload.uploadImage(imagePath, 256));
                         trySendPackage(jobId);
                     } catch (Exception ex) {
                         job.exception = ex;
                         if (job.callback != null) job.callback.accept(job);
                         Main.LOGGER.error("Upload Image", ex);
                         removeJob(jobId);
+                    } finally {
+                        try {
+                            Files.deleteIfExists(imagePath);
+                        } catch (IOException ex) {
+                            Main.LOGGER.error("Delete image file", ex);
+                        }
                     }
                 });
             }
