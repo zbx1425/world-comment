@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.datafixers.types.templates.Check;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -16,9 +17,11 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,7 @@ public class CommentToolScreen extends Screen {
     public CommentToolScreen(Path imagePath) {
         super(Component.literal("Comment Tool"));
         this.imagePath = imagePath;
+        this.screenshotSaved = false;
         try (FileInputStream fis = new FileInputStream(imagePath.toFile())) {
             widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(fis)));
         } catch (IOException e) {
@@ -46,6 +50,11 @@ public class CommentToolScreen extends Screen {
     @Override
     public void onClose() {
         widgetImage.close();
+        try {
+            Files.delete(imagePath);
+        } catch (IOException e) {
+            Main.LOGGER.warn("Delete image", e);
+        }
         super.onClose();
     }
 
@@ -54,8 +63,11 @@ public class CommentToolScreen extends Screen {
     private MultiLineEditBox textBoxMessage;
     private Checkbox checkBoxNoImage;
     private Checkbox checkBoxAnonymous;
+    private WidgetColorButton btnSaveScreenshot;
     private Button btnSendFeedback;
     private int selectedCommentType = 0;
+
+    boolean screenshotSaved;
 
     public int containerWidth, containerHeight, containerOffsetX, containerOffsetY;
 
@@ -63,9 +75,12 @@ public class CommentToolScreen extends Screen {
     protected void init() {
         super.init();
 
+        Minecraft minecraft = Minecraft.getInstance();
+
         int baseY = CONTAINER_PADDING_Y;
         radioButtons.clear();
-        for (int r = 0; r < 2; r++) {
+        boolean canAccessBuildTools = minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
+        for (int r = 0; r < (canAccessBuildTools ? 2 : 1); r++) {
             addRenderableWidget(new WidgetFlagLabel(
                     SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 4 + 10, SQ_SIZE / 2,
                     0xFF2196F3, Component.translatable("gui.worldcomment.comment_type.r" + (r + 1))
@@ -88,7 +103,9 @@ public class CommentToolScreen extends Screen {
             }
             baseY += CommentTypeButton.BTN_HEIGHT + SQ_SIZE / 2;
         }
-        // baseY += SQ_SIZE / 2;
+        if (!canAccessBuildTools) {
+            baseY += SQ_SIZE / 2;
+        }
 
         addRenderableWidget(new WidgetFlagLabel(
                 SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 6 + 10, SQ_SIZE / 2,
@@ -152,6 +169,23 @@ public class CommentToolScreen extends Screen {
             widget.setX(widget.getX() + containerOffsetX);
             widget.setY(widget.getY() + containerOffsetY);
         }
+
+        btnSaveScreenshot = new WidgetColorButton(
+                containerOffsetX, btnSendFeedback.getY(), CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+                Component.translatable("gui.worldcomment.save_screenshot"), 0xFF81D4FA, sender -> {
+                    Path persistentPath = imagePath.resolveSibling(
+                            imagePath.getFileName().toString().replace("WorldComment", "WorldComment-Saved"));
+                    try {
+                        Files.copy(imagePath, persistentPath);
+                        screenshotSaved = true;
+                        btnSaveScreenshot.active = false;
+                    } catch (IOException e) {
+                        Main.LOGGER.error("Copy image", e);
+                    }
+                }
+        );
+        btnSaveScreenshot.active = !screenshotSaved;
+        addRenderableWidget(btnSaveScreenshot);
     }
 
     private void sendReport() {
