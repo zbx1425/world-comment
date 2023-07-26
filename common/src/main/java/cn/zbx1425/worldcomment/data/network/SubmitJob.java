@@ -11,9 +11,10 @@ public class SubmitJob {
     public final CommentEntry comment;
     public final Path imagePath;
     public boolean imageReady, blockPosReady;
-    public Consumer<Exception> callback;
+    public Exception exception;
+    public Consumer<SubmitJob> callback;
 
-    public SubmitJob(CommentEntry comment, Path imagePath, Consumer<Exception> callback) {
+    public SubmitJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback) {
         this.comment = comment;
         this.imagePath = imagePath;
         if (imagePath == null) {

@@ -1,16 +1,13 @@
 package cn.zbx1425.worldcomment.data.network;
 
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.Database;
 import cn.zbx1425.worldcomment.network.PacketSubmitCommentC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.core.BlockPos;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -21,7 +18,7 @@ public class SubmitDispatcher {
     private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final Long2ObjectMap<SubmitJob> pendingJobs = new Long2ObjectOpenHashMap<>();
 
-    public static long addJob(CommentEntry comment, Path imagePath, Consumer<Exception> callback) {
+    public static long addJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback) {
         synchronized (pendingJobs) {
             long jobId = Database.SNOWFLAKE.nextId();
             SubmitJob job = new SubmitJob(comment, imagePath, callback);
@@ -29,10 +26,12 @@ public class SubmitDispatcher {
             if (imagePath != null) {
                 NETWORK_EXECUTOR.execute(() -> {
                     try {
-                        job.setImage(ImageHost.uploadImage(imagePath));
+                        job.setImage(ImageUpload.uploadImage(imagePath));
                         trySendPackage(jobId);
                     } catch (Exception ex) {
-                        if (job.callback != null) job.callback.accept(ex);
+                        job.exception = ex;
+                        if (job.callback != null) job.callback.accept(job);
+                        Main.LOGGER.error("Upload Image", ex);
                         removeJob(jobId);
                     }
                 });
@@ -61,6 +60,10 @@ public class SubmitDispatcher {
             PacketSubmitCommentC2S.ClientLogics.send(job.comment);
             if (job.callback != null) job.callback.accept(null);
             removeJob(jobId);
+        } else {
+            if (job.imagePath != null && !job.imageReady) {
+                if (job.callback != null) job.callback.accept(job);
+            }
         }
     }
 }

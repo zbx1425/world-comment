@@ -32,7 +32,8 @@
   "gui.worldcomment.list.remove": "移除",
   "gui.worldcomment.list.like": "点赞",
 
-  "gui.worldcomment.send_pending": "正在处理您的消息。与此同时，请选择放置评论的位置。",
+  "gui.worldcomment.send_pending": "请选择放置评论的位置。",
+  "gui.worldcomment.send_upload_incomplete": "您的评论图片还没有完成上传，请您稍等。",
   "gui.worldcomment.send_finish": "您的评论已成功发送。",
-  "gui.worldcomment.send_fail": "处理您的评论时发生了错误: %s"
+  "gui.worldcomment.send_fail": "处理您的评论时发生了错误: %s\n处理您的评论时发生了错误。"
 }

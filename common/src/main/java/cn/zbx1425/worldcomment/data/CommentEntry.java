@@ -14,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class CommentEntry {
@@ -29,8 +30,9 @@ public class CommentEntry {
     public String initiatorName;
     public int messageType;
     public String message;
-    public boolean deleted;
     public ThumbImage image;
+    public boolean deleted;
+    public int like;
 
     public long fileOffset;
 
@@ -51,7 +53,16 @@ public class CommentEntry {
     }
 
     public CommentEntry(ResourceLocation level, FriendlyByteBuf src, boolean fromFile) {
-        if (fromFile) fileOffset = src.readerIndex();
+        if (fromFile) {
+            fileOffset = src.readerIndex();
+            src.skipBytes(16);
+        }
+
+        deleted = src.readBoolean();
+        src.skipBytes(3);
+        like = src.readInt();
+        src.skipBytes(4);
+
         id = src.readLong();
         timestamp = src.readLong();
         this.level = level;
@@ -61,8 +72,8 @@ public class CommentEntry {
         initiatorName = src.readUtf();
         messageType = src.readInt();
         message = src.readUtf();
-        deleted = src.readBoolean();
         image = new ThumbImage(src.readUtf(), src.readUtf());
+
         if (fromFile) src.skipBytes(16 - (src.readerIndex() % 16));
     }
 
@@ -72,6 +83,15 @@ public class CommentEntry {
     }
 
     public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
+        if (toFile) {
+            dst.writeBytes("=====(C)=Zbx1425".getBytes(StandardCharsets.UTF_8));
+        }
+
+        dst.writeBoolean(deleted);
+        dst.writeZero(3);
+        dst.writeInt(like);
+        dst.writeZero(4);
+
         dst.writeLong(id);
         dst.writeLong(timestamp);
         dst.writeBlockPos(location);
@@ -79,9 +99,9 @@ public class CommentEntry {
         dst.writeUtf(initiatorName);
         dst.writeInt(messageType);
         dst.writeUtf(message);
-        dst.writeBoolean(deleted);
         dst.writeUtf(image.url);
         dst.writeUtf(image.thumbUrl);
+
         if (toFile) dst.writeZero(16 - (dst.writerIndex() % 16));
     }
 

@@ -17,7 +17,7 @@ public class CommentOverlayRenderer {
         return widgets.computeIfAbsent(entry, WidgetCommentEntry::new);
     }
 
-    public static void render(GuiGraphics guiGraphics, float partialTick) {
+    public static void render(GuiGraphics guiGraphics) {
         int pickedCommentsSize = ClientRayPicking.pickedComments.size();
         if (pickedCommentsSize > 0) {
             int[] yOffsets = new int[pickedCommentsSize];
@@ -44,7 +44,7 @@ public class CommentOverlayRenderer {
                         guiGraphics.guiWidth() / 2 - 30
                 );
                 if (widget.getY() + widget.getHeight() > 0 && widget.getY() < guiGraphics.guiHeight()) {
-                    widget.render(guiGraphics, 0, 0, partialTick);
+                    widget.render(guiGraphics, 0, 0, 0);
                 }
             }
             if (pickedCommentsSize > 1) {

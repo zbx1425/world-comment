@@ -163,13 +163,18 @@ public class CommentToolScreen extends Screen {
             );
             long jobId = SubmitDispatcher.addJob(
                     comment, checkBoxNoImage.selected() ? null : imagePath,
-                    exception -> Minecraft.getInstance().execute(() -> {
-                        if (exception == null) {
+                    data -> Minecraft.getInstance().execute(() -> {
+                        if (data == null) {
                             Minecraft.getInstance().player.displayClientMessage(
                                     Component.translatable("gui.worldcomment.send_finish"), false);
                         } else {
-                            Minecraft.getInstance().player.displayClientMessage(
-                                    Component.translatable("gui.worldcomment.send_fail", exception.getMessage()), true);
+                            if (data.exception != null) {
+                                Minecraft.getInstance().player.displayClientMessage(
+                                        Component.translatable("gui.worldcomment.send_fail", data.exception.getMessage()), false);
+                            } else {
+                                Minecraft.getInstance().player.displayClientMessage(
+                                        Component.translatable("gui.worldcomment.send_upload_incomplete"), false);
+                            }
                         }
                     }
             ));

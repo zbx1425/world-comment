@@ -47,7 +47,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         int textHeight = 26
                 + (comment.message.isEmpty() ? 0 : font.wordWrapHeight(comment.message, picWidth * 2 - 8))
                 + 4;
-        int picHeight = 20 + (comment.image.url.isEmpty() ? 0 : (picWidth * 9 / 16)) + 4;
+        int picHeight = 20 + (comment.image.url.isEmpty() ? 0 : (picWidth)) + 4;
         height = Math.max(Math.max(textHeight, picHeight), 28 + 4);
     }
 
@@ -67,7 +67,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
         if (!comment.image.url.isEmpty()) {
             int picWidth = (width - 16) / 3;
-            int picHeight = picWidth * 9 / 16;
+            int picHeight = picWidth;
             String imageUrl = comment.image.thumbUrl.isEmpty() ? comment.image.url : comment.image.thumbUrl;
             RenderSystem.setShaderTexture(0, ImageDownload.getTexture(imageUrl).getId());
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
