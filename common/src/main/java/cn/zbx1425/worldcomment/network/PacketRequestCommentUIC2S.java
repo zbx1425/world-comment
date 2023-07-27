@@ -13,33 +13,46 @@ import net.minecraft.world.level.ChunkPos;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class PacketRequestCommentUIC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "request_region");
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "request_comment_ui");
 
     public static class ClientLogics {
 
-        public static void send(ResourceLocation level, List<ChunkPos> requests) {
+        public static void sendPlayer(UUID playerId, long nonce) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-            buffer.writeResourceLocation(level);
-            buffer.writeInt(requests.size());
-            for (ChunkPos request : requests) {
-                buffer.writeChunkPos(request);
-            }
+            buffer.writeInt(1);
+            buffer.writeLong(nonce);
+            buffer.writeUUID(playerId);
+            ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
+        }
+
+        public static void sendLatest(int offset, int limit, long nonce) {
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+            buffer.writeInt(2);
+            buffer.writeLong(nonce);
+            buffer.writeInt(offset);
+            buffer.writeInt(limit);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
     }
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
-        ResourceLocation level = buffer.readResourceLocation();
-        Map<ChunkPos, List<CommentEntry>> results = new Object2ObjectArrayMap<>();
-        int size = buffer.readInt();
-        for (int i = 0; i < size; i++) {
-            ChunkPos request = buffer.readChunkPos();
-            List<CommentEntry> regionResults = Main.DATABASE.comments.queryRegion(level, request);
-            results.put(request, regionResults);
+        int requestType = buffer.readInt();
+        long nonce = buffer.readLong();
+
+        switch (requestType) {
+            case 1 -> {
+                UUID playerId = buffer.readUUID();
+                PacketCommentDataUIS2C.send(initiator, Main.DATABASE.comments.queryPlayer(playerId), nonce);
+            }
+            case 2 -> {
+                int offset = buffer.readInt();
+                int limit = buffer.readInt();
+                PacketCommentDataUIS2C.send(initiator, Main.DATABASE.comments.queryLatest(offset, limit), nonce);
+            }
         }
-        PacketRegionDataS2C.send(initiator, level, results);
     }
 }

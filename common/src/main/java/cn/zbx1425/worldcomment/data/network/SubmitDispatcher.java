@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.Database;
+import cn.zbx1425.worldcomment.data.persist.Database;
 import cn.zbx1425.worldcomment.network.PacketSubmitCommentC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;

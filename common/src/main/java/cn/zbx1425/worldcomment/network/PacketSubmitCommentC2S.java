@@ -44,7 +44,7 @@ public class PacketSubmitCommentC2S {
 
                 }
                  */
-                PacketRegionUpdateS2C.send(player, comment, false);
+                PacketCommentUpdateS2C.send(player, comment, false);
             }
         } catch (IOException e) {
             Main.LOGGER.error("Failed to create comment", e);

@@ -1,12 +1,11 @@
-package cn.zbx1425.worldcomment.data;
+package cn.zbx1425.worldcomment.data.persist;
 
-import io.netty.buffer.ByteBuf;
+import cn.zbx1425.worldcomment.data.CommentEntry;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -118,6 +117,7 @@ public class CommentTable {
                     .add(newEntry);
             playerIndex.computeIfAbsent(newEntry.initiator, ignored -> new ArrayList<>())
                     .add(newEntry);
+            timeIndex.put(newEntry.timestamp, newEntry);
         }
     }
 }

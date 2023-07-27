@@ -2,9 +2,11 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.persist.Database;
 import cn.zbx1425.worldcomment.data.client.ClientDatabase;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.network.PacketRequestCommentUIC2S;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -35,6 +37,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     List<CommentEntry> commentList = new ArrayList<>();
     int commentListOffset = 0;
+    int latestCommentsRequestedAmount = 0;
+    private final int latestCommentsPageSize = 20;
 
     CommentEntry commentForDetail;
 
@@ -65,32 +69,36 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         Minecraft minecraft = Minecraft.getInstance();
         this.prevSubScreen = this.subScreen;
         this.subScreen = subScreen;
-        switch (subScreen) {
-            case 0:
-                commentList.clear();
-                BlockPos playerPos = minecraft.player.blockPosition();
-                for (Map<BlockPos, List<CommentEntry>> region : ClientDatabase.INSTANCE.regions.values()) {
-                    for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
-                        commentList.addAll(blockData.getValue());
+        if (prevSubScreen != 3) {
+            switch (subScreen) {
+                case 0 -> {
+                    commentList.clear();
+                    BlockPos playerPos = minecraft.player.blockPosition();
+                    for (Map<BlockPos, List<CommentEntry>> region : ClientDatabase.INSTANCE.regions.values()) {
+                        for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
+                            commentList.addAll(blockData.getValue());
+                        }
                     }
+                    commentList.sort(Comparator.comparingDouble(entry -> entry.location.distSqr(playerPos)));
+                    commentListOffset = 0;
                 }
-                commentList.sort(Comparator.comparingDouble(entry -> entry.location.distSqr(playerPos)));
-                commentListOffset = prevSubScreen == 3
-                        ? Mth.clamp(0, commentListOffset, Math.max(commentList.size() - 1, 0)) : 0;
-                break;
-            case 1:
-                commentList.clear();
-                commentListOffset = prevSubScreen == 3
-                        ? Mth.clamp(0, commentListOffset, Math.max(commentList.size() - 1, 0)) : 0;
-                break;
-            case 2:
-                commentList.clear();
-                commentListOffset = prevSubScreen == 3
-                        ? Mth.clamp(0, commentListOffset, Math.max(commentList.size() - 1, 0)) : 0;
-                break;
-            case 3:
-
-                break;
+                case 1 -> {
+                    commentList.clear();
+                    commentListOffset = 0;
+                    lastRequestNonce = Database.SNOWFLAKE.nextId();
+                    latestCommentsRequestedAmount = 0;
+                    PacketRequestCommentUIC2S.ClientLogics.sendLatest(
+                            latestCommentsRequestedAmount,  latestCommentsPageSize, lastRequestNonce);
+                    latestCommentsRequestedAmount += latestCommentsPageSize;
+                }
+                case 2 -> {
+                    commentList.clear();
+                    commentListOffset = 0;
+                    lastRequestNonce = Database.SNOWFLAKE.nextId();
+                    PacketRequestCommentUIC2S.ClientLogics.sendPlayer(
+                            minecraft.player.getGameProfile().getId(), lastRequestNonce);
+                }
+            }
         }
         clearWidgets();
         init();
@@ -169,10 +177,12 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             }
             guiGraphics.disableScissor();
 
-            String pageStr = String.format("↕ %d / %d", commentListOffset + 1, commentList.size());
-            guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
-                    width - 10 - 10 - Minecraft.getInstance().font.width(pageStr),
-                    15, 0xFFA5D6A7, true);
+            if (commentList.size() > 1) {
+                String pageStr = String.format("↕ %d / %d", commentListOffset + 1, commentList.size());
+                guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
+                        width - 10 - 10 - Minecraft.getInstance().font.width(pageStr),
+                        15, 0xFFA5D6A7, true);
+            }
         }
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -229,14 +239,21 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         int scrollAmount = (int)this.accumulatedScroll;
         if (scrollAmount == 0) return super.mouseScrolled(mouseX, mouseY, delta);
         this.accumulatedScroll -= scrollAmount;
-        if (commentList.size() > 1) {
-            int dir = -(int)Math.signum(scrollAmount);
-            commentListOffset = Mth.clamp(commentListOffset + dir, 0, commentList.size() - 1);
-            return true;
-        } else {
+
+        if (commentList.size() <= 1) {
             commentListOffset = 0;
+            return super.mouseScrolled(mouseX, mouseY, delta);
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        int dir = -(int)Math.signum(scrollAmount);
+        commentListOffset = Mth.clamp(commentListOffset + dir, 0, commentList.size() - 1);
+
+        if (subScreen == 1 && commentListOffset >= latestCommentsRequestedAmount - latestCommentsPageSize / 2) {
+            lastRequestNonce = Database.SNOWFLAKE.nextId();
+            PacketRequestCommentUIC2S.ClientLogics.sendLatest(
+                    latestCommentsRequestedAmount, latestCommentsPageSize, lastRequestNonce);
+            latestCommentsRequestedAmount += latestCommentsPageSize;
+        }
+        return true;
     }
 
     @Override
@@ -251,6 +268,15 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private long lastRequestNonce;
+
+    public void handleCommentDataUI(List<CommentEntry> data, long nonce) {
+        if (nonce != lastRequestNonce) return;
+        commentList.addAll(data);
+        commentList.sort(Comparator.comparingLong(entry -> -entry.timestamp));
+        commentListOffset = Mth.clamp(0, commentListOffset, Math.max(commentList.size() - 1, 0));
     }
 
     public static boolean handleKeyF5() {

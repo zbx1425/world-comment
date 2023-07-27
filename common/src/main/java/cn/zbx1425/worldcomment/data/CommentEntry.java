@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import cn.zbx1425.worldcomment.data.persist.Database;
 import io.netty.buffer.Unpooled;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -9,11 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 

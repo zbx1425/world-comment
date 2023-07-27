@@ -1,7 +1,8 @@
 package cn.zbx1425.worldcomment;
 
-import cn.zbx1425.worldcomment.data.Database;
+import cn.zbx1425.worldcomment.data.persist.Database;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
+import cn.zbx1425.worldcomment.network.PacketRequestCommentUIC2S;
 import cn.zbx1425.worldcomment.network.PacketRequestRegionC2S;
 import cn.zbx1425.worldcomment.network.PacketSubmitCommentC2S;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
@@ -25,8 +26,12 @@ public class Main {
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL, CreativeModeTabs.TOOLS_AND_UTILITIES);
 
-		ServerPlatform.registerNetworkReceiver(PacketRequestRegionC2S.IDENTIFIER, PacketRequestRegionC2S::handle);
-		ServerPlatform.registerNetworkReceiver(PacketSubmitCommentC2S.IDENTIFIER, PacketSubmitCommentC2S::handle);
+		ServerPlatform.registerNetworkReceiver(
+				PacketRequestRegionC2S.IDENTIFIER, PacketRequestRegionC2S::handle);
+		ServerPlatform.registerNetworkReceiver(
+				PacketRequestCommentUIC2S.IDENTIFIER, PacketRequestCommentUIC2S::handle);
+		ServerPlatform.registerNetworkReceiver(
+				PacketSubmitCommentC2S.IDENTIFIER, PacketSubmitCommentC2S::handle);
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {

@@ -1,5 +1,6 @@
-package cn.zbx1425.worldcomment.data;
+package cn.zbx1425.worldcomment.data.persist;
 
+import cn.zbx1425.worldcomment.data.Snowflake;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
