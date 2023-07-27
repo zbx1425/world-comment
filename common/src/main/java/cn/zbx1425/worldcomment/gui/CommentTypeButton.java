@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 public class CommentTypeButton extends Button implements IGuiCommon {
 
-    private static final int[] COMMENT_TYPE_COLOR = {
+    public static final int[] COMMENT_TYPE_COLOR = {
         0xFF8BC34A, 0xFFCDDC39, 0xFFFFEB3B, 0xFFFF9800,
         0xFF607D8B, 0xFFFFC107, 0xFF03A9F4, 0xFF009888
     };

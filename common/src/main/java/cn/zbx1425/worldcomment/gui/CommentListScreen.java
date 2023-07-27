@@ -69,7 +69,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         Minecraft minecraft = Minecraft.getInstance();
         this.prevSubScreen = this.subScreen;
         this.subScreen = subScreen;
-        if (prevSubScreen != 3) {
+        if (prevSubScreen != 3 || commentList.isEmpty()) {
             switch (subScreen) {
                 case 0 -> {
                     commentList.clear();
@@ -137,6 +137,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
                 BufferUploader.drawWithShader(bufferBuilder.end());
             }
+            WidgetCommentEntry widget = getWidget(comment);
+            widget.showImage = false;
+            int imgAreaWidth = width - 100 - 20 - 10;
+            widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), 0, imgAreaWidth / 2);
+            widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), height - 20 - widget.getHeight(),
+                    imgAreaWidth / 2);
+            widget.render(guiGraphics, mouseX, mouseY, partialTick);
         } else {
             graphicsBlit9(guiGraphics, 100, 30, width - 120, height - 50,
                     176, 40, 20, 20, 256, 256,
@@ -147,6 +154,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             for (int i = commentListOffset; i < commentList.size(); i++) {
                 CommentEntry comment = commentList.get(i);
                 WidgetCommentEntry widget = getWidget(comment);
+                widget.showImage = true;
                 widget.setBounds(106, yOffset, width - 102 - 22 - 8 - 4 - 16);
                 widget.render(guiGraphics, mouseX, mouseY, partialTick);
 
