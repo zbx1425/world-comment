@@ -11,9 +11,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import org.joml.Matrix4f;
 
 import java.time.Instant;
@@ -27,6 +29,8 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
     private final CommentEntry comment;
     private final Font font;
+
+    private List<FormattedCharSequence> wrappedText = List.of();
 
     public boolean showImage = true;
 
@@ -49,8 +53,10 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     private void calculateHeight() {
         int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
         int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
+        wrappedText = Language.getInstance().getVisualOrder(
+                font.getSplitter().splitLines(comment.message, textWidth, Style.EMPTY));
         int textHeight = 26
-                + (comment.message.isEmpty() ? 0 : font.wordWrapHeight(comment.message, textWidth))
+                + (comment.message.isEmpty() ? 0 : 9 * wrappedText.size())
                 + 4;
         int picHeight = 20 + ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4 + 4;
         height = Math.max(Math.max(textHeight, picHeight), 28 + 4);
@@ -65,12 +71,14 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         );
 
         int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
-        int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
         int picHeight = ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4;
 
         if (!comment.message.isEmpty()) {
-            guiGraphics.drawWordWrap(font, FormattedText.of(comment.message), getX() + 16, getY() + 26,
-                    textWidth, 0xFF444444);
+            int lineY = getY() + 26;
+            for (FormattedCharSequence formattedCharSequence : wrappedText) {
+                guiGraphics.drawString(font, formattedCharSequence, getX() + 16, lineY, 0xFF444444, false);
+                lineY += font.lineHeight;
+            }
         }
 
         if (!comment.image.url.isEmpty() && showImage) {
