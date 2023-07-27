@@ -5,12 +5,10 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.types.templates.Check;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -89,7 +87,7 @@ public class CommentToolScreen extends Screen {
                         for (CommentTypeButton radioButton : radioButtons) {
                             radioButton.active = radioButton.commentType != selectedCommentType;
                         }
-                        btnSendFeedback.active = selectedCommentType != 0;
+                        updateBtnSendFeedback();
                     }
                 );
                 selectBtn.active = selectBtn.commentType != selectedCommentType;
@@ -103,26 +101,27 @@ public class CommentToolScreen extends Screen {
         }
 
         addRenderableWidget(new WidgetFlagLabel(
-                SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 6 + 10, SQ_SIZE / 2,
+                SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 5 + 10, SQ_SIZE / 2,
                 0xFF00BCD4, Component.translatable("gui.worldcomment.message")
         ));
         baseY += SQ_SIZE / 2;
         textBoxMessage = new MultiLineEditBox(
                 Minecraft.getInstance().font,
-                SIDEBAR_OFFSET, baseY, CommentTypeButton.BTN_WIDTH * 6, SQ_SIZE * 4,
+                SIDEBAR_OFFSET, baseY, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4,
                 Component.translatable("gui.worldcomment.message.placeholder"),
                 Component.literal("")
         );
+        textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
         addRenderableWidget(textBoxMessage);
         baseY += textBoxMessage.getHeight();
         baseY += CONTAINER_PADDING_Y;
 
         btnSendFeedback = new WidgetColorButton(
-                SIDEBAR_OFFSET + CommentTypeButton.BTN_WIDTH * 4, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+                SIDEBAR_OFFSET + CommentTypeButton.BTN_WIDTH * 3, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
                 Component.translatable("gui.worldcomment.submit"), 0xFFC5E1A5,
                 sender -> sendReport()
         );
-        btnSendFeedback.active = selectedCommentType != 0;
+        updateBtnSendFeedback();
         addRenderableWidget(btnSendFeedback);
 
         baseY = CONTAINER_PADDING_Y;
@@ -228,14 +227,14 @@ public class CommentToolScreen extends Screen {
                 containerOffsetY - CONTAINER_PADDING_Y,
                 containerOffsetX + containerWidth + CONTAINER_PADDING_X,
                 containerOffsetY + containerHeight - SQ_SIZE + CONTAINER_PADDING_Y,
-                0x99111111
+                0xBB111111
         );
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY + containerHeight - SQ_SIZE + CONTAINER_PADDING_Y,
                 containerOffsetX + containerWidth + CONTAINER_PADDING_X,
                 containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
-                0x99444444
+                0xBB444444
         );
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
@@ -264,5 +263,20 @@ public class CommentToolScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private void updateBtnSendFeedback() {
+        if (selectedCommentType == 0) {
+            btnSendFeedback.active = false;
+            btnSendFeedback.setTooltip(Tooltip.create(
+                    Component.translatable("gui.worldcomment.require_comment_type").withStyle(ChatFormatting.RED)));
+        } else if (textBoxMessage.getValue().length() > CommentEntry.MESSAGE_MAX_LENGTH) {
+            btnSendFeedback.active = false;
+            btnSendFeedback.setTooltip(Tooltip.create(
+                    Component.translatable("gui.worldcomment.message_too_long").withStyle(ChatFormatting.RED)));
+        } else {
+            btnSendFeedback.active = true;
+            btnSendFeedback.setTooltip(null);
+        }
     }
 }

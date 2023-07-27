@@ -1,7 +1,9 @@
 package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
+import cn.zbx1425.worldcomment.render.OverlayLayer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.Tag;
@@ -16,6 +18,7 @@ import java.util.function.Consumer;
 public class Screenshot {
 
     public static void grabScreenshot(Consumer<Path> callback) {
+        OverlayLayer.isTakingScreenshot = true;
         Minecraft.getInstance().execute(() -> {
             File targetFile = getAvailableFile();
             net.minecraft.client.Screenshot.grab(Minecraft.getInstance().gameDirectory, targetFile.getName(),
@@ -23,6 +26,7 @@ public class Screenshot {
                     ignored -> {
                         callback.accept(targetFile.toPath());
                     });
+            OverlayLayer.isTakingScreenshot = false;
         });
     }
 
@@ -49,12 +53,14 @@ public class Screenshot {
         if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return false;
         if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) return false;
 
-        grabScreenshot(path -> {
-            Minecraft.getInstance().execute(() -> {
-                minecraft.player.playSound(shutterSoundEvent);
-                Minecraft.getInstance().setScreen(new CommentToolScreen(path));
+        if (minecraft.screen == null) {
+            grabScreenshot(path -> {
+                Minecraft.getInstance().execute(() -> {
+                    minecraft.player.playSound(shutterSoundEvent);
+                    Minecraft.getInstance().setScreen(new CommentToolScreen(path));
+                });
             });
-        });
+        }
         return true;
     }
 }

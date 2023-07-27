@@ -6,6 +6,7 @@ import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -36,20 +37,30 @@ public class CommentToolItem extends Item {
 
         if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
             long jobId = item.getOrCreateTag().getLong("uploadJobId");
-            item.getOrCreateTag().remove("uploadJobId");
             HitResult hitResult = Minecraft.getInstance().hitResult;
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockHitResult blockHitResult = (BlockHitResult) hitResult;
                 BlockPos facePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                SubmitDispatcher.placeJobAt(jobId, facePos);
-            } else {
-                return InteractionResultHolder.fail(item);
+                boolean hasClearance = true;
+                for (int y = 0; y < 3; y++) {
+                    if (level.getBlockState(facePos.offset(0, y, 0)).isSolid()) {
+                        hasClearance = false;
+                        break;
+                    }
+                }
+                if (hasClearance) {
+                    SubmitDispatcher.placeJobAt(jobId, facePos);
+                    item.getOrCreateTag().remove("uploadJobId");
+                    return InteractionResultHolder.success(item);
+                } else {
+                    player.displayClientMessage(
+                            Component.translatable("gui.worldcomment.send_insufficient_clearance"), false);
+                }
             }
         } else {
 
         }
-
-        return InteractionResultHolder.success(item);
+        return InteractionResultHolder.fail(item);
     }
 
     @Override

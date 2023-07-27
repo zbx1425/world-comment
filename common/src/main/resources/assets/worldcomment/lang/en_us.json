@@ -17,6 +17,8 @@
   "gui.worldcomment.exclude_screenshot": "Exclude Screenshot",
   "gui.worldcomment.anonymous": "Anonymous",
   "gui.worldcomment.save_screenshot": "Save Screenshot",
+  "gui.worldcomment.require_comment_type": "Pick a comment type.",
+  "gui.worldcomment.message_too_long": "Message is too long.",
   "gui.worldcomment.submit": "Submit!",
 
   "gui.worldcomment.control_tip.create": "Take Screenshot and Comment",
@@ -36,6 +38,7 @@
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down.",
   "gui.worldcomment.send_upload_incomplete": "§bYour image is still being uploaded. Please wait.",
+  "gui.worldcomment.send_insufficient_clearance": "Please choose a place with more clearance as the comment object is 3 blocks tall.",
   "gui.worldcomment.send_finish": "§aYour message is sent successfully.",
   "gui.worldcomment.send_fail": "§c§lError occurred when processing your message: %s\n  §c§lError occurred when processing your message."
 }

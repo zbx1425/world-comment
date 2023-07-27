@@ -350,7 +350,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         minecraft.execute(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
                 minecraft.screen.onClose();
-            } else {
+            } else if (minecraft.screen == null) {
                 minecraft.setScreen(new CommentListScreen(null));
             }
         });
@@ -366,7 +366,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         minecraft.execute(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
                 minecraft.screen.onClose();
-            } else {
+            } else if (minecraft.screen == null) {
                 minecraft.setScreen(
                         new CommentListScreen(ClientRayPicking.pickedComments.get(ClientRayPicking.overlayOffset)));
             }

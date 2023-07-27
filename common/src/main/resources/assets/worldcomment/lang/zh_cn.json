@@ -17,6 +17,8 @@
   "gui.worldcomment.exclude_screenshot": "不包含截图",
   "gui.worldcomment.anonymous": "匿名评论",
   "gui.worldcomment.save_screenshot": "另存截图",
+  "gui.worldcomment.require_comment_type": "请选择评论类型",
+  "gui.worldcomment.message_too_long": "留言内容太长",
   "gui.worldcomment.submit": "提交!",
 
   "gui.worldcomment.control_tip.create": "截图并评论",
@@ -37,5 +39,6 @@
   "gui.worldcomment.send_pending": "§6§l请选择放置评论的位置。",
   "gui.worldcomment.send_upload_incomplete": "§b您的评论图片还没有完成上传，请您稍等。",
   "gui.worldcomment.send_finish": "§a您的评论已成功发送。",
-  "gui.worldcomment.send_fail": "§c§l处理您的评论时发生了错误: %s\n  §c§l处理您的评论时发生了错误。"
+  "gui.worldcomment.send_fail": "§c§l处理您的评论时发生了错误: %s\n  §c§l处理您的评论时发生了错误。",
+  "gui.worldcomment.send_insufficient_clearance": "§6请选择一处更开阔的地方，因为评论物件有 3 格高。"
 }

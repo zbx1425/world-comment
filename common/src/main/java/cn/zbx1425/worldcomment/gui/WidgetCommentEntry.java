@@ -47,11 +47,12 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     }
 
     private void calculateHeight() {
-        int picWidth = (width - 16) / 3;
+        int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
+        int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
         int textHeight = 26
-                + (comment.message.isEmpty() ? 0 : font.wordWrapHeight(comment.message, picWidth * 2 - 8))
+                + (comment.message.isEmpty() ? 0 : font.wordWrapHeight(comment.message, textWidth))
                 + 4;
-        int picHeight = 20 + ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4;
+        int picHeight = 20 + ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4 + 4;
         height = Math.max(Math.max(textHeight, picHeight), 28 + 4);
     }
 
@@ -63,15 +64,16 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
                 24, 4, 4, 28
         );
 
+        int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
+        int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
+        int picHeight = ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4;
+
         if (!comment.message.isEmpty()) {
-            int picWidth = (width - 16) / 3;
             guiGraphics.drawWordWrap(font, FormattedText.of(comment.message), getX() + 16, getY() + 26,
-                    picWidth * 2 - 8, 0xFF444444);
+                    textWidth, 0xFF444444);
         }
 
         if (!comment.image.url.isEmpty() && showImage) {
-            int picWidth = (width - 16) / 3;
-            int picHeight = picWidth * 9 / 16;
             String imageUrl = comment.image.thumbUrl.isEmpty() ? comment.image.url : comment.image.thumbUrl;
             RenderSystem.setShaderTexture(0, ImageDownload.getTexture(imageUrl).getId());
             RenderSystem.setShader(GameRenderer::getPositionTexShader);

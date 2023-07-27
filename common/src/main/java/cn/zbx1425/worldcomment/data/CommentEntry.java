@@ -19,6 +19,7 @@ import java.util.UUID;
 public class CommentEntry {
 
     public static int REGION_SHIFT = 2;
+    public static final int MESSAGE_MAX_LENGTH = 256;
 
     public long id;
     public long timestamp;
