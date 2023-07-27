@@ -9,9 +9,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-public class PacketCommentUpdateS2C {
+public class PacketEntryUpdateS2C {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "comment_update");
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "entry_update");
 
     public static void send(ServerPlayer target, CommentEntry comment, boolean update) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());

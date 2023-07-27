@@ -31,6 +31,7 @@
   "gui.worldcomment.list.my_posts": "我的评论",
   "gui.worldcomment.list.detail": "详情",
   "gui.worldcomment.list.remove": "移除",
+  "gui.worldcomment.list.remove.confirm": "再点击一次确认移除",
   "gui.worldcomment.list.like": "点赞",
 
   "gui.worldcomment.send_pending": "§6§l请选择放置评论的位置。",

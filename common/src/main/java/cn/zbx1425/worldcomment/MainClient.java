@@ -1,8 +1,8 @@
 package cn.zbx1425.worldcomment;
 
-import cn.zbx1425.worldcomment.network.PacketCommentDataUIS2C;
+import cn.zbx1425.worldcomment.network.PacketCollectionDataS2C;
 import cn.zbx1425.worldcomment.network.PacketRegionDataS2C;
-import cn.zbx1425.worldcomment.network.PacketCommentUpdateS2C;
+import cn.zbx1425.worldcomment.network.PacketEntryUpdateS2C;
 
 public class MainClient {
 
@@ -10,9 +10,9 @@ public class MainClient {
 		ClientPlatform.registerNetworkReceiver(
 				PacketRegionDataS2C.IDENTIFIER, PacketRegionDataS2C.ClientLogics::handle);
 		ClientPlatform.registerNetworkReceiver(
-				PacketCommentDataUIS2C.IDENTIFIER, PacketCommentDataUIS2C.ClientLogics::handle);
+				PacketCollectionDataS2C.IDENTIFIER, PacketCollectionDataS2C.ClientLogics::handle);
 		ClientPlatform.registerNetworkReceiver(
-				PacketCommentUpdateS2C.IDENTIFIER, PacketCommentUpdateS2C.ClientLogics::handle);
+				PacketEntryUpdateS2C.IDENTIFIER, PacketEntryUpdateS2C.ClientLogics::handle);
 	}
 
 }

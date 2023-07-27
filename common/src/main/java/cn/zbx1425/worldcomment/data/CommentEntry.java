@@ -12,6 +12,7 @@ import net.minecraft.world.level.ChunkPos;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -51,15 +52,12 @@ public class CommentEntry {
     }
 
     public CommentEntry(ResourceLocation level, FriendlyByteBuf src, boolean fromFile) {
-        if (fromFile) {
-            fileOffset = src.readerIndex();
-            src.skipBytes(16);
-        }
+        fileOffset = src.readerIndex();
 
         deleted = src.readBoolean();
         src.skipBytes(3);
         like = src.readInt();
-        src.skipBytes(4);
+        src.skipBytes(8);
 
         id = src.readLong();
         timestamp = src.readLong();
@@ -81,14 +79,10 @@ public class CommentEntry {
     }
 
     public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
-        if (toFile) {
-            dst.writeBytes("=====(C)=Zbx1425".getBytes(StandardCharsets.UTF_8));
-        }
-
         dst.writeBoolean(deleted);
         dst.writeZero(3);
         dst.writeInt(like);
-        dst.writeZero(4);
+        dst.writeBytes("====ZBX=".getBytes(StandardCharsets.UTF_8));
 
         dst.writeLong(id);
         dst.writeLong(timestamp);
@@ -108,6 +102,13 @@ public class CommentEntry {
         writeBuffer(buf, true);
         fileOffset = oStream.getChannel().position();
         oStream.write(buf.array(), 0, buf.writerIndex());
+    }
+
+    public void updateInFile(RandomAccessFile oFile) throws IOException {
+        oFile.seek(fileOffset);
+        oFile.writeBoolean(deleted);
+        oFile.write(new byte[3]);
+        oFile.writeInt(like);
     }
 
 }

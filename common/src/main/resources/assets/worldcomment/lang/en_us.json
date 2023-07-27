@@ -31,6 +31,7 @@
   "gui.worldcomment.list.my_posts": "My Posts",
   "gui.worldcomment.list.detail": "Detail",
   "gui.worldcomment.list.remove": "Remove",
+  "gui.worldcomment.list.remove.confirm": "Click again to CONFIRM",
   "gui.worldcomment.list.like": "Like",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down.",

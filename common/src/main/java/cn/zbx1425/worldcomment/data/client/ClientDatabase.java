@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.network.PacketRequestRegionC2S;
+import cn.zbx1425.worldcomment.network.PacketRegionRequestC2S;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -52,7 +52,7 @@ public class ClientDatabase {
                 }
             }
             if (regionsToRequest.size() > 0) {
-                PacketRequestRegionC2S.ClientLogics.send(minecraft.level.dimension().location(), regionsToRequest);
+                PacketRegionRequestC2S.ClientLogics.send(minecraft.level.dimension().location(), regionsToRequest);
             }
 
             for (ObjectIterator<Long2LongMap.Entry> it = regionExpiry.long2LongEntrySet().iterator(); it.hasNext(); ) {
@@ -99,7 +99,11 @@ public class ClientDatabase {
                     List<CommentEntry> blockData = regionData.get(comment.location);
                     for (int i = 0; i < blockData.size(); i++) {
                         if (blockData.get(i).id == comment.id) {
-                            blockData.set(i, comment);
+                            if (comment.deleted) {
+                                blockData.remove(i);
+                            } else {
+                                blockData.set(i, comment);
+                            }
                             break;
                         }
                     }

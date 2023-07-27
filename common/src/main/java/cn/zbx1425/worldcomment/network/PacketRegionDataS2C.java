@@ -47,6 +47,7 @@ public class PacketRegionDataS2C {
                 ArrayList<CommentEntry> comments = new ArrayList<>(commentSize);
                 for (int j = 0; j < commentSize; j++) {
                     CommentEntry comment = new CommentEntry(level, buffer, false);
+                    if (comment.deleted) continue;
                     comments.add(comment);
                 }
                 regions.put(region.toLong(), comments);

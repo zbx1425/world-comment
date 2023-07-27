@@ -14,7 +14,7 @@ import net.minecraft.world.level.ChunkPos;
 import java.util.List;
 import java.util.Map;
 
-public class PacketRequestRegionC2S {
+public class PacketRegionRequestC2S {
 
     public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "request_region");
 

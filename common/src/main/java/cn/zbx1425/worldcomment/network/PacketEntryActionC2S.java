@@ -12,15 +12,26 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
 
-public class PacketSubmitCommentC2S {
+public class PacketEntryActionC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "submit_comment");
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "entry_action");
+
+    public static final int ACTION_DELETE = -1;
+    public static final int ACTION_LIKE = 1;
 
     public static class ClientLogics {
 
-        public static void send(CommentEntry comment) {
+        public static void send(CommentEntry comment, int action) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeResourceLocation(comment.level);
+            switch (action) {
+                case ACTION_DELETE -> {
+                    comment.deleted = true;
+                }
+                case ACTION_LIKE -> {
+                    comment.like++;
+                }
+            }
             comment.writeBuffer(buffer, false);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
@@ -29,22 +40,15 @@ public class PacketSubmitCommentC2S {
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         ResourceLocation level = buffer.readResourceLocation();
         CommentEntry comment = new CommentEntry(level, buffer, false);
-        if (!comment.initiator.equals(Util.NIL_UUID)
+        if (!initiator.hasPermissions(3)
                 && !comment.initiator.equals(initiator.getGameProfile().getId())) {
             return;
         }
         try {
-            Main.DATABASE.comments.insert(comment);
+            Main.DATABASE.comments.update(comment);
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                /*
-                int playerCX = player.blockPosition().getX() >> 4;
-                int playerCZ = player.blockPosition().getX() >> 4;
-                if (Math.abs(comment.region.x - playerCX) <= 1 && Math.abs(comment.region.z - playerCZ) <= 1) {
-
-                }
-                 */
-                PacketCommentUpdateS2C.send(player, comment, false);
+                PacketEntryUpdateS2C.send(player, comment, true);
             }
         } catch (IOException e) {
             Main.LOGGER.error("Failed to create comment", e);

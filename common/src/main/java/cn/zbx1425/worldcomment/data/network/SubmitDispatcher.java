@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.data.network;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.persist.Database;
-import cn.zbx1425.worldcomment.network.PacketSubmitCommentC2S;
+import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
@@ -65,7 +65,7 @@ public class SubmitDispatcher {
     private static void trySendPackage(long jobId) {
         SubmitJob job = pendingJobs.get(jobId);
         if (job.isReady()) {
-            PacketSubmitCommentC2S.ClientLogics.send(job.comment);
+            PacketEntryCreateC2S.ClientLogics.send(job.comment);
             if (job.callback != null) job.callback.accept(null);
             removeJob(jobId);
         } else {

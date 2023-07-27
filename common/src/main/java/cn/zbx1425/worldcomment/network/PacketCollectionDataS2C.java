@@ -3,24 +3,19 @@ package cn.zbx1425.worldcomment.network;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerPlatform;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.client.ClientDatabase;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class PacketCommentDataUIS2C {
+public class PacketCollectionDataS2C {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "comment_data_ui");
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "collection_data");
 
     public static void send(ServerPlayer target, List<CommentEntry> data, long nonce) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
@@ -42,6 +37,7 @@ public class PacketCommentDataUIS2C {
             for (int j = 0; j < commentSize; j++) {
                 ResourceLocation level = buffer.readResourceLocation();
                 CommentEntry comment = new CommentEntry(level, buffer, false);
+                if (comment.deleted) continue;
                 comments.add(comment);
             }
             Minecraft minecraft = Minecraft.getInstance();

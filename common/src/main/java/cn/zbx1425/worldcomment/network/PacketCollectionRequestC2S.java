@@ -2,22 +2,17 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.CommentEntry;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-public class PacketRequestCommentUIC2S {
+public class PacketCollectionRequestC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "request_comment_ui");
+    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "collection_request");
 
     public static class ClientLogics {
 
@@ -46,12 +41,12 @@ public class PacketRequestCommentUIC2S {
         switch (requestType) {
             case 1 -> {
                 UUID playerId = buffer.readUUID();
-                PacketCommentDataUIS2C.send(initiator, Main.DATABASE.comments.queryPlayer(playerId), nonce);
+                PacketCollectionDataS2C.send(initiator, Main.DATABASE.comments.queryPlayer(playerId), nonce);
             }
             case 2 -> {
                 int offset = buffer.readInt();
                 int limit = buffer.readInt();
-                PacketCommentDataUIS2C.send(initiator, Main.DATABASE.comments.queryLatest(offset, limit), nonce);
+                PacketCollectionDataS2C.send(initiator, Main.DATABASE.comments.queryLatest(offset, limit), nonce);
             }
         }
     }

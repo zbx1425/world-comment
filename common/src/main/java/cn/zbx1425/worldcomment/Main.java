@@ -2,9 +2,10 @@ package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.persist.Database;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
-import cn.zbx1425.worldcomment.network.PacketRequestCommentUIC2S;
-import cn.zbx1425.worldcomment.network.PacketRequestRegionC2S;
-import cn.zbx1425.worldcomment.network.PacketSubmitCommentC2S;
+import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
+import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
+import cn.zbx1425.worldcomment.network.PacketRegionRequestC2S;
+import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -27,11 +28,13 @@ public class Main {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL, CreativeModeTabs.TOOLS_AND_UTILITIES);
 
 		ServerPlatform.registerNetworkReceiver(
-				PacketRequestRegionC2S.IDENTIFIER, PacketRequestRegionC2S::handle);
+				PacketRegionRequestC2S.IDENTIFIER, PacketRegionRequestC2S::handle);
 		ServerPlatform.registerNetworkReceiver(
-				PacketRequestCommentUIC2S.IDENTIFIER, PacketRequestCommentUIC2S::handle);
+				PacketCollectionRequestC2S.IDENTIFIER, PacketCollectionRequestC2S::handle);
 		ServerPlatform.registerNetworkReceiver(
-				PacketSubmitCommentC2S.IDENTIFIER, PacketSubmitCommentC2S::handle);
+				PacketEntryCreateC2S.IDENTIFIER, PacketEntryCreateC2S::handle);
+		ServerPlatform.registerNetworkReceiver(
+				PacketEntryActionC2S.IDENTIFIER, PacketEntryActionC2S::handle);
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {

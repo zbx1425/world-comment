@@ -6,7 +6,8 @@ import cn.zbx1425.worldcomment.data.persist.Database;
 import cn.zbx1425.worldcomment.data.client.ClientDatabase;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
-import cn.zbx1425.worldcomment.network.PacketRequestCommentUIC2S;
+import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
+import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -41,6 +42,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     private final int latestCommentsPageSize = 20;
 
     CommentEntry commentForDetail;
+    CommentEntry commentToDelete;
 
     private final Map<CommentEntry, WidgetCommentEntry> widgets = new WeakHashMap<>();
 
@@ -76,7 +78,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     BlockPos playerPos = minecraft.player.blockPosition();
                     for (Map<BlockPos, List<CommentEntry>> region : ClientDatabase.INSTANCE.regions.values()) {
                         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
-                            commentList.addAll(blockData.getValue());
+                            for (CommentEntry comment : blockData.getValue()) {
+                                if (comment.deleted) continue;
+                                commentList.add(comment);
+                            }
                         }
                     }
                     commentList.sort(Comparator.comparingDouble(entry -> entry.location.distSqr(playerPos)));
@@ -87,7 +92,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     commentListOffset = 0;
                     lastRequestNonce = Database.SNOWFLAKE.nextId();
                     latestCommentsRequestedAmount = 0;
-                    PacketRequestCommentUIC2S.ClientLogics.sendLatest(
+                    PacketCollectionRequestC2S.ClientLogics.sendLatest(
                             latestCommentsRequestedAmount,  latestCommentsPageSize, lastRequestNonce);
                     latestCommentsRequestedAmount += latestCommentsPageSize;
                 }
@@ -95,7 +100,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     commentList.clear();
                     commentListOffset = 0;
                     lastRequestNonce = Database.SNOWFLAKE.nextId();
-                    PacketRequestCommentUIC2S.ClientLogics.sendPlayer(
+                    PacketCollectionRequestC2S.ClientLogics.sendPlayer(
                             minecraft.player.getGameProfile().getId(), lastRequestNonce);
                 }
             }
@@ -113,19 +118,20 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
         if (subScreen == 3) {
             CommentEntry comment = commentForDetail;
-            if (!comment.image.url.isEmpty()) {
-                int picWidth = width - 100 - 20 - 20;
-                int picHeight = picWidth * 9 / 16;
-                int x1 = 100 + 10, x2 = 100 + 10 + picWidth;
-                int y1 = 30 + 10, y2 = 30 + 10 + picHeight;
 
-                int shadowColor = 0xFF000000;
-                int shadowOffset = 3;
-                guiGraphics.fill(
-                        (int) (x1 + shadowOffset), (int) (y1 + shadowOffset),
-                        (int) (x2 + shadowOffset), (int) (y2 + shadowOffset),
-                        shadowColor
-                );
+            int picWidth = width - 100 - 20 - 20;
+            int picHeight = picWidth * 9 / 16;
+            int x1 = 100 + 10, x2 = 100 + 10 + picWidth;
+            int y1 = 30 + 10, y2 = 30 + 10 + picHeight;
+
+            int shadowColor = 0xFF000000;
+            int shadowOffset = 3;
+            guiGraphics.fill(
+                    (int) (x1 + shadowOffset), (int) (y1 + shadowOffset),
+                    (int) (x2 + shadowOffset), (int) (y2 + shadowOffset),
+                    shadowColor
+            );
+            if (!comment.image.url.isEmpty()) {
                 RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image.url).getId());
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 Matrix4f matrix4f = guiGraphics.pose().last().pose();
@@ -136,7 +142,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
                 bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
                 BufferUploader.drawWithShader(bufferBuilder.end());
+            } else {
+                guiGraphics.fillGradient(x1, y1, x2, y2, 0xff014e7c, 0xff501639);
             }
+
             WidgetCommentEntry widget = getWidget(comment);
             widget.showImage = false;
             int imgAreaWidth = width - 100 - 20 - 10;
@@ -144,6 +153,22 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), height - 20 - widget.getHeight(),
                     imgAreaWidth / 2);
             widget.render(guiGraphics, mouseX, mouseY, partialTick);
+
+            boolean canDelete = minecraft.player.hasPermissions(3)
+                    || minecraft.player.getGameProfile().getId().equals(comment.initiator);
+            if (canDelete) {
+                int deleteBtnX = 100 + 18, deleteBtnY = height - 20 - 22;
+                guiGraphics.blit(ATLAS_LOCATION, deleteBtnX, deleteBtnY, 20, 20,
+                        216, 60, 20, 20, 256, 256);
+                if (mouseX > deleteBtnX && mouseX < deleteBtnX + 20
+                        && mouseY > deleteBtnY && mouseY < deleteBtnY + 20) {
+                    guiGraphics.blit(ATLAS_LOCATION, deleteBtnX, deleteBtnY, 20, 20,
+                            236, 60, 20, 20, 256, 256);
+                    if (commentToDelete == comment) {
+                        guiGraphics.renderTooltip(font, Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
+                    }
+                }
+            }
         } else {
             graphicsBlit9(guiGraphics, 100, 30, width - 120, height - 50,
                     176, 40, 20, 20, 256, 256,
@@ -164,7 +189,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                         && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
                     guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
                             236, 60, 20, 20, 256, 256);
-                }
+                    }
 
                 boolean canDelete = minecraft.player.hasPermissions(3)
                         || minecraft.player.getGameProfile().getId().equals(comment.initiator);
@@ -176,6 +201,9 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                             && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
                         guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
                                 236, 60, 20, 20, 256, 256);
+                        if (commentToDelete == comment) {
+                            guiGraphics.renderTooltip(font, Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
+                        }
                     }
                     yOffset -= 16;
                 }
@@ -198,31 +226,56 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (subScreen == 3) return super.mouseClicked(mouseX, mouseY, button);
-
-        int yOffset = 32 + 4;
-        for (int i = commentListOffset; i < commentList.size(); i++) {
-            CommentEntry comment = commentList.get(i);
-            WidgetCommentEntry widget = getWidget(comment);
-
-            if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
-                    && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
-                this.commentForDetail = comment;
-                useSubScreen(3);
-                return true;
+        if (subScreen == 3) {
+            CommentEntry comment = commentForDetail;
+            boolean canDelete = minecraft.player.hasPermissions(3)
+                    || minecraft.player.getGameProfile().getId().equals(comment.initiator);
+            if (canDelete) {
+                int deleteBtnX = 100 + 18, deleteBtnY = height - 20 - 22;
+                if (mouseX > deleteBtnX && mouseX < deleteBtnX + 20
+                        && mouseY > deleteBtnY && mouseY < deleteBtnY + 20) {
+                    if (comment == commentToDelete) {
+                        PacketEntryActionC2S.ClientLogics.send(comment, PacketEntryActionC2S.ACTION_DELETE);
+                        commentList.remove(comment);
+                        commentToDelete = null;
+                        commentListOffset = Mth.clamp(commentListOffset, 0, Math.max(commentList.size() - 1, 0));
+                        onClose();
+                    } else {
+                        commentToDelete = comment;
+                    }
+                }
             }
+        } else {
+            int yOffset = 32 + 4;
+            for (int i = commentListOffset; i < commentList.size(); i++) {
+                CommentEntry comment = commentList.get(i);
+                WidgetCommentEntry widget = getWidget(comment);
 
-            yOffset += 16;
-            if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
-                    && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
-                this.commentForDetail = comment;
-                useSubScreen(3);
-                return true;
+                if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
+                        && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
+                    this.commentForDetail = comment;
+                    useSubScreen(3);
+                    return true;
+                }
+
+                yOffset += 16;
+                if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
+                        && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
+                    if (comment == commentToDelete) {
+                        PacketEntryActionC2S.ClientLogics.send(comment, PacketEntryActionC2S.ACTION_DELETE);
+                        commentList.remove(comment);
+                        commentToDelete = null;
+                        commentListOffset = Mth.clamp(commentListOffset, 0, Math.max(commentList.size() - 1, 0));
+                    } else {
+                        commentToDelete = comment;
+                    }
+                    return true;
+                }
+                yOffset -= 16;
+
+                yOffset += widget.getHeight() + 6;
+                if (yOffset > height - 22) break;
             }
-            yOffset -= 16;
-
-            yOffset += widget.getHeight() + 6;
-            if (yOffset > height - 22) break;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -253,11 +306,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             return super.mouseScrolled(mouseX, mouseY, delta);
         }
         int dir = -(int)Math.signum(scrollAmount);
-        commentListOffset = Mth.clamp(commentListOffset + dir, 0, commentList.size() - 1);
+        commentListOffset = Mth.clamp(commentListOffset + dir, 0, Math.max(commentList.size() - 1, 0));
 
         if (subScreen == 1 && commentListOffset >= latestCommentsRequestedAmount - latestCommentsPageSize / 2) {
             lastRequestNonce = Database.SNOWFLAKE.nextId();
-            PacketRequestCommentUIC2S.ClientLogics.sendLatest(
+            PacketCollectionRequestC2S.ClientLogics.sendLatest(
                     latestCommentsRequestedAmount, latestCommentsPageSize, lastRequestNonce);
             latestCommentsRequestedAmount += latestCommentsPageSize;
         }
@@ -284,7 +337,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         if (nonce != lastRequestNonce) return;
         commentList.addAll(data);
         commentList.sort(Comparator.comparingLong(entry -> -entry.timestamp));
-        commentListOffset = Mth.clamp(0, commentListOffset, Math.max(commentList.size() - 1, 0));
+        commentListOffset = Mth.clamp(commentListOffset, 0, Math.max(commentList.size() - 1, 0));
     }
 
     public static boolean handleKeyF5() {
