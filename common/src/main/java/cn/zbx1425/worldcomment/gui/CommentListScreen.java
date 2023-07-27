@@ -248,6 +248,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         }
     }
 
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
     public static boolean handleKeyF5() {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return false;

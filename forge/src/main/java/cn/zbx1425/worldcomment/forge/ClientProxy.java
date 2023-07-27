@@ -15,14 +15,13 @@ public class ClientProxy {
             MainClient.init();
         }
 
-        @SubscribeEvent
-        public static void onRenderGameOverlay(RenderGuiOverlayEvent.Post event) {
-            OverlayLayer.render(event.getGuiGraphics());
-        }
-
     }
 
     public static class ForgeEventBusListener {
 
+        @SubscribeEvent
+        public static void onRenderGameOverlay(RenderGuiOverlayEvent.Post event) {
+            OverlayLayer.render(event.getGuiGraphics());
+        }
     }
 }
