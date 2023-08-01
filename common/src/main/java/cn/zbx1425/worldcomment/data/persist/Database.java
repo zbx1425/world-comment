@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.persist;
 
 import cn.zbx1425.worldcomment.data.Snowflake;
+import cn.zbx1425.worldcomment.data.synchronizer.SingletonSynchronizer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
@@ -21,7 +22,7 @@ public class Database {
     public Database(MinecraftServer server) {
         this.server = server;
         this.basePath = Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "world-comment");
-        comments = new CommentTable(this);
+        comments = new CommentTable(this, new SingletonSynchronizer());
     }
 
     public void load() throws IOException {
