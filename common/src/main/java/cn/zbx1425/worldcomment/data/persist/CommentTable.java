@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.persist;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.synchronizer.*;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -25,15 +26,24 @@ public class CommentTable {
     Map<UUID, List<CommentEntry>> playerIndex = new HashMap<>();
     Long2ObjectSortedMap<CommentEntry> timeIndex = new Long2ObjectAVLTreeMap<>(Comparator.reverseOrder());
 
-    public CommentTable(Database db) {
+    private final Synchronizer synchronizer;
+
+    public CommentTable(Database db, Synchronizer sync) {
         this.db = db;
+        this.synchronizer = sync;
+
+        try {
+            this.synchronizer.sync(db.basePath.resolve("region"));
+        } catch (IOException e) {
+            //Todo: seems need to do something here
+        }
+
     }
 
     public void load() throws IOException {
         regionIndex.clear();
         playerIndex.clear();
         timeIndex.clear();
-        if (db.isHost) {
             try {
                 Files.createDirectories(db.basePath.resolve("region"));
             } catch (FileAlreadyExistsException ignored) {
@@ -53,9 +63,6 @@ public class CommentTable {
                     }
                 }
             }
-        } else {
-
-        }
     }
 
     public void loadRegion(ResourceLocation dimension, long region, byte[] data, boolean fromFile) {
@@ -130,10 +137,8 @@ public class CommentTable {
 
                     }
                 }
-                Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
-                try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), true)) {
-                    newEntry.writeFileStream(oStream);
-                }
+
+                this.synchronizer.update(newEntry, getLevelRegionPath(newEntry.level, newEntry.region));
             }
             regionIndex.get(newEntry.level)
                     .computeIfAbsent(newEntry.region.toLong(), ignored -> new ArrayList<>())
@@ -151,14 +156,12 @@ public class CommentTable {
             if (regionData == null) return;
             for (CommentEntry existingEntry : regionData) {
                 if (existingEntry.id == newEntry.id) {
+                    //Todo: refactor this
                     existingEntry.deleted = newEntry.deleted;
                     existingEntry.like = newEntry.like;
                     assert existingEntry.fileOffset > 0;
                     if (db.isHost) {
-                        Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
-                        try (RandomAccessFile oStream = new RandomAccessFile(targetFile.toFile(), "rw")) {
-                            existingEntry.updateInFile(oStream);
-                        }
+                        this.synchronizer.update(existingEntry, getLevelRegionPath(newEntry.level, newEntry.region));
                     }
                 }
             }
