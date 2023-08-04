@@ -25,7 +25,7 @@ public class ClientDatabase {
 
     public static ClientDatabase INSTANCE = new ClientDatabase();
 
-    public static final long REGION_TTL = 60000;
+    public static final long REGION_TTL = 300000;
 
     private long lastTickTime = 0;
 
@@ -36,6 +36,11 @@ public class ClientDatabase {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastTickTime < 1000) return;
             lastTickTime = currentTime;
+
+            if (minecraft.level.dimension().location() != this.level) {
+                this.level = minecraft.level.dimension().location();
+                clear();
+            }
 
             BlockPos playerPos = minecraft.player.blockPosition();
             int cx = playerPos.getX() >> (4 + CommentEntry.REGION_SHIFT);
@@ -74,8 +79,7 @@ public class ClientDatabase {
 
     public void acceptRegions(ResourceLocation level, Long2ObjectMap<List<CommentEntry>> regions) {
         synchronized (this) {
-            if (!level.equals(this.level)) clear();
-            this.level = level;
+            if (!level.equals(this.level)) return;
             long currentTime = System.currentTimeMillis();
             for (Long2ObjectMap.Entry<List<CommentEntry>> entry : regions.long2ObjectEntrySet()) {
                 this.regions.computeIfAbsent(entry.getLongKey(), ignored -> new Object2ObjectArrayMap<>()).clear();
@@ -91,8 +95,7 @@ public class ClientDatabase {
 
     public void acceptUpdate(CommentEntry comment, boolean update) {
         synchronized (this) {
-            if (!level.equals(comment.level)) clear();
-            this.level = comment.level;
+            if (!comment.level.equals(this.level)) return;
             Map<BlockPos, List<CommentEntry>> regionData = regions.get(comment.region.toLong());
             if (regionData != null) {
                 if (update) {
