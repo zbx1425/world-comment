@@ -1,7 +1,6 @@
 package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
-import cn.zbx1425.worldcomment.data.persist.Database;
 import io.netty.buffer.Unpooled;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -37,7 +36,7 @@ public class CommentEntry {
     public long fileOffset;
 
     public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message) {
-        id = Database.SNOWFLAKE.nextId();
+        id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
         level = initiator.level().dimension().location();
         if (isAnonymous) {

@@ -17,13 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ClientDatabase {
+public class ClientWorldData {
 
     public ResourceLocation level;
     public Long2ObjectMap<Map<BlockPos, List<CommentEntry>>> regions = new Long2ObjectOpenHashMap<>();
     public Long2LongMap regionExpiry = new Long2LongOpenHashMap();
 
-    public static ClientDatabase INSTANCE = new ClientDatabase();
+    public static ClientWorldData INSTANCE = new ClientWorldData();
 
     public static final long REGION_TTL = 300000;
 

@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.network;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerPlatform;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.client.ClientDatabase;
+import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +27,7 @@ public class PacketEntryUpdateS2C {
             boolean update = buffer.readBoolean();
             ResourceLocation level = buffer.readResourceLocation();
             CommentEntry comment = new CommentEntry(level, buffer, false);
-            ClientDatabase.INSTANCE.acceptUpdate(comment, update);
+            ClientWorldData.INSTANCE.acceptUpdate(comment, update);
         }
     }
 }

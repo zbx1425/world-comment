@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.mixin;
 
-import cn.zbx1425.worldcomment.data.client.ClientDatabase;
+import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,7 +25,7 @@ public class LevelRendererMixin {
 
     @Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=blockentities", ordinal = 0))
     private void afterEntities(PoseStack matrices, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-        ClientDatabase.INSTANCE.tick();
+        ClientWorldData.INSTANCE.tick();
         ClientRayPicking.tick(partialTick, 20);
         matrices.pushPose();
         Vec3 cameraPos = camera.getPosition();

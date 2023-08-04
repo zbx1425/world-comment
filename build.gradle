@@ -36,7 +36,7 @@ String parchment_version = parchment_not_avail ? "N/A" : new XmlSlurper().parse(
 
 
 rootProject.ext.fabric_loader_version = new JsonSlurper().parse(("https://meta.fabricmc.net/v2/versions/loader/" + minecraft_version).toURL())[0]["loader"]["version"]
-rootProject.ext.forge_version = minecraft_version + "-" + new JsonSlurper().parse(("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json").toURL())["promos"][minecraft_version + "-latest"]
+rootProject.ext.forge_version = minecraft_version + "-" + new JsonSlurper().parse(("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json").toURL())["promos"][minecraft_version + "-recommended"]
 rootProject.ext.fabric_api_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
 rootProject.ext.mod_menu_version = getModrinthVersion("fabric", minecraft_version, "modmenu")
 rootProject.ext.architectury_version = getModrinthVersion("forge", minecraft_version, "architectury-api").split("\\+")[0]
