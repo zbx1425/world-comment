@@ -1,10 +1,9 @@
 package cn.zbx1425.worldcomment.network;
 
-import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerPlatform;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.client.ClientDatabase;
+import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -52,7 +51,7 @@ public class PacketRegionDataS2C {
                 }
                 regions.put(region.toLong(), comments);
             }
-            ClientDatabase.INSTANCE.acceptRegions(level, regions);
+            ClientWorldData.INSTANCE.acceptRegions(level, regions);
         }
     }
 }

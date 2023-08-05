@@ -39,7 +39,7 @@ public class ClientRayPicking {
 
         visibleComments.clear();
         pickedComments.clear();
-        for (Map<BlockPos, List<CommentEntry>> region : ClientDatabase.INSTANCE.regions.values()) {
+        for (Map<BlockPos, List<CommentEntry>> region : ClientWorldData.INSTANCE.regions.values()) {
             for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
                 AABB blockHitArea = new AABB(blockData.getKey(), blockData.getKey().offset(1, 3, 1));
                 if (!((LevelRendererAccessor)minecraft.levelRenderer).getCullingFrustum().isVisible(blockHitArea)) continue;

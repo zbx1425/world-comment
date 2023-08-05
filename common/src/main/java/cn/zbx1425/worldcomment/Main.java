@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment;
 
-import cn.zbx1425.worldcomment.data.persist.Database;
+import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
@@ -20,7 +20,7 @@ public class Main {
 	public static final String MOD_ID = "worldcomment";
 	public static final Logger LOGGER = LoggerFactory.getLogger("Subnoteica");
 
-	public static Database DATABASE;
+	public static ServerWorldData DATABASE;
 
 	public static final RegistryObject<Item> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
@@ -38,7 +38,7 @@ public class Main {
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {
-				DATABASE = new Database(server);
+				DATABASE = new ServerWorldData(server);
 				DATABASE.load();
 			} catch (IOException e) {
 				LOGGER.error("Failed to open data storage", e);

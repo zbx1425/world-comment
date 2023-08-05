@@ -34,7 +34,7 @@ public class PacketEntryCreateC2S {
             return;
         }
         try {
-            Main.DATABASE.comments.insert(comment);
+            Main.DATABASE.insert(comment);
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 /*

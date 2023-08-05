@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.persist.Database;
+import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -22,7 +22,7 @@ public class SubmitDispatcher {
 
     public static long addJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback) {
         synchronized (pendingJobs) {
-            long jobId = Database.SNOWFLAKE.nextId();
+            long jobId = ServerWorldData.SNOWFLAKE.nextId();
             SubmitJob job = new SubmitJob(comment, imagePath, callback);
             pendingJobs.put(jobId, job);
             if (imagePath != null) {

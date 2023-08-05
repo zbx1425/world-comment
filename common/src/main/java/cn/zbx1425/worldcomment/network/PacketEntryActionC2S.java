@@ -45,7 +45,7 @@ public class PacketEntryActionC2S {
             return;
         }
         try {
-            Main.DATABASE.comments.update(comment);
+            Main.DATABASE.update(comment);
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 PacketEntryUpdateS2C.send(player, comment, true);

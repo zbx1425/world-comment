@@ -1,69 +1,19 @@
-package cn.zbx1425.worldcomment.data.persist;
+package cn.zbx1425.worldcomment.data;
 
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.synchronizer.*;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.*;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Stream;
 
-public class CommentTable {
-
-    public final Database db;
+public class CommentCache {
 
     Map<ResourceLocation, Long2ObjectMap<List<CommentEntry>>> regionIndex = new HashMap<>();
     Map<UUID, List<CommentEntry>> playerIndex = new HashMap<>();
     Long2ObjectSortedMap<CommentEntry> timeIndex = new Long2ObjectAVLTreeMap<>(Comparator.reverseOrder());
-
-    private final Synchronizer synchronizer;
-
-    public CommentTable(Database db, Synchronizer sync) {
-        this.db = db;
-        this.synchronizer = sync;
-
-        try {
-            this.synchronizer.sync(db.basePath.resolve("region"));
-        } catch (IOException e) {
-            //Todo: seems need to do something here
-        }
-
-    }
-
-    public void load() throws IOException {
-        regionIndex.clear();
-        playerIndex.clear();
-        timeIndex.clear();
-            try {
-                Files.createDirectories(db.basePath.resolve("region"));
-            } catch (FileAlreadyExistsException ignored) {
-
-            }
-            try (Stream<Path> levelFiles = Files.list(db.basePath.resolve("region"))) {
-                for (Path levelPath : levelFiles.toList()) {
-                    ResourceLocation dimension = new ResourceLocation(levelPath.getFileName().toString().replace("+", ":"));
-                    try (Stream<Path> files = Files.list(levelPath)) {
-                        for (Path file : files.toList()) {
-                            String[] fileNameParts = file.getFileName().toString().split("\\.");
-                            if (fileNameParts.length != 4 || !fileNameParts[3].equals("bin")) continue;
-                            ChunkPos region = new ChunkPos(Integer.parseInt(fileNameParts[1]), Integer.parseInt(fileNameParts[2]));
-                            byte[] fileContent = Files.readAllBytes(file);
-                            loadRegion(dimension, region.toLong(), fileContent, true);
-                        }
-                    }
-                }
-            }
-    }
 
     public void loadRegion(ResourceLocation dimension, long region, byte[] data, boolean fromFile) {
         synchronized (this) {
@@ -80,17 +30,6 @@ public class CommentTable {
             regionIndex.computeIfAbsent(dimension, ignored -> new Long2ObjectOpenHashMap<>())
                     .put(region, regionEntries);
         }
-    }
-
-    private Path getLevelPath(ResourceLocation dimension) {
-        return db.basePath.resolve("region")
-                .resolve(dimension.getNamespace() + "+" + dimension.getPath());
-    }
-
-    private Path getLevelRegionPath(ResourceLocation dimension, ChunkPos region) {
-        return db.basePath.resolve("region")
-                .resolve(dimension.getNamespace() + "+" + dimension.getPath())
-                .resolve("r." + region.x + "." + region.z + ".bin");
     }
 
     public List<CommentEntry> queryRegion(ResourceLocation level, ChunkPos region) {
@@ -125,21 +64,10 @@ public class CommentTable {
         }
     }
 
-    public void insert(CommentEntry newEntry) throws IOException {
+    protected void insert(CommentEntry newEntry) {
         synchronized (this) {
             boolean createLevelFolder = !regionIndex.containsKey(newEntry.level);
             if (createLevelFolder) regionIndex.put(newEntry.level, new Long2ObjectOpenHashMap<>());
-            if (db.isHost) {
-                if (createLevelFolder) {
-                    try {
-                        Files.createDirectory(getLevelPath(newEntry.level));
-                    } catch (FileAlreadyExistsException ignored) {
-
-                    }
-                }
-
-                this.synchronizer.update(newEntry, getLevelRegionPath(newEntry.level, newEntry.region));
-            }
             regionIndex.get(newEntry.level)
                     .computeIfAbsent(newEntry.region.toLong(), ignored -> new ArrayList<>())
                     .add(newEntry);
@@ -149,22 +77,28 @@ public class CommentTable {
         }
     }
 
-    public void update(CommentEntry newEntry) throws IOException {
+    protected CommentEntry update(CommentEntry newEntry) {
         synchronized (this) {
             List<CommentEntry> regionData = regionIndex.getOrDefault(newEntry.level, Long2ObjectMaps.emptyMap())
                     .get(newEntry.region.toLong());
-            if (regionData == null) return;
+            if (regionData == null) return null;
             for (CommentEntry existingEntry : regionData) {
                 if (existingEntry.id == newEntry.id) {
-                    //Todo: refactor this
                     existingEntry.deleted = newEntry.deleted;
                     existingEntry.like = newEntry.like;
                     assert existingEntry.fileOffset > 0;
-                    if (db.isHost) {
-                        this.synchronizer.update(existingEntry, getLevelRegionPath(newEntry.level, newEntry.region));
-                    }
+                    return existingEntry;
                 }
             }
+            return null;
+        }
+    }
+
+    public void clear() {
+        synchronized (this) {
+            regionIndex.clear();
+            playerIndex.clear();
+            timeIndex.clear();
         }
     }
 }

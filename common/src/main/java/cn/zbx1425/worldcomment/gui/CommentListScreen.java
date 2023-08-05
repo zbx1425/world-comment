@@ -2,8 +2,8 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.persist.Database;
-import cn.zbx1425.worldcomment.data.client.ClientDatabase;
+import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
@@ -76,7 +76,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 case 0 -> {
                     commentList.clear();
                     BlockPos playerPos = minecraft.player.blockPosition();
-                    for (Map<BlockPos, List<CommentEntry>> region : ClientDatabase.INSTANCE.regions.values()) {
+                    for (Map<BlockPos, List<CommentEntry>> region : ClientWorldData.INSTANCE.regions.values()) {
                         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
                             for (CommentEntry comment : blockData.getValue()) {
                                 if (comment.deleted) continue;
@@ -90,7 +90,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 case 1 -> {
                     commentList.clear();
                     commentListOffset = 0;
-                    lastRequestNonce = Database.SNOWFLAKE.nextId();
+                    lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
                     latestCommentsRequestedAmount = 0;
                     PacketCollectionRequestC2S.ClientLogics.sendLatest(
                             latestCommentsRequestedAmount,  latestCommentsPageSize, lastRequestNonce);
@@ -99,7 +99,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 case 2 -> {
                     commentList.clear();
                     commentListOffset = 0;
-                    lastRequestNonce = Database.SNOWFLAKE.nextId();
+                    lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
                     PacketCollectionRequestC2S.ClientLogics.sendPlayer(
                             minecraft.player.getGameProfile().getId(), lastRequestNonce);
                 }
@@ -309,7 +309,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         commentListOffset = Mth.clamp(commentListOffset + dir, 0, Math.max(commentList.size() - 1, 0));
 
         if (subScreen == 1 && commentListOffset >= latestCommentsRequestedAmount - latestCommentsPageSize / 2) {
-            lastRequestNonce = Database.SNOWFLAKE.nextId();
+            lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
             PacketCollectionRequestC2S.ClientLogics.sendLatest(
                     latestCommentsRequestedAmount, latestCommentsPageSize, lastRequestNonce);
             latestCommentsRequestedAmount += latestCommentsPageSize;
