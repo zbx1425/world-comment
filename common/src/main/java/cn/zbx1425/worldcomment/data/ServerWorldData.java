@@ -21,14 +21,14 @@ public class ServerWorldData {
     public final CommentCache comments = new CommentCache();
 
     public final FileSerializer fileSerializer;
-    public final RedisSynchronizer synchronizer;
+    public final Synchronizer synchronizer;
 
-    public ServerWorldData(MinecraftServer server) {
+    public ServerWorldData(MinecraftServer server, Synchronizer synchronizer) {
         this.server = server;
         this.basePath = Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "world-comment");
         fileSerializer = new FileSerializer(basePath);
         //Todo: sync config inject
-        this.synchronizer = new RedisSynchronizer("", true, basePath)
+        this.synchronizer = synchronizer;
     }
 
     public void load() throws IOException {
@@ -36,29 +36,20 @@ public class ServerWorldData {
             fileSerializer.loadInto(comments);
             synchronizer.kvWriteAll(comments.timeIndex);
         } else {
+            //will cover all data
             synchronizer.kvReadAllInto(comments);
         }
     }
 
-    public void insert(CommentEntry newEntry, boolean fromPeer) throws IOException {
+    public void insert(CommentEntry newEntry) throws IOException {
         comments.insert(newEntry);
-        if (isHost) {
-            fileSerializer.insert(newEntry);
-            synchronizer.kvWriteEntry(newEntry);
-        }
-        if (!fromPeer) {
-            synchronizer.notifyInsert(newEntry);
-        }
+        fileSerializer.insert(newEntry);
+        synchronizer.notifyInsert(newEntry);
     }
 
-    public void update(CommentEntry newEntry, boolean fromPeer) throws IOException {
+    public void update(CommentEntry newEntry) throws IOException {
         CommentEntry trustedEntry = comments.update(newEntry);
-        if (isHost) {
-            fileSerializer.update(trustedEntry);
-            synchronizer.kvWriteEntry(trustedEntry);
-        }
-        if (!fromPeer) {
-            synchronizer.notifyUpdate(trustedEntry);
-        }
+        fileSerializer.update(trustedEntry);
+        synchronizer.notifyUpdate(newEntry);
     }
 }

@@ -1,7 +1,9 @@
 package cn.zbx1425.worldcomment.data.sync;
 
+import cn.zbx1425.worldcomment.data.CommentCache;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.persist.FileSerializer;
+import com.mojang.datafixers.TypeRewriteRule;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,6 +15,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -23,115 +26,180 @@ public class RedisSynchronizer implements Synchronizer {
     private final FileSerializer Serializer;
 
     private final boolean host;
-    public RedisSynchronizer(String URI, boolean host, Path persist) {
+
+    public RedisSynchronizer(String URI, Path persist, boolean host) {
         this.redis = new RedisChannelInterface(URI);
+        this.Serializer = new FileSerializer(persist);
         this.host = host;
-        this.Serializer = new FileSerializer(persist)
 
         receiver hook = new receiver();
         hook.start();
     }
 
     @Override
-    public void sync(Path path) throws IOException {
-        if (this.host) {
-            this.upload(path);
-        } else {
-            this.fetchAll(path);
-        }
-    }
+    public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> all) {
+        HashMap<String, String> data = new HashMap<>();
 
-
-    @Override
-    public void update(CommentEntry entry, Path targetFile) throws IOException {
-        try (RandomAccessFile oStream = new RandomAccessFile(targetFile.toFile(), "rw")) {
-            entry.updateInFile(oStream);
+        for (CommentEntry entry : all.values()) {
+            data.put(String.valueOf(entry.id), entry.toJson());
         }
 
-
-        if (this.host) {
-            this.redis.hset(
-                    Command.DataKey(
-                            Command.ALL_DATA_ID
-                    ),
-                    new HashMap<String, String>(){{
-                        put(String.valueOf(entry.id), entry.toString());
-                    }});
-
-
-            this.redis.publish(
-                    Command.COMMAND_CHANNEL,
-                    Command.Updated(String.valueOf(entry.id)));
-
-        } else {
-            this.redis.set(Command.DataKey(
-                            String.valueOf(entry.id)),
-                    entry.toString());
-
-            this.redis.publish(
-                    Command.COMMAND_CHANNEL,
-                    Command.Update(String.valueOf(entry.id)));
+        if (data.isEmpty()) {
+            return;
         }
-    }
-
-    public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> all) throws IOException {
-        
 
         this.redis.hset(
                 Command.DataKey(
                         Command.ALL_DATA_ID
                 ),
-                pendingUpload
+                data
         );
 
     }
 
-    public Map<String, String> fetchAll(Path dirPath) throws IOException {
-        Map<String, String> exist = this.redis.hgetall(Command.DataKey(
-                Command.ALL_DATA_ID
-        ));
 
-        try {
-            Files.createDirectories(dirPath);
-        } catch (FileAlreadyExistsException ignored) {
+    @Override
+    public void kvWriteEntry(CommentEntry trustedEntry) {
+        HashMap<String, String> data = new HashMap<>();
+        data.put(String.valueOf(trustedEntry.id), trustedEntry.toJson());
 
-        }
-        try (Stream<Path> levelFiles = Files.list(dirPath)) {
-            for (Path levelPath : levelFiles.toList()) {
-                ResourceLocation dimension = new ResourceLocation(levelPath.getFileName().toString().replace("+", ":"));
-                try (Stream<Path> files = Files.list(levelPath)) {
-                    for (Path file : files.toList()) {
-                        String[] fileNameParts = file.getFileName().toString().split("\\.");
-                        if (fileNameParts.length != 4 || !fileNameParts[3].equals("bin")) continue;
-                        byte[] data = Files.readAllBytes(file);
-                        FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
-                        while (src.readerIndex() < data.length) {
-                            CommentEntry entry = new CommentEntry(dimension, src, false);
-                            exist.remove(String.valueOf(entry.id));
-                        }
-                    }
-                }
-            }
+        if (trustedEntry.deleted) {
+            this.redis.hdel(
+                    Command.DataKey(
+                            Command.ALL_DATA_ID
+                    ),
+                    String.valueOf(trustedEntry.id)
+            );
+            return;
         }
 
-        exist.forEach((id, entry) -> {
-            CommentEntry commentEntry = new CommentEntry();
-            this.update(commentEntry, getLevelRegionPath(commentEntry.level, commentEntry.region));
-        });
+
+        this.redis.hset(
+               Command.DataKey(
+                    Command.ALL_DATA_ID
+               ),
+               data
+        );
+    }
+
+    public void notifyUpdated(CommentEntry trustedEntry) {
+        redis.publish(
+                Command.COMMAND_CHANNEL,
+                Command.Updated(
+                        String.valueOf(trustedEntry.id)
+                )
+        );
+    }
+
+    @Override
+    public void notifyUpdate(CommentEntry trustedEntry) {
+        if (!host) {
+            redis.set(
+                    Command.DataKey(
+                            String.valueOf(trustedEntry.id)
+                    ),
+                    trustedEntry.toJson());
+
+            redis.publish(
+                    Command.COMMAND_CHANNEL,
+                    Command.Update(
+                            String.valueOf(trustedEntry.id)
+                    )
+            );
+
+            return;
+        }
+
+        kvWriteEntry(trustedEntry);
+        notifyUpdated(trustedEntry);
+
+    }
+
+    @Override
+    public void notifyInsert(CommentEntry newEntry) {
+        if (!host) {
+            redis.set(
+                    Command.DataKey(
+                            String.valueOf(newEntry.id)
+                    ),
+                    newEntry.toJson());
 
 
-        //cache cleaned or some other situation
-        if (false) {
-            sendFetchCommand();
+            redis.publish(
+                    Command.COMMAND_CHANNEL,
+                    Command.Update(
+                            String.valueOf(newEntry.id)
+                    )
+            );
+
+            return;
+        }
+
+        kvWriteEntry(newEntry);
+        notifyUpdated(newEntry);
+
+    }
+
+    @Override
+    public void kvReadAllInto(CommentCache comments) throws IOException {
+        Map<String, String> data = redis.hgetall(
+                Command.DataKey(
+                        Command.ALL_DATA_ID
+                )
+        );
+
+        for (String entry : data.values()) {
+            CommentEntry comment = CommentEntry.fromJson(entry);
+            Serializer.cover(comment, false);
         }
     }
 
-    private void sendFetchCommand() {
-        this.redis.publish(
-                Command.COMMAND_CHANNEL,
-                Command.Request(
+    //Client action only
+    private void onUpdated(long id) throws IOException {
+        Map<String, String> rawMap = redis.hgetall(
+                Command.DataKey(
                         Command.ALL_DATA_ID
-        ));
+                )
+        );
+
+        String raw = rawMap.get(String.valueOf(id));
+        if (raw.isEmpty()) {
+            return;
+        }
+
+        CommentEntry comment = CommentEntry.fromJson(raw);
+
+        Serializer.cover(comment, true);
+
+    }
+
+    //Host action only
+    private void onUpdate(long id) throws IOException {
+        String raw = redis.get(
+                Command.DataKey(
+                        String.valueOf(id)
+                )
+        );
+
+        CommentEntry comment = CommentEntry.fromJson(raw);
+
+        Serializer.cover(comment, true);
+
+        kvWriteEntry(comment);
+
+        redis.del(
+                Command.DataKey(
+                        String.valueOf(id)
+                ));
+
+
+
+        redis.publish(
+                Command.COMMAND_CHANNEL,
+                Command.Updated(
+                        String.valueOf(id)
+                )
+        );
     }
 
     public class receiver extends Thread {
@@ -143,9 +211,35 @@ public class RedisSynchronizer implements Synchronizer {
             while (true) {
                 String command = redis.Queue.next();
 
-                if (command.) {
+                if (command.isEmpty()) {
                     continue;
                 }
+
+                if (!host) {
+                    long id = Command.IsUpdated(command);
+                    if (id == 0) {
+                        continue;
+                    }
+
+
+                    try {
+                        onUpdated(id);
+                    } catch (IOException e) {
+                        //Todo: do something
+                    }
+                } else {
+                    long id = Command.IsUpdate(command);
+                    if (id == 0) {
+                        continue;
+                    }
+
+                    try {
+                        onUpdate(id);
+                    } catch (IOException e) {
+                        //Todo: do something
+                    }
+                }
+
             }
 
         }

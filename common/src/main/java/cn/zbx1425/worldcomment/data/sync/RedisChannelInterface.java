@@ -8,6 +8,7 @@ import io.lettuce.core.pubsub.api.async.RedisPubSubAsyncCommands;
 
 import java.util.Map;
 
+//Todo: Notice that this class is COMPLETELY SYNC currently
 public class RedisChannelInterface {
     public RedisChannelMessageQueue Queue = new RedisChannelMessageQueue();
     private final StatefulRedisPubSubConnection<String, String> channel;
@@ -41,12 +42,20 @@ public class RedisChannelInterface {
         this.channel.sync().publish(Channel, Data);
     }
 
+    public void del(String Key) {
+        this.instance.sync().del(Key);
+    }
+
+    public void hdel(String Key, String Field) {
+        this.instance.sync().hdel(Key, Field);
+    }
+
     public synchronized void recvChannel(String[] Channels) {
         if (StartedListening) {
             this.stop();
         }
 
-        RedisPubSubAdapter<String, String> adapter = new RedisPubSubAdapter<>() {
+        /*RedisPubSubAdapter<String, String> adapter = new RedisPubSubAdapter<>() {
             @Override
             public void message(String channel, String message) {
                 Queue.append(channel, message);
@@ -63,7 +72,7 @@ public class RedisChannelInterface {
             Thread.onSpinWait();
         }
 
-        this.channel.removeListener(adapter);
+        this.channel.removeListener(adapter);*/
     }
 
     public void stop() {

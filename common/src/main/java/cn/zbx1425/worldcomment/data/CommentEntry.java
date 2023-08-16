@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -111,4 +113,29 @@ public class CommentEntry {
         oFile.writeInt(like);
     }
 
+    public String toJson() {
+        //Todo: wth is this
+        JsonObject json = new JsonObject();
+        json.addProperty("id", id);
+        json.addProperty("timestamp", timestamp);
+        json.addProperty("level", level.toString());
+        json.addProperty("region", region.toString());
+        json.addProperty("location", location.toString());
+        json.addProperty("initiator", initiator.toString());
+        json.addProperty("initiatorName", initiatorName);
+        json.addProperty("messageType", messageType);
+        json.addProperty("message", message);
+        json.addProperty("image", image.url);
+        json.addProperty("thumb", image.thumbUrl);
+        json.addProperty("deleted", deleted);
+        json.addProperty("like", like);
+        return json.toString();
+    }
+
+
+    public static CommentEntry fromJson(String json) {
+        Gson g = new Gson();
+
+        return g.fromJson(json, CommentEntry.class);
+    }
 }

@@ -25,6 +25,8 @@ dependencies {
 	forge "net.minecraftforge:forge:${rootProject.forge_version}"
 	modApi "${rootProject.architectury_id}:architectury-forge:${rootProject.architectury_version}"
 
+	forgeRuntimeLibrary 'io.lettuce:lettuce-core:6.2.3.RELEASE'
+
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 }

@@ -63,6 +63,17 @@ public class FileSerializer {
         }
     }
 
+    public void cover(CommentEntry newEntry, boolean append) throws IOException {
+        try {
+            Files.createDirectory(getLevelPath(newEntry.level));
+        } catch (FileAlreadyExistsException ignored) { }
+
+        Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
+        try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), append)) {
+            newEntry.writeFileStream(oStream);
+        }
+    }
+
     public void update(CommentEntry existingEntry) throws IOException {
         assert existingEntry.fileOffset > 0;
         Path targetFile = getLevelRegionPath(existingEntry.level, existingEntry.region);

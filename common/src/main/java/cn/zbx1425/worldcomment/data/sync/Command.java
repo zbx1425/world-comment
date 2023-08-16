@@ -21,4 +21,25 @@ public class Command {
         return "UPDATED#"+ID;
     }
 
+    public static String Delete(String ID) {
+        return "DELETE#"+ID;
+    }
+
+    public static long IsUpdated(String Command) {
+        if (!Command.startsWith("UPDATED#")) {
+            return 0;
+        };
+
+        return Long.parseLong(Command.substring(8));
+    }
+
+    public static long IsUpdate(String Command) {
+        if (!Command.startsWith("UPDATE#")) {
+            return 0;
+        };
+
+        return Long.parseLong(Command.substring(7));
+    }
+
+
 }

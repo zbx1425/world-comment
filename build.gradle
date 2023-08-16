@@ -78,6 +78,9 @@ subprojects {
 			officialMojangMappings()
 			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
 		}
+
+		implementation 'io.lettuce:lettuce-core:6.2.3.RELEASE'
+		shadowCommon 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 	}
 }
 

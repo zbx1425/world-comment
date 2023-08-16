@@ -1,7 +1,9 @@
 package cn.zbx1425.worldcomment.data.sync;
 
+import cn.zbx1425.worldcomment.data.CommentCache;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.persist.FileSerializer;
+import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,12 +20,27 @@ public class SingletonSynchronizer implements Synchronizer {
     }
 
     @Override
-    public void sync(Path path) throws IOException {
-        //do nothing
+    public void kvWriteEntry(CommentEntry trustedEntry) {
+
     }
 
     @Override
-    public void update(CommentEntry entry, Path targetFile) throws IOException {
+    public void notifyUpdate(CommentEntry trustedEntry) {
+
+    }
+
+    @Override
+    public void notifyInsert(CommentEntry newEntry) {
+
+    }
+
+    @Override
+    public void kvReadAllInto(CommentCache comments) {
+
+    }
+
+    @Override
+    public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> timeIndex) {
 
     }
 }

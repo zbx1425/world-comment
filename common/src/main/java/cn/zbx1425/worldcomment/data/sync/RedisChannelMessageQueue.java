@@ -13,6 +13,12 @@ public class RedisChannelMessageQueue {
     }
 
     public synchronized String next() {
+        if (CachedMessage.isEmpty()) {
+            return "";
+        }
+
+
+
         String ret = CachedMessage.get(0);
         CachedMessage.remove(0);
         return ret;
