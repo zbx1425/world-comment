@@ -17,17 +17,18 @@ public class ServerWorldData {
     public final MinecraftServer server;
     public final Path basePath;
 
-    public boolean isHost = true;
+    public boolean isHost;
 
     public final CommentCache comments = new CommentCache();
 
     public final FileSerializer fileSerializer;
     public Synchronizer peerChannel;
 
-    public ServerWorldData(MinecraftServer server) {
+    public ServerWorldData(MinecraftServer server, boolean isHost) {
         this.server = server;
         this.basePath = Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "world-comment");
         fileSerializer = new FileSerializer(basePath);
+        this.isHost = isHost;
         this.peerChannel = Synchronizer.NOOP;
     }
 
