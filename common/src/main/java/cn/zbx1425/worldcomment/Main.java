@@ -52,6 +52,13 @@ public class Main {
 				throw new RuntimeException(e);
 			}
 		});
+		ServerPlatform.registerServerStoppingEvent(server -> {
+			try {
+				DATABASE.peerChannel.close();
+			} catch (Exception ex) {
+				LOGGER.error("Failed to close database peerChannel", ex);
+			}
+		});
 	}
 
 }

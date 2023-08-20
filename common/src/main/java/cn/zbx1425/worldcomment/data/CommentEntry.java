@@ -34,6 +34,7 @@ public class CommentEntry {
     public int messageType;
     public String message;
     public ThumbImage image;
+
     public boolean deleted;
     public int like;
 

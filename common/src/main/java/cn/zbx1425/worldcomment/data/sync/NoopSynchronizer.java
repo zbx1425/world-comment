@@ -35,4 +35,9 @@ public class NoopSynchronizer implements Synchronizer {
     public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> timeIndex) {
 
     }
+
+    @Override
+    public void close() {
+
+    }
 }

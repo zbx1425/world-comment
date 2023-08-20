@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 
 import java.io.IOException;
 
-public interface Synchronizer {
+public interface Synchronizer extends AutoCloseable {
 
     Synchronizer NOOP = new NoopSynchronizer();
 
