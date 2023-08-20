@@ -67,4 +67,13 @@ public class ServerWorldData {
             PacketEntryUpdateS2C.send(player, trustedEntry, true);
         }
     }
+
+    public void updateUplinkState(CommentEntry newEntry) throws IOException {
+        CommentEntry trustedEntry = comments.update(newEntry);
+        if (isHost) {
+            fileSerializer.update(trustedEntry);
+        } else {
+            throw new AssertionError("updateUplinkState called at non-host peer");
+        }
+    }
 }

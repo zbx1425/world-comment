@@ -1,7 +1,6 @@
 package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
@@ -36,6 +35,7 @@ public class CommentEntry {
     public ThumbImage image;
 
     public boolean deleted;
+    public boolean uplinkSent;
     public int like;
 
     public long fileOffset;
@@ -60,7 +60,8 @@ public class CommentEntry {
         fileOffset = src.readerIndex();
 
         deleted = src.readBoolean();
-        src.skipBytes(3);
+        uplinkSent = src.readBoolean();
+        src.skipBytes(2);
         like = src.readInt();
         src.skipBytes(8);
 
@@ -85,7 +86,8 @@ public class CommentEntry {
 
     public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
         dst.writeBoolean(deleted);
-        dst.writeZero(3);
+        dst.writeBoolean(uplinkSent);
+        dst.writeZero(2);
         dst.writeInt(like);
         dst.writeBytes("====ZBX=".getBytes(StandardCharsets.UTF_8));
 
@@ -112,7 +114,8 @@ public class CommentEntry {
     public void updateInFile(RandomAccessFile oFile) throws IOException {
         oFile.seek(fileOffset);
         oFile.writeBoolean(deleted);
-        oFile.write(new byte[3]);
+        oFile.writeBoolean(uplinkSent);
+        oFile.write(new byte[2]);
         oFile.writeInt(like);
     }
 

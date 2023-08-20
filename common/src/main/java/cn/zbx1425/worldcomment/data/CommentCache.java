@@ -83,6 +83,7 @@ public class CommentCache {
             for (CommentEntry existingEntry : regionData) {
                 if (existingEntry.id == newEntry.id) {
                     existingEntry.deleted = newEntry.deleted;
+                    existingEntry.uplinkSent = newEntry.uplinkSent;
                     existingEntry.like = newEntry.like;
                     assert existingEntry.fileOffset > 0;
                     return existingEntry;
