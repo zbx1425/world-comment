@@ -64,11 +64,9 @@ public class CommentCache {
         }
     }
 
-    protected void insert(CommentEntry newEntry) {
+    public void insert(CommentEntry newEntry) {
         synchronized (this) {
-            boolean createLevelFolder = !regionIndex.containsKey(newEntry.level);
-            if (createLevelFolder) regionIndex.put(newEntry.level, new Long2ObjectOpenHashMap<>());
-            regionIndex.get(newEntry.level)
+            regionIndex.computeIfAbsent(newEntry.level, ignored -> new Long2ObjectOpenHashMap<>())
                     .computeIfAbsent(newEntry.region.toLong(), ignored -> new ArrayList<>())
                     .add(newEntry);
             playerIndex.computeIfAbsent(newEntry.initiator, ignored -> new ArrayList<>())
@@ -77,7 +75,7 @@ public class CommentCache {
         }
     }
 
-    protected CommentEntry update(CommentEntry newEntry) {
+    public CommentEntry update(CommentEntry newEntry) {
         synchronized (this) {
             List<CommentEntry> regionData = regionIndex.getOrDefault(newEntry.level, Long2ObjectMaps.emptyMap())
                     .get(newEntry.region.toLong());

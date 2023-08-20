@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.minecraft.Util;
@@ -10,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -113,29 +115,36 @@ public class CommentEntry {
         oFile.writeInt(like);
     }
 
-    public String toJson() {
-        //Todo: wth is this
+    public JsonObject toJson() {
         JsonObject json = new JsonObject();
         json.addProperty("id", id);
         json.addProperty("timestamp", timestamp);
         json.addProperty("level", level.toString());
-        json.addProperty("region", region.toString());
-        json.addProperty("location", location.toString());
+        JsonArray blockPosArr = new JsonArray();
+        blockPosArr.add(location.getX());
+        blockPosArr.add(location.getY());
+        blockPosArr.add(location.getZ());
+        json.add("location", blockPosArr);
         json.addProperty("initiator", initiator.toString());
         json.addProperty("initiatorName", initiatorName);
         json.addProperty("messageType", messageType);
         json.addProperty("message", message);
-        json.addProperty("image", image.url);
-        json.addProperty("thumb", image.thumbUrl);
+        json.add("image", image.toJson());
         json.addProperty("deleted", deleted);
         json.addProperty("like", like);
-        return json.toString();
+        return json;
     }
 
+    public String toBinaryString() {
+        FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer());
+        dest.writeResourceLocation(level);
+        writeBuffer(dest, false);
+        return Base64.encodeBase64String(dest.array());
+    }
 
-    public static CommentEntry fromJson(String json) {
-        Gson g = new Gson();
-
-        return g.fromJson(json, CommentEntry.class);
+    public static CommentEntry fromBinaryString(String str) {
+        FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(Base64.decodeBase64(str)));
+        ResourceLocation level = src.readResourceLocation();
+        return new CommentEntry(level, src, false);
     }
 }

@@ -5,9 +5,10 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 public interface Synchronizer {
+
+    Synchronizer NOOP = new NoopSynchronizer();
 
     void kvWriteEntry(CommentEntry trustedEntry);
 

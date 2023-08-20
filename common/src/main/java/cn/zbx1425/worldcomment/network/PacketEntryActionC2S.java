@@ -45,11 +45,7 @@ public class PacketEntryActionC2S {
             return;
         }
         try {
-            Main.DATABASE.update(comment);
-
-            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                PacketEntryUpdateS2C.send(player, comment, true);
-            }
+            Main.DATABASE.update(comment, false);
         } catch (IOException e) {
             Main.LOGGER.error("Failed to create comment", e);
         }

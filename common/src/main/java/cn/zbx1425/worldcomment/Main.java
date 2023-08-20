@@ -44,9 +44,8 @@ public class Main {
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {
 				//Todo: config inject here
-
-				Synchronizer synchronizer = new RedisSynchronizer("redis://192.168.1.148:6379/0", Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "world-comment"), true);
-				DATABASE = new ServerWorldData(server, synchronizer);
+				DATABASE = new ServerWorldData(server);
+				DATABASE.peerChannel = new RedisSynchronizer("redis://192.168.1.148:6379/0", DATABASE);
 				DATABASE.load();
 			} catch (IOException e) {
 				LOGGER.error("Failed to open data storage", e);

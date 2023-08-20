@@ -34,6 +34,10 @@ public class RedisChannelInterface {
         this.instance.sync().hset(Key, Value);
     }
 
+    public void hset(String Key, String MapKey, String Value) {
+        this.instance.sync().hset(Key, MapKey, Value);
+    }
+
     public Map<String, String> hgetall(String Key) {
         return this.instance.sync().hgetall(Key);
     }

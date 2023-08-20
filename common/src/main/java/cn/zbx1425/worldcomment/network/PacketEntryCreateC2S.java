@@ -34,18 +34,7 @@ public class PacketEntryCreateC2S {
             return;
         }
         try {
-            Main.DATABASE.insert(comment);
-
-            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                /*
-                int playerCX = player.blockPosition().getX() >> 4;
-                int playerCZ = player.blockPosition().getX() >> 4;
-                if (Math.abs(comment.region.x - playerCX) <= 1 && Math.abs(comment.region.z - playerCZ) <= 1) {
-
-                }
-                 */
-                PacketEntryUpdateS2C.send(player, comment, false);
-            }
+            Main.DATABASE.insert(comment, false);
         } catch (IOException e) {
             Main.LOGGER.error("Failed to create comment", e);
         }
