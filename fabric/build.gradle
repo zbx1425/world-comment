@@ -54,6 +54,13 @@ shadowJar {
 
 	configurations = [project.configurations.shadowCommon]
 	classifier "dev-shadow"
+
+	dependencies {
+		it.exclude it.dependency('io.netty:.*')
+	}
+	relocate "reactor", "vendor.cn.zbx1425.worldcomment.reactor"
+	relocate "io.lettuce", "vendor.cn.zbx1425.worldcomment.io.lettuce"
+	relocate "org.reactivestreams", "vendor.cn.zbx1425.worldcomment.org.reactivestreams"
 }
 
 remapJar {
