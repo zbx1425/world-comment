@@ -4,7 +4,6 @@ import cn.zbx1425.worldcomment.data.CommentCache;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 
-//Todo: doing nothing currently
 public class NoopSynchronizer implements Synchronizer {
 
     public NoopSynchronizer() {

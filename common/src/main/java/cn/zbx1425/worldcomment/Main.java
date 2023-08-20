@@ -27,6 +27,8 @@ public class Main {
 
 	public static ServerWorldData DATABASE;
 
+	public static Config CONFIG = new Config();
+
 	public static final RegistryObject<Item> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
 	public static void init(RegistriesWrapper registries) {
@@ -43,9 +45,13 @@ public class Main {
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {
-				//Todo: config inject here
+				CONFIG.load(server.getServerDirectory().toPath()
+						.resolve("config").resolve("world-comment.json"));
+
 				DATABASE = new ServerWorldData(server);
-				DATABASE.peerChannel = new RedisSynchronizer("redis://192.168.1.148:6379/0", DATABASE);
+				if (!CONFIG.redisUrl.isEmpty()) {
+					DATABASE.peerChannel = new RedisSynchronizer(CONFIG.redisUrl, DATABASE);
+				}
 				DATABASE.load();
 			} catch (IOException e) {
 				LOGGER.error("Failed to open data storage", e);
