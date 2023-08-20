@@ -143,7 +143,9 @@ public class CommentEntry {
         FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer());
         dest.writeResourceLocation(level);
         writeBuffer(dest, false);
-        return Base64.encodeBase64String(dest.array());
+        byte[] destArray = new byte[dest.writerIndex()];
+        dest.getBytes(0, destArray);
+        return Base64.encodeBase64String(destArray);
     }
 
     public static CommentEntry fromBinaryString(String str) {

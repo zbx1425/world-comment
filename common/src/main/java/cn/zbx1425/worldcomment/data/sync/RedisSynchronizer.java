@@ -6,6 +6,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.pubsub.RedisPubSubListener;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
@@ -16,41 +17,47 @@ import java.util.Map;
 
 public class RedisSynchronizer implements Synchronizer {
 
-    private final StatefulRedisPubSubConnection<String, String> redisChannel;
+    private final StatefulRedisPubSubConnection<String, String> redisSub;
     private final StatefulRedisConnection<String, String> redisConn;
+
+    public static final String HMAP_ALL_KEY = "WORLD_COMMENT_DATA_ALL";
 
     private final ServerWorldData serverWorldData;
 
     public RedisSynchronizer(String URI, ServerWorldData serverWorldData) {
         redisConn = RedisClient.create(URI).connect();
-        redisChannel = RedisClient.create(URI).connectPubSub();
-        redisChannel.addListener(new Listener());
-        redisChannel.sync().subscribe(RedisCommand.COMMAND_CHANNEL);
+        redisSub = RedisClient.create(URI).connectPubSub();
+        redisSub.addListener(new Listener());
+        redisSub.sync().subscribe(RedisMessage.COMMAND_CHANNEL);
 
         this.serverWorldData = serverWorldData;
     }
 
     @Override
     public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> all) {
+        RedisAsyncCommands<String, String> commands = redisConn.async();
+        commands.multi();
+        commands.del(HMAP_ALL_KEY);
         HashMap<String, String> data = new HashMap<>();
         for (CommentEntry entry : all.values()) {
             data.put(Long.toHexString(entry.id), entry.toBinaryString());
         }
-        redisConn.async().hset(RedisCommand.HMAP_ALL_ID, data);
+        commands.hset(HMAP_ALL_KEY, data);
+        commands.exec();
     }
 
     @Override
     public void kvWriteEntry(CommentEntry newEntry) {
         if (newEntry.deleted) {
-            redisConn.async().hdel(RedisCommand.HMAP_ALL_ID, Long.toHexString(newEntry.id));
+            redisConn.async().hdel(HMAP_ALL_KEY, Long.toHexString(newEntry.id));
         } else {
-            redisConn.async().hset(RedisCommand.HMAP_ALL_ID, Long.toHexString(newEntry.id), newEntry.toBinaryString());
+            redisConn.async().hset(HMAP_ALL_KEY, Long.toHexString(newEntry.id), newEntry.toBinaryString());
         }
     }
 
     @Override
     public void notifyInsert(CommentEntry newEntry) {
-        redisChannel.async().publish(RedisCommand.COMMAND_CHANNEL, RedisCommand.Insert(newEntry.toBinaryString()));
+        RedisMessage.insert(newEntry).publishAsync(redisConn);
     }
 
     private void handleInsert(CommentEntry peerEntry) throws IOException {
@@ -59,7 +66,7 @@ public class RedisSynchronizer implements Synchronizer {
 
     @Override
     public void notifyUpdate(CommentEntry newEntry) {
-        redisChannel.async().publish(RedisCommand.COMMAND_CHANNEL, RedisCommand.Update(newEntry.toBinaryString()));
+        RedisMessage.update(newEntry).publishAsync(redisConn);
     }
 
     private void handleUpdate(CommentEntry peerEntry) throws IOException {
@@ -68,7 +75,7 @@ public class RedisSynchronizer implements Synchronizer {
 
     @Override
     public void kvReadAllInto(CommentCache comments) throws IOException {
-        Map<String, String> data = redisChannel.sync().hgetall(RedisCommand.HMAP_ALL_ID);
+        Map<String, String> data = redisConn.sync().hgetall(HMAP_ALL_KEY);
         for (String entry : data.values()) {
             comments.insert(CommentEntry.fromBinaryString(entry));
         }
@@ -76,17 +83,19 @@ public class RedisSynchronizer implements Synchronizer {
 
     @Override
     public void close() {
-        redisChannel.close();
+        redisSub.close();
         redisConn.close();
     }
 
     public class Listener implements RedisPubSubListener<String, String> {
         @Override
-        public void message(String channel, String message) {
+        public void message(String channel, String rawMessage) {
+            RedisMessage message = new RedisMessage(rawMessage);
+            if (message.isFromSelf()) return;
             try {
-                switch (RedisCommand.getAction(message)) {
-                    case "INSERT" -> handleInsert(CommentEntry.fromBinaryString(RedisCommand.getContent(message)));
-                    case "UPDATE" -> handleUpdate(CommentEntry.fromBinaryString(RedisCommand.getContent(message)));
+                switch (message.action) {
+                    case "INSERT" -> handleInsert(CommentEntry.fromBinaryString(message.content));
+                    case "UPDATE" -> handleUpdate(CommentEntry.fromBinaryString(message.content));
                 }
             } catch (IOException ex) {
                 Main.LOGGER.error("Redis handler", ex);

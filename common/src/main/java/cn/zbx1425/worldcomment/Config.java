@@ -33,6 +33,6 @@ public class Config {
         json.addProperty("uplinkUrl", uplinkUrl);
         json.addProperty("uplinkAuthKey", uplinkAuthKey);
 
-        Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json.toString()));
+        Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }
 }
