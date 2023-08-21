@@ -30,13 +30,4 @@ public class KeyMappingMixin {
             if (Screenshot.handleKeyF2()) cir.setReturnValue(false);
         }
     }
-
-    @Inject(method = "isDown", at = @At("RETURN"), cancellable = true)
-    private void isDown(CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValue()) return;
-        Options options = Minecraft.getInstance().options;
-        if ((Object)this == options.keyPlayerList) {
-            if (CommentListScreen.handleKeyTab()) cir.setReturnValue(false);
-        }
-    }
 }

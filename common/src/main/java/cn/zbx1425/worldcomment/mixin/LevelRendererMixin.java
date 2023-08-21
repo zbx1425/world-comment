@@ -1,7 +1,9 @@
 package cn.zbx1425.worldcomment.mixin;
 
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
@@ -27,6 +29,11 @@ public class LevelRendererMixin {
     private void afterEntities(PoseStack matrices, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
         ClientWorldData.INSTANCE.tick();
         ClientRayPicking.tick(partialTick, 20);
+
+        if (MainClient.KEY_COMMENT_DETAIL.consumeClick()) {
+            CommentListScreen.handleKeyTab();
+        }
+
         matrices.pushPose();
         Vec3 cameraPos = camera.getPosition();
         matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);

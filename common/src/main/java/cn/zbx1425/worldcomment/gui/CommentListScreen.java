@@ -361,7 +361,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return false;
 
-        if (ClientRayPicking.pickedComments.size() == 0) return false;
+        if (ClientRayPicking.pickedComments.isEmpty()) return false;
 
         minecraft.execute(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
