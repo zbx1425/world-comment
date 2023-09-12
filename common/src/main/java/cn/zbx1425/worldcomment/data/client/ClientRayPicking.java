@@ -46,7 +46,7 @@ public class ClientRayPicking {
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;
                 for (CommentEntry comment : blockData.getValue()) {
-                    boolean isVisible = comment.messageType >= 4
+                    boolean isVisible = (comment.messageType - 1) >= 4
                             || minecraft.player.getMainHandItem().is(Main.ITEM_COMMENT_TOOL.get());
                     if (isVisible) {
                         visibleComments.computeIfAbsent(comment.location, ignored -> new ArrayList<>()).add(comment);
