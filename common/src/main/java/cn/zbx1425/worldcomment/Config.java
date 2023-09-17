@@ -18,13 +18,15 @@ public class Config {
     public ConfigItem uplinkAuthKey;
 
     public void load(Path configPath) throws IOException {
-        if (!Files.exists(configPath)) save(configPath);
-
-        JsonObject json = JsonParser.parseString(Files.readString(configPath)).getAsJsonObject();
+        JsonObject json = Files.exists(configPath)
+                ? JsonParser.parseString(Files.readString(configPath)).getAsJsonObject()
+                : new JsonObject();
         redisUrl = new ConfigItem(json, "redisUrl", "");
-        syncRole = new ConfigItem(json, "redisSyncRole", "host");
+        syncRole = new ConfigItem(json, "syncRole", "host");
         uplinkUrl = new ConfigItem(json, "uplinkUrl", "");
         uplinkAuthKey = new ConfigItem(json, "uplinkAuthKey", "");
+
+        if (!Files.exists(configPath)) save(configPath);
     }
 
     public void save(Path configPath) throws IOException {

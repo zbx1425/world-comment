@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.data;
 
+import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.data.network.UplinkDispatcher;
 import cn.zbx1425.worldcomment.data.persist.FileSerializer;
 import cn.zbx1425.worldcomment.data.sync.Synchronizer;
 import cn.zbx1425.worldcomment.network.PacketEntryUpdateS2C;
@@ -22,6 +24,7 @@ public class ServerWorldData {
     public final CommentCache comments = new CommentCache();
 
     public final FileSerializer fileSerializer;
+    public final UplinkDispatcher uplinkDispatcher;
     public Synchronizer peerChannel;
 
     public ServerWorldData(MinecraftServer server, boolean isHost) {
@@ -30,6 +33,7 @@ public class ServerWorldData {
         fileSerializer = new FileSerializer(basePath);
         this.isHost = isHost;
         this.peerChannel = Synchronizer.NOOP;
+        uplinkDispatcher = new UplinkDispatcher(Main.CONFIG.uplinkUrl.value);
     }
 
     public void load() throws IOException {
@@ -45,6 +49,7 @@ public class ServerWorldData {
         comments.insert(newEntry);
         if (isHost) {
             fileSerializer.insert(newEntry);
+            uplinkDispatcher.insert(newEntry);
             peerChannel.kvWriteEntry(newEntry);
         }
         if (!fromPeer) {
@@ -59,6 +64,7 @@ public class ServerWorldData {
         CommentEntry trustedEntry = comments.update(newEntry);
         if (isHost) {
             fileSerializer.update(trustedEntry);
+            uplinkDispatcher.update(trustedEntry);
             peerChannel.kvWriteEntry(trustedEntry);
         }
         if (!fromPeer) {
@@ -66,15 +72,6 @@ public class ServerWorldData {
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             PacketEntryUpdateS2C.send(player, trustedEntry, true);
-        }
-    }
-
-    public void updateUplinkState(CommentEntry newEntry) throws IOException {
-        CommentEntry trustedEntry = comments.update(newEntry);
-        if (isHost) {
-            fileSerializer.update(trustedEntry);
-        } else {
-            throw new AssertionError("updateUplinkState called at non-host peer");
         }
     }
 }
