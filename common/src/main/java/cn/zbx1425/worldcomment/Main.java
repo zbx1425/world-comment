@@ -48,9 +48,9 @@ public class Main {
 				CONFIG.load(server.getServerDirectory().toPath()
 						.resolve("config").resolve("world-comment.json"));
 
-				DATABASE = new ServerWorldData(server, CONFIG.syncIsHost);
-				if (!CONFIG.redisUrl.isEmpty()) {
-					DATABASE.peerChannel = new RedisSynchronizer(CONFIG.redisUrl, DATABASE);
+				DATABASE = new ServerWorldData(server, CONFIG.syncRole.value.equalsIgnoreCase("host"));
+				if (!CONFIG.redisUrl.value.isEmpty()) {
+					DATABASE.peerChannel = new RedisSynchronizer(CONFIG.redisUrl.value, DATABASE);
 				}
 				DATABASE.load();
 			} catch (IOException e) {
