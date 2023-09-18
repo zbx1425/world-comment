@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
@@ -133,18 +134,18 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             );
             if (!comment.image.url.isEmpty()) {
                 RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image.url).getId());
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                Matrix4f matrix4f = guiGraphics.pose().last().pose();
-                BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-                bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
-                bufferBuilder.vertex(matrix4f, x1, y2, 0).uv(0, 1).endVertex();
-                bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
-                bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
-                BufferUploader.drawWithShader(bufferBuilder.end());
             } else {
-                guiGraphics.fillGradient(x1, y1, x2, y2, 0xff014e7c, 0xff501639);
+                RenderSystem.setShaderTexture(0, new ResourceLocation(Main.MOD_ID, "textures/gui/placeholder-blank.png"));
             }
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            Matrix4f matrix4f = guiGraphics.pose().last().pose();
+            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
+            bufferBuilder.vertex(matrix4f, x1, y2, 0).uv(0, 1).endVertex();
+            bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
+            bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
+            BufferUploader.drawWithShader(bufferBuilder.end());
 
             WidgetCommentEntry widget = getWidget(comment);
             widget.showImage = false;
