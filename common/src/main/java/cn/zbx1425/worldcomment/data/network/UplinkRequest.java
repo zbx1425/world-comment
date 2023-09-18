@@ -38,7 +38,7 @@ public class UplinkRequest {
     public final Consumer<JsonObject> callback;
 
     public UplinkRequest(String url, JsonObject payload) {
-        this(url, "GET", payload, null);
+        this(url, "POST", payload, null);
     }
 
     public UplinkRequest(String url, String method, JsonObject payload, Consumer<JsonObject> callback) {

@@ -99,6 +99,9 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
         Component nameComponent = comment.initiatorName.isEmpty() ? Component.translatable("gui.worldcomment.anonymous")
                 : Component.literal(comment.initiatorName);
+        String uuidToDisplay = comment.initiatorName.isEmpty()
+                ? (Minecraft.getInstance().player.hasPermissions(3) ? comment.initiator.toString() : "")
+                : "..." + comment.initiator.toString().substring(24);
         guiGraphics.drawString(font, nameComponent,
                 getX() + 34, getY() + 8, 0xFFFFFFFF, true);
 
@@ -120,7 +123,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
                             .append(Component.literal("  (" + comment.location.toShortString() + ")").setStyle(Style.EMPTY.withBold(false).withColor(ChatFormatting.WHITE))),
                     Component.literal("  " + Instant.ofEpochMilli(comment.timestamp).atZone(ZoneId.systemDefault())
                             .toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)),
-                    Component.literal("  " + nameComponent.getString() + " ..." + comment.initiator.toString().substring(24)).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY))
+                    Component.literal("  " + nameComponent.getString() + " " + uuidToDisplay).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY))
             ), Optional.empty(), mouseX, mouseY);
         }
     }

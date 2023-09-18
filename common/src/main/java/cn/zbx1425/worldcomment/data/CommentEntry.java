@@ -44,11 +44,10 @@ public class CommentEntry {
         id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
         level = initiator.level().dimension().location();
+        this.initiator = initiator.getGameProfile().getId();
         if (isAnonymous) {
-            this.initiator = Util.NIL_UUID;
             initiatorName = "";
         } else {
-            this.initiator = initiator.getGameProfile().getId();
             initiatorName = initiator.getGameProfile().getName();
         }
         this.messageType = messageType;

@@ -29,8 +29,7 @@ public class PacketEntryCreateC2S {
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         ResourceLocation level = buffer.readResourceLocation();
         CommentEntry comment = new CommentEntry(level, buffer, false);
-        if (!comment.initiator.equals(Util.NIL_UUID)
-                && !comment.initiator.equals(initiator.getGameProfile().getId())) {
+        if (!comment.initiator.equals(initiator.getGameProfile().getId())) {
             return;
         }
         try {
