@@ -28,7 +28,7 @@ public class SubmitDispatcher {
             if (imagePath != null) {
                 NETWORK_EXECUTOR.execute(() -> {
                     try {
-                        job.setImage(ImageUpload.uploadImage(imagePath, 256));
+                        job.setImage(ImageUpload.uploadImage(imagePath, comment));
                         trySendPackage(jobId);
                     } catch (Exception ex) {
                         job.exception = ex;
