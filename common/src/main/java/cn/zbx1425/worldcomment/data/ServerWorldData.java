@@ -46,6 +46,12 @@ public class ServerWorldData {
     }
 
     public void insert(CommentEntry newEntry, boolean fromPeer) throws IOException {
+        if (CommentCommand.isCommand(newEntry)) {
+            if (isHost) {
+                CommentCommand.executeCommand(newEntry, this);
+            }
+            return;
+        }
         comments.insert(newEntry);
         if (isHost) {
             fileSerializer.insert(newEntry);

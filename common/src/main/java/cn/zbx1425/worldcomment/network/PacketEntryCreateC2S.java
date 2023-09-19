@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.data.CommentCommand;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import io.netty.buffer.Unpooled;
 import net.minecraft.Util;
@@ -29,9 +30,9 @@ public class PacketEntryCreateC2S {
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         ResourceLocation level = buffer.readResourceLocation();
         CommentEntry comment = new CommentEntry(level, buffer, false);
-        if (!comment.initiator.equals(initiator.getGameProfile().getId())) {
-            return;
-        }
+        if (!comment.initiator.equals(initiator.getGameProfile().getId())) return;
+        if (comment.message.length() > CommentEntry.MESSAGE_MAX_LENGTH) return;
+        if (CommentCommand.isCommand(comment) && !initiator.hasPermissions(3)) return;
         try {
             Main.DATABASE.insert(comment, false);
         } catch (IOException e) {
