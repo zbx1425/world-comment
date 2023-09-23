@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -10,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
@@ -55,8 +57,9 @@ public class ControlTipRenderer implements IGuiCommon {
         if (minecraft.player == null) {
             return;
         }
-        if (minecraft.player.getMainHandItem().is(Main.ITEM_COMMENT_TOOL.get())) {
-            if (minecraft.player.getMainHandItem().getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
+        ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
+        if (item != null) {
+            if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
                 TIP_PLACE_COMMENT.visible = true;
                 return; // De-clutter
             } else {

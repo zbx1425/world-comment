@@ -6,6 +6,7 @@ import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -345,8 +346,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return false;
 
-        ItemStack item = minecraft.player.getMainHandItem();
-        if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return false;
+        if (CommentToolItem.Client.getHoldingCommentTool() == null) return false;
 
         minecraft.execute(() -> {
             if (minecraft.screen instanceof CommentListScreen) {

@@ -35,36 +35,55 @@ public class CommentToolItem extends Item {
         if (!level.isClientSide) return InteractionResultHolder.pass(item);
         if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return InteractionResultHolder.fail(item);
 
-        if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
-            long jobId = item.getOrCreateTag().getLong("uploadJobId");
-            HitResult hitResult = Minecraft.getInstance().hitResult;
-            if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
-                BlockHitResult blockHitResult = (BlockHitResult) hitResult;
-                BlockPos facePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                boolean hasClearance = true;
-                for (int y = 0; y < 3; y++) {
-                    if (level.getBlockState(facePos.offset(0, y, 0)).isSolid()) {
-                        hasClearance = false;
-                        break;
-                    }
-                }
-                if (hasClearance) {
-                    SubmitDispatcher.placeJobAt(jobId, facePos);
-                    item.getOrCreateTag().remove("uploadJobId");
-                    return InteractionResultHolder.success(item);
-                } else {
-                    player.displayClientMessage(
-                            Component.translatable("gui.worldcomment.send_insufficient_clearance"), false);
-                }
-            }
+        if (Client.placeUploadJob(level, player, item)) {
+            return InteractionResultHolder.success(item);
         } else {
-
+            return InteractionResultHolder.fail(item);
         }
-        return InteractionResultHolder.fail(item);
     }
 
     @Override
     public @NotNull InteractionResult useOn(UseOnContext context) {
         return super.useOn(context);
+    }
+
+    public static class Client {
+
+        public static ItemStack getHoldingCommentTool() {
+            Player player = Minecraft.getInstance().player;
+            if (player == null) return null;
+            ItemStack mainHandStack = player.getMainHandItem();
+            if (mainHandStack.is(Main.ITEM_COMMENT_TOOL.get())) return mainHandStack;
+            ItemStack offHandStack = player.getOffhandItem();
+            if (offHandStack.is(Main.ITEM_COMMENT_TOOL.get())) return offHandStack;
+            return null;
+        }
+
+        public static boolean placeUploadJob(Level level, Player player, ItemStack item) {
+            if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
+                long jobId = item.getOrCreateTag().getLong("uploadJobId");
+                HitResult hitResult = Minecraft.getInstance().hitResult;
+                if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+                    BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+                    BlockPos facePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
+                    boolean hasClearance = true;
+                    for (int y = 0; y < 3; y++) {
+                        if (level.getBlockState(facePos.offset(0, y, 0)).isSolid()) {
+                            hasClearance = false;
+                            break;
+                        }
+                    }
+                    if (hasClearance) {
+                        SubmitDispatcher.placeJobAt(jobId, facePos);
+                        item.getOrCreateTag().remove("uploadJobId");
+                        return true;
+                    } else {
+                        player.displayClientMessage(
+                                Component.translatable("gui.worldcomment.send_insufficient_clearance"), false);
+                    }
+                }
+            }
+            return false;
+        }
     }
 }

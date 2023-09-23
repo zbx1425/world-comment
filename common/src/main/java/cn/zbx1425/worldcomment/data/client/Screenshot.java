@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.client;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -49,8 +50,8 @@ public class Screenshot {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null) return false;
 
-        ItemStack item = minecraft.player.getMainHandItem();
-        if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return false;
+        ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
+        if (item == null) return false;
         if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) return false;
 
         if (minecraft.screen == null) {

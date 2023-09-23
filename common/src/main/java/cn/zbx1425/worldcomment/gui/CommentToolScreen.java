@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.types.templates.Check;
 import net.minecraft.ChatFormatting;
@@ -208,8 +209,8 @@ public class CommentToolScreen extends Screen {
             ));
             Minecraft.getInstance().player.displayClientMessage(
                     Component.translatable("gui.worldcomment.send_pending"), false);
-            ItemStack item = Minecraft.getInstance().player.getMainHandItem();
-            if (item.is(Main.ITEM_COMMENT_TOOL.get())) {
+            ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
+            if (item != null) {
                 item.getOrCreateTag().putLong("uploadJobId", jobId);
             }
         });
