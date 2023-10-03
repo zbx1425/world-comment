@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SubmitJob {
@@ -15,11 +16,10 @@ public class SubmitJob {
     public final CommentEntry comment;
     public final Path imagePath;
     public boolean imageReady, blockPosReady;
-    public Exception exception;
-    public Consumer<SubmitJob> callback;
+    public BiConsumer<SubmitJob, Exception> callback;
     public Queue<ImageUploadConfig> uploaderToUse;
 
-    public SubmitJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback, ClientConfig config) {
+    public SubmitJob(CommentEntry comment, Path imagePath, BiConsumer<SubmitJob, Exception> callback, ClientConfig config) {
         this.comment = comment;
         this.imagePath = imagePath;
         if (imagePath == null) {

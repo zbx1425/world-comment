@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SubmitDispatcher {
@@ -23,38 +24,44 @@ public class SubmitDispatcher {
     private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final Long2ObjectMap<SubmitJob> pendingJobs = new Long2ObjectOpenHashMap<>();
 
-    public static long addJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback) {
-        synchronized (pendingJobs) {
-            long jobId = ServerWorldData.SNOWFLAKE.nextId();
-            SubmitJob job = new SubmitJob(comment, imagePath, callback, MainClient.CLIENT_CONFIG);
-            pendingJobs.put(jobId, job);
-            if (imagePath != null) {
-                NETWORK_EXECUTOR.execute(() -> {
+    public static long addJob(CommentEntry comment, Path imagePath, BiConsumer<SubmitJob, Exception> callback) {
+        long jobId = ServerWorldData.SNOWFLAKE.nextId();
+        SubmitJob job = new SubmitJob(comment, imagePath, callback, MainClient.CLIENT_CONFIG);
+        addJob(jobId, job);
+        return jobId;
+    }
+
+    private static void addJob(long jobId, SubmitJob job) {
+        pendingJobs.put(jobId, job);
+        if (job.imagePath != null) {
+            NETWORK_EXECUTOR.execute(() -> {
+                try {
+                    ImageUploadConfig uploader = job.uploaderToUse.poll();
+                    if (uploader == null) throw new IllegalStateException("All uploads failed");
+                    ThumbImage thumbImage = ImageUploader.getUploader(uploader).uploadImage(job.imagePath, job.comment);
+                    job.setImage(thumbImage);
+                    trySendPackage(jobId);
+
                     try {
-                        ImageUploadConfig uploader = job.uploaderToUse.poll();
-                        if (uploader == null) throw new IllegalStateException("All uploads failed");
-                        ThumbImage thumbImage = ImageUploader.getUploader(uploader).uploadImage(imagePath, comment);
-                        job.setImage(thumbImage);
-                        trySendPackage(jobId);
-                    } catch (Exception ex) {
-                        Main.LOGGER.error("Upload Image", ex);
-                        if (job.uploaderToUse.isEmpty()) {
-                            job.exception = ex;
-                            if (job.callback != null) job.callback.accept(job);
-                            removeJob(jobId);
-                        } else {
-                            addJob(comment, imagePath, callback);
-                        }
-                    } finally {
-                        try {
-                            Files.deleteIfExists(imagePath);
-                        } catch (IOException ex) {
-                            Main.LOGGER.error("Delete image file", ex);
-                        }
+                        Files.deleteIfExists(job.imagePath);
+                    } catch (IOException ex) {
+                        Main.LOGGER.error("Delete image file", ex);
                     }
-                });
-            }
-            return jobId;
+                } catch (Exception ex) {
+                    Main.LOGGER.error("Upload Image", ex);
+                    if (job.callback != null) job.callback.accept(job, ex);
+                    if (job.uploaderToUse.isEmpty()) {
+                        removeJob(jobId);
+                        try {
+                            Files.deleteIfExists(job.imagePath);
+                        } catch (IOException ex2) {
+                            Main.LOGGER.error("Delete image file", ex2);
+                        }
+                    } else {
+                        addJob(jobId, job);
+                    }
+                }
+            });
         }
     }
 
@@ -76,11 +83,11 @@ public class SubmitDispatcher {
         SubmitJob job = pendingJobs.get(jobId);
         if (job.isReady()) {
             PacketEntryCreateC2S.ClientLogics.send(job.comment);
-            if (job.callback != null) job.callback.accept(null);
+            if (job.callback != null) job.callback.accept(null, null);
             removeJob(jobId);
         } else {
             if (job.imagePath != null && !job.imageReady) {
-                if (job.callback != null) job.callback.accept(job);
+                if (job.callback != null) job.callback.accept(job, null);
             }
         }
     }
