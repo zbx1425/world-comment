@@ -10,4 +10,9 @@ public class ImageUploadConfig {
         this.service = configStr.substring(0, firstHash);
         this.config = configStr.substring(firstHash + 1);
     }
+
+    @Override
+    public String toString() {
+        return service + ":" + config;
+    }
 }

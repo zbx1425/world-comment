@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.render;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
@@ -25,6 +26,14 @@ public class ControlTipRenderer implements IGuiCommon {
             Component.translatable("gui.worldcomment.control_tip.place_comment"), 0,
             null, true
     );
+    public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
+            Component.translatable("gui.worldcomment.control_tip.toggle_show"), 0,
+            null, true
+    );
+    public static final ControlTip TIP_TOGGLE_HIDE = new ControlTip(
+            Component.translatable("gui.worldcomment.control_tip.toggle_hide"), 0,
+            null, false
+    );
     public static final ControlTip TIP_VIEW_MANAGE = new ControlTip(
             Component.translatable("gui.worldcomment.control_tip.view_manage"), 2,
             Minecraft.getInstance().options.keyTogglePerspective, false
@@ -39,7 +48,7 @@ public class ControlTipRenderer implements IGuiCommon {
     );
 
     public static final List<ControlTip> TIPS =
-            List.of(TIP_PLACE_COMMENT, TIP_CREATE, TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL);
+            List.of(TIP_PLACE_COMMENT, TIP_TOGGLE_SHOW, TIP_TOGGLE_HIDE, TIP_CREATE, TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL);
 
     public static void render(GuiGraphics guiGraphics) {
         update();
@@ -64,6 +73,11 @@ public class ControlTipRenderer implements IGuiCommon {
                 return; // De-clutter
             } else {
                 TIP_CREATE.visible = true;
+                if (MainClient.CLIENT_CONFIG.isCommentVisible) {
+                    TIP_TOGGLE_HIDE.visible = true;
+                } else {
+                    TIP_TOGGLE_SHOW.visible = true;
+                }
             }
             TIP_VIEW_MANAGE.visible = true;
         }

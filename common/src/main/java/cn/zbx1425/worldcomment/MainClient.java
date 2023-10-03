@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.network.PacketClientConfigS2C;
 import cn.zbx1425.worldcomment.network.PacketCollectionDataS2C;
 import cn.zbx1425.worldcomment.network.PacketRegionDataS2C;
 import cn.zbx1425.worldcomment.network.PacketEntryUpdateS2C;
@@ -22,6 +23,8 @@ public class MainClient {
 				PacketCollectionDataS2C.IDENTIFIER, PacketCollectionDataS2C.ClientLogics::handle);
 		ClientPlatform.registerNetworkReceiver(
 				PacketEntryUpdateS2C.IDENTIFIER, PacketEntryUpdateS2C.ClientLogics::handle);
+		ClientPlatform.registerNetworkReceiver(
+				PacketClientConfigS2C.IDENTIFIER, PacketClientConfigS2C.ClientLogics::handle);
 
 		ClientPlatform.registerPlayerJoinEvent(ignored -> {
 			ClientWorldData.INSTANCE.clear();

@@ -24,7 +24,7 @@ public class PacketClientConfigS2C {
     public static class ClientLogics {
 
         public static void handle(FriendlyByteBuf buffer) {
-            MainClient.CLIENT_CONFIG = new ClientConfig(buffer);
+            MainClient.CLIENT_CONFIG.readPacket(buffer);
         }
     }
 }

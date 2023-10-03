@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.item;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
@@ -40,11 +42,6 @@ public class CommentToolItem extends Item {
         } else {
             return InteractionResultHolder.fail(item);
         }
-    }
-
-    @Override
-    public @NotNull InteractionResult useOn(UseOnContext context) {
-        return super.useOn(context);
     }
 
     public static class Client {
@@ -82,6 +79,8 @@ public class CommentToolItem extends Item {
                                 Component.translatable("gui.worldcomment.send_insufficient_clearance"), false);
                     }
                 }
+            } else {
+                MainClient.CLIENT_CONFIG.isCommentVisible = !MainClient.CLIENT_CONFIG.isCommentVisible;
             }
             return false;
         }

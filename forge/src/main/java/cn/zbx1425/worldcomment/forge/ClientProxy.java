@@ -21,7 +21,7 @@ public class ClientProxy {
 
         @SubscribeEvent
         public static void onRegisterGuiOverlays(RegisterGuiOverlaysEvent event) {
-            event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "picked_comments", PICKED_COMMENTS_OVERLAY);
+            event.registerAbove(VanillaGuiOverlay.SCOREBOARD.id(), "picked_comments", PICKED_COMMENTS_OVERLAY);
         }
 
         private static final IGuiOverlay PICKED_COMMENTS_OVERLAY = new PickedCommentsOverlay();

@@ -22,6 +22,8 @@
   "gui.worldcomment.submit": "Submit!",
 
   "gui.worldcomment.control_tip.create": "Take Screenshot and Comment",
+  "gui.worldcomment.control_tip.toggle_show": "Show Hidden Comments",
+  "gui.worldcomment.control_tip.toggle_hide": "Hide Comments",
   "gui.worldcomment.control_tip.place_comment": "Place Down the Comment",
   "gui.worldcomment.control_tip.view_manage": "View or Manage All Comments",
   "gui.worldcomment.control_tip.detail": "See Detail",
