@@ -13,6 +13,8 @@ public class MainClient {
 	public static final KeyMapping KEY_COMMENT_DETAIL = new KeyMapping("key.worldcomment.comment_detail",
 			InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_TAB, "key.categories.misc");
 
+	public static ClientConfig CLIENT_CONFIG = new ClientConfig();
+
 	public static void init() {
 		ClientPlatform.registerNetworkReceiver(
 				PacketRegionDataS2C.IDENTIFIER, PacketRegionDataS2C.ClientLogics::handle);

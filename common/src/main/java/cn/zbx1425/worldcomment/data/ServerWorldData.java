@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.network.UplinkDispatcher;
+import cn.zbx1425.worldcomment.data.network.uplink.UplinkDispatcher;
 import cn.zbx1425.worldcomment.data.persist.FileSerializer;
 import cn.zbx1425.worldcomment.data.sync.Synchronizer;
 import cn.zbx1425.worldcomment.network.PacketEntryUpdateS2C;
@@ -33,7 +33,7 @@ public class ServerWorldData {
         fileSerializer = new FileSerializer(basePath);
         this.isHost = isHost;
         this.peerChannel = Synchronizer.NOOP;
-        uplinkDispatcher = new UplinkDispatcher(Main.CONFIG.uplinkUrl.value);
+        uplinkDispatcher = new UplinkDispatcher(Main.SERVER_CONFIG.uplinkUrl.value);
     }
 
     public void load() throws IOException {

@@ -1,30 +1,17 @@
-package cn.zbx1425.worldcomment.data.network;
+package cn.zbx1425.worldcomment.data.network.uplink;
 
 import cn.zbx1425.worldcomment.Main;
 import com.google.common.hash.Hashing;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 
-import javax.crypto.Mac;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,9 +46,9 @@ public class UplinkRequest {
                 conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
 
-                if (!Main.CONFIG.uplinkAuthKey.value.isEmpty()) {
+                if (!Main.SERVER_CONFIG.uplinkAuthKey.value.isEmpty()) {
                     byte[] signatureBytes = Hashing
-                            .hmacSha1(Main.CONFIG.uplinkAuthKey.value.getBytes(StandardCharsets.UTF_8))
+                            .hmacSha1(Main.SERVER_CONFIG.uplinkAuthKey.value.getBytes(StandardCharsets.UTF_8))
                             .hashBytes(postDataBytes).asBytes();
                     conn.setRequestProperty("Authorization", "NEX-HMAC-SHA1 Signature=" + Base64.encodeBase64String(signatureBytes));
                 }

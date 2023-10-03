@@ -9,13 +9,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Config {
+public class ServerConfig {
 
     public ConfigItem redisUrl;
     public ConfigItem syncRole;
 
     public ConfigItem uplinkUrl;
     public ConfigItem uplinkAuthKey;
+
+    public ConfigItem imageUploadConfig;
 
     public void load(Path configPath) throws IOException {
         JsonObject json = Files.exists(configPath)
@@ -25,6 +27,7 @@ public class Config {
         syncRole = new ConfigItem(json, "syncRole", "host");
         uplinkUrl = new ConfigItem(json, "uplinkUrl", "");
         uplinkAuthKey = new ConfigItem(json, "uplinkAuthKey", "");
+        imageUploadConfig = new ConfigItem(json, "imageUploadConfig", "");
 
         if (!Files.exists(configPath)) save(configPath);
     }
@@ -35,6 +38,7 @@ public class Config {
         syncRole.writeJson(json);
         uplinkUrl.writeJson(json);
         uplinkAuthKey.writeJson(json);
+        imageUploadConfig.writeJson(json);
 
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }

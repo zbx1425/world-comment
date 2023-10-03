@@ -1,9 +1,13 @@
 package cn.zbx1425.worldcomment.data.network;
 
+import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploadConfig;
 import net.minecraft.core.BlockPos;
 
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.function.Consumer;
 
 public class SubmitJob {
@@ -13,8 +17,9 @@ public class SubmitJob {
     public boolean imageReady, blockPosReady;
     public Exception exception;
     public Consumer<SubmitJob> callback;
+    public Queue<ImageUploadConfig> uploaderToUse;
 
-    public SubmitJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback) {
+    public SubmitJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback, ClientConfig config) {
         this.comment = comment;
         this.imagePath = imagePath;
         if (imagePath == null) {
@@ -22,6 +27,7 @@ public class SubmitJob {
             imageReady = true;
         }
         this.callback = callback;
+        this.uploaderToUse = new LinkedList<>(config.imageUploader);
     }
 
     public void setImage(ThumbImage image) {

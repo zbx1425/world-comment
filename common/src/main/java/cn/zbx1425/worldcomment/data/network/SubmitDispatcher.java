@@ -1,8 +1,11 @@
 package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploadConfig;
 import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -23,18 +26,25 @@ public class SubmitDispatcher {
     public static long addJob(CommentEntry comment, Path imagePath, Consumer<SubmitJob> callback) {
         synchronized (pendingJobs) {
             long jobId = ServerWorldData.SNOWFLAKE.nextId();
-            SubmitJob job = new SubmitJob(comment, imagePath, callback);
+            SubmitJob job = new SubmitJob(comment, imagePath, callback, MainClient.CLIENT_CONFIG);
             pendingJobs.put(jobId, job);
             if (imagePath != null) {
                 NETWORK_EXECUTOR.execute(() -> {
                     try {
-                        job.setImage(ImageUpload.uploadImage(imagePath, comment));
+                        ImageUploadConfig uploader = job.uploaderToUse.poll();
+                        if (uploader == null) throw new IllegalStateException("All uploads failed");
+                        ThumbImage thumbImage = ImageUploader.getUploader(uploader).uploadImage(imagePath, comment);
+                        job.setImage(thumbImage);
                         trySendPackage(jobId);
                     } catch (Exception ex) {
-                        job.exception = ex;
-                        if (job.callback != null) job.callback.accept(job);
                         Main.LOGGER.error("Upload Image", ex);
-                        removeJob(jobId);
+                        if (job.uploaderToUse.isEmpty()) {
+                            job.exception = ex;
+                            if (job.callback != null) job.callback.accept(job);
+                            removeJob(jobId);
+                        } else {
+                            addJob(comment, imagePath, callback);
+                        }
                     } finally {
                         try {
                             Files.deleteIfExists(imagePath);

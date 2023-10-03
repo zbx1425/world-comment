@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.data.network;
+package cn.zbx1425.worldcomment.data.network.uplink;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
 

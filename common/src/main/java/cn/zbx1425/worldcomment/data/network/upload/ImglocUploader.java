@@ -1,32 +1,30 @@
-package cn.zbx1425.worldcomment.data.network;
+package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
+import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.io.FilenameUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ImageUpload {
+public class ImglocUploader extends ImageUploader {
 
-    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+    private static final String apiUrl = "https://imgloc.com/api/1/upload";
+    private final String apiToken;
 
-    private static String apiUrl = "https://imgloc.com/api/1/upload";
-    private static String apiToken = "chv_WdW_afa0889c65f7afcdbd13fc2528d9b9793d193a9a8e16c78f964be1e731cd10e9884d806a1bf767d45cafc5952216827d65541a31174b5acc45f988e6a2210885";
+    public ImglocUploader(ImageUploadConfig config) {
+        this.apiToken = config.config;
+    }
 
-    public static ThumbImage uploadImage(Path imagePath, CommentEntry comment) throws IOException, InterruptedException {
+    public ThumbImage uploadImage(Path imagePath, CommentEntry comment) throws IOException, InterruptedException {
         MimeMultipartData body = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
                 .addFile("source", imagePath.getFileName().toString(), Files.readAllBytes(imagePath), "image/png")
