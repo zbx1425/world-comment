@@ -48,7 +48,7 @@ public class ServerWorldData {
     public void insert(CommentEntry newEntry, boolean fromPeer) throws IOException {
         if (CommentCommand.isCommand(newEntry)) {
             if (isHost) {
-                CommentCommand.executeCommand(newEntry, this);
+                CommentCommand.executeCommandServer(newEntry, this);
             }
             return;
         }

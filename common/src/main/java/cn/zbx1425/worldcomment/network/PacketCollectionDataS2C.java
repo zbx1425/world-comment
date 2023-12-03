@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.network;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerPlatform;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.ImageDump;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
@@ -40,10 +41,13 @@ public class PacketCollectionDataS2C {
                 if (comment.deleted) continue;
                 comments.add(comment);
             }
+
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.screen instanceof CommentListScreen) {
                 ((CommentListScreen)minecraft.screen).handleCommentDataUI(comments, nonce);
             }
+
+            ImageDump.handleDumpResponse(comments, nonce);
         }
     }
 }

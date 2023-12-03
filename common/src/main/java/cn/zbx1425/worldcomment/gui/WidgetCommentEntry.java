@@ -82,8 +82,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         }
 
         if (!comment.image.url.isEmpty() && showImage) {
-            String imageUrl = comment.image.thumbUrl.isEmpty() ? comment.image.url : comment.image.thumbUrl;
-            RenderSystem.setShaderTexture(0, ImageDownload.getTexture(imageUrl).getId());
+            RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image, true).getId());
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             Matrix4f matrix4f = guiGraphics.pose().last().pose();
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();

@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.data;
 
+import cn.zbx1425.worldcomment.data.network.ImageDump;
+
 import java.util.Locale;
 
 public class CommentCommand {
@@ -8,7 +10,7 @@ public class CommentCommand {
         return comment.message.startsWith("$SNCMD:");
     }
 
-    public static void executeCommand(CommentEntry comment, ServerWorldData worldData) {
+    public static void executeCommandServer(CommentEntry comment, ServerWorldData worldData) {
         if (!isCommand(comment)) return;
         String commandContent = comment.message.substring(7);
         String command = commandContent.split(" ")[0].toLowerCase(Locale.ROOT);
@@ -18,6 +20,19 @@ public class CommentCommand {
                 for (CommentEntry commentEntry : worldData.comments.timeIndex.values()) {
                     worldData.uplinkDispatcher.insert(commentEntry);
                 }
+            }
+        }
+    }
+
+    public static void executeCommandClient(CommentEntry comment) {
+        if (!isCommand(comment)) return;
+        String commandContent = comment.message.substring(7);
+        String command = commandContent.split(" ")[0].toLowerCase(Locale.ROOT);
+        String[] args = commandContent.substring(command.length()).trim().split(" ");
+        switch (command) {
+            case "imagedumpall" -> {
+                if (args.length < 1) return;
+                ImageDump.requestDumpComments(args[0]);
             }
         }
     }

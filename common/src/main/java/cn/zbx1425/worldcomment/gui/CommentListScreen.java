@@ -134,7 +134,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     shadowColor
             );
             if (!comment.image.url.isEmpty()) {
-                RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image.url).getId());
+                RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image, false).getId());
             } else {
                 RenderSystem.setShaderTexture(0, new ResourceLocation(Main.MOD_ID, "textures/gui/placeholder-blank.png"));
             }

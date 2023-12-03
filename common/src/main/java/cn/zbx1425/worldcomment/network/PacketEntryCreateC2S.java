@@ -23,6 +23,9 @@ public class PacketEntryCreateC2S {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeResourceLocation(comment.level);
             comment.writeBuffer(buffer, false);
+            if (CommentCommand.isCommand(comment)) {
+                CommentCommand.executeCommandClient(comment);
+            }
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
     }
