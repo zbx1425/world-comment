@@ -7,8 +7,8 @@ public class ImageUploadConfig {
 
     public ImageUploadConfig(String configStr) {
         int firstHash = configStr.indexOf(':');
-        this.service = configStr.substring(0, firstHash);
-        this.config = configStr.substring(firstHash + 1);
+        this.service = configStr.substring(0, firstHash).trim();
+        this.config = configStr.substring(firstHash + 1).trim();
     }
 
     @Override
