@@ -34,7 +34,7 @@ public class WidgetLabel extends AbstractWidget {
 
     @Override
 #if MC_VERSION >= "12000"
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
 #elif MC_VERSION >= "11904"
         public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
 #else

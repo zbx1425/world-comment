@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.util.compat;
 
+#if MC_VERSION < "12000"
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -237,3 +239,12 @@ public class GuiGraphics {
     }
 
 }
+
+#else
+
+public class GuiGraphics {
+
+}
+
+#endif
+

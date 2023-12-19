@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
+#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.mixin.CreativeModeTabsAccessor; #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;

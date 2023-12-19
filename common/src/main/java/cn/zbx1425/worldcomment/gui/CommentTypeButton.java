@@ -6,6 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
+#if MC_VERSION >= "12000" import java.util.function.Supplier; #endif
+
 public class CommentTypeButton extends Button implements IGuiCommon {
 
     public static final int[] COMMENT_TYPE_COLOR = {
