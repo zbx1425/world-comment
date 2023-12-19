@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.render;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 
 public class OverlayLayer {
 

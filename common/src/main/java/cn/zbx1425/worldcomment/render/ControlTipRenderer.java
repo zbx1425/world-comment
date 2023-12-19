@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.render;
 
-import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
@@ -8,10 +7,9 @@ import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;

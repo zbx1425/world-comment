@@ -32,7 +32,7 @@ public class Screenshot {
     }
 
     private static File getAvailableFile() {
-        File screenShotDirectory = new File(Minecraft.getInstance().gameDirectory, net.minecraft.client.Screenshot.SCREENSHOT_DIR);
+        File screenShotDirectory = new File(Minecraft.getInstance().gameDirectory,"screenshots");
         String s = "WorldComment-" + Util.getFilenameFormattedDateTime();
         int i = 1;
         File file1;
@@ -42,7 +42,7 @@ public class Screenshot {
         return file1;
     }
 
-    private static final SoundEvent shutterSoundEvent = SoundEvent.createFixedRangeEvent(
+    private static final SoundEvent shutterSoundEvent = #if MC_VERSION >= "11903" SoundEvent.createFixedRangeEvent #else new SoundEvent #endif (
             new ResourceLocation("worldcomment:shutter"), 16
     );
 

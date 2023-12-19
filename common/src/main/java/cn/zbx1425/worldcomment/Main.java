@@ -3,10 +3,12 @@ package cn.zbx1425.worldcomment;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
+import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.mixin.CreativeModeTabsAccessor;
 import cn.zbx1425.worldcomment.network.*;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,10 @@ public class Main {
 
 	public static ServerConfig SERVER_CONFIG = new ServerConfig();
 
-	public static final RegistryObject<Item> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
+	public static final RegistryObject<GroupedItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
 	public static void init(RegistriesWrapper registries) {
-		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL, CreativeModeTabsAccessor.getTOOLS_AND_UTILITIES());
+		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL);
 
 		ServerPlatform.registerNetworkReceiver(
 				PacketRegionRequestC2S.IDENTIFIER, PacketRegionRequestC2S::handle);

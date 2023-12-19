@@ -7,16 +7,15 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
-import org.joml.Matrix4f;
+#if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -63,7 +62,13 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+#if MC_VERSION >= "12000"
+    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = guiParam;
+#else
+    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
+#endif
         graphicsBlit9(
                 guiGraphics, getX(), getY(), getWidth(), getHeight(),
                 0, 0, 128, 48, 256, 256,
@@ -128,7 +133,16 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+#if MC_VERSION >= "12000"
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
+#else
+    public void updateNarration(NarrationElementOutput narrationElementOutput) { }
+#endif
 
-    }
+#if MC_VERSION < "12000"
+    private int getX() { return x; }
+    private int getY() { return y; }
+    private void setX(int x) { this.x = x; }
+    private void setY(int y) { this.y = y; }
+#endif
 }

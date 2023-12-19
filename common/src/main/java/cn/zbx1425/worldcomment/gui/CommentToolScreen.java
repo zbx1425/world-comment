@@ -5,10 +5,9 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.datafixers.types.templates.Check;
-import net.minecraft.ChatFormatting;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -109,9 +108,11 @@ public class CommentToolScreen extends Screen {
         textBoxMessage = new MultiLineEditBox(
                 Minecraft.getInstance().font,
                 SIDEBAR_OFFSET, baseY, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4,
-                Component.translatable("gui.worldcomment.message.placeholder"),
+                // On 1.19.2 this doesn't rescale with the poseStack
+                #if MC_VERSION >= "12000" Component.translatable("gui.worldcomment.message.placeholder") #else Component.literal("") #endif,
                 Component.literal("")
         );
+        textBoxMessage.setValue("");
         textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
         addRenderableWidget(textBoxMessage);
         baseY += textBoxMessage.getHeight();
@@ -146,8 +147,8 @@ public class CommentToolScreen extends Screen {
         int maxX = 0, maxY = 0;
         for (GuiEventListener child : children()) {
             AbstractWidget widget = (AbstractWidget)child;
-            maxX = Math.max(maxX, widget.getX() + widget.getWidth());
-            maxY = Math.max(maxY, widget.getY() + widget.getHeight());
+            maxX = Math.max(maxX, widget #if MC_VERSION >= "11903" .getX() #else .x #endif + widget.getWidth());
+            maxY = Math.max(maxY, widget #if MC_VERSION >= "11903" .getY() #else .y #endif + widget.getHeight());
         }
         containerWidth = maxX;
         containerHeight = maxY;
@@ -161,12 +162,12 @@ public class CommentToolScreen extends Screen {
         containerOffsetY = (height - (containerHeight + CONTAINER_PADDING_Y * 2)) / 2 + CONTAINER_PADDING_Y;
         for (GuiEventListener child : children()) {
             AbstractWidget widget = (AbstractWidget)child;
-            widget.setX(widget.getX() + containerOffsetX);
-            widget.setY(widget.getY() + containerOffsetY);
+            widget #if MC_VERSION >= "11903" .setX #else .x = #endif (widget #if MC_VERSION >= "11903" .getX() #else .x #endif + containerOffsetX);
+            widget #if MC_VERSION >= "11903" .setY #else .y = #endif (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + containerOffsetY);
         }
 
         btnSaveScreenshot = new WidgetColorButton(
-                containerOffsetX, btnSendFeedback.getY(), CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+                containerOffsetX, btnSendFeedback #if MC_VERSION >= "11903" .getY() #else .y #endif, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
                 Component.translatable("gui.worldcomment.save_screenshot"), 0xFF81D4FA, sender -> {
                     Path persistentPath = imagePath.resolveSibling(
                             imagePath.getFileName().toString().replace("WorldComment", "WorldComment-Saved"));
@@ -219,8 +220,9 @@ public class CommentToolScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics);
+    public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        renderBackground(guiParam);
         guiGraphics.pose().pushPose();
         setupAnimationTransform(guiGraphics);
 
@@ -238,7 +240,7 @@ public class CommentToolScreen extends Screen {
                 containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
                 0xBB444444
         );
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiParam, mouseX, mouseY, partialTick);
 
         guiGraphics.pose().popPose();
     }
@@ -270,15 +272,19 @@ public class CommentToolScreen extends Screen {
     private void updateBtnSendFeedback() {
         if (selectedCommentType == 0) {
             btnSendFeedback.active = false;
-            btnSendFeedback.setTooltip(Tooltip.create(
-                    Component.translatable("gui.worldcomment.require_comment_type").withStyle(ChatFormatting.RED)));
+#if MC_VERSION >= "12000"
+            btnSendFeedback.setTooltip(Tooltip.create(Component.translatable("gui.worldcomment.require_comment_type").withStyle(ChatFormatting.RED)));
+#endif
         } else if (textBoxMessage.getValue().length() > CommentEntry.MESSAGE_MAX_LENGTH) {
             btnSendFeedback.active = false;
-            btnSendFeedback.setTooltip(Tooltip.create(
-                    Component.translatable("gui.worldcomment.message_too_long").withStyle(ChatFormatting.RED)));
+#if MC_VERSION >= "12000"
+            btnSendFeedback.setTooltip(Tooltip.create(Component.translatable("gui.worldcomment.message_too_long").withStyle(ChatFormatting.RED)));
+#endif
         } else {
             btnSendFeedback.active = true;
+#if MC_VERSION >= "12000"
             btnSendFeedback.setTooltip(null);
+#endif
         }
     }
 }

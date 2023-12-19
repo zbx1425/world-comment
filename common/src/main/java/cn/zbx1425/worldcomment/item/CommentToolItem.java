@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -25,10 +26,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 
-public class CommentToolItem extends Item {
+public class CommentToolItem extends GroupedItem {
 
     public CommentToolItem() {
-        super(new Properties().stacksTo(1));
+        super(
+            () -> #if MC_VERSION >= "12000" CreativeModeTabsAccessor.getTOOLS_AND_UTILITIES() #else CreativeModeTab.TAB_MISC #endif,
+            properties -> properties.stacksTo(1)
+        );
     }
 
     @Override
@@ -65,7 +69,7 @@ public class CommentToolItem extends Item {
                     BlockPos facePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
                     boolean hasClearance = true;
                     for (int y = 0; y < 3; y++) {
-                        if (level.getBlockState(facePos.offset(0, y, 0)).isSolid()) {
+                        if (level.getBlockState(facePos.offset(0, y, 0)) #if MC_VERSION < "12000" .getMaterial() #endif .isSolid()) {
                             hasClearance = false;
                             break;
                         }

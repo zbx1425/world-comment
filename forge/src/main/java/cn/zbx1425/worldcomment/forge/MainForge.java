@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.forge;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -26,6 +27,7 @@ public class MainForge {
 		eventBus.register(RegistriesWrapperImpl.RegisterCreativeTabs.class);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			MainClient.init();
 			eventBus.register(ClientProxy.ModEventBusListener.class);
 			MinecraftForge.EVENT_BUS.register(ClientProxy.ForgeEventBusListener.class);
 		});

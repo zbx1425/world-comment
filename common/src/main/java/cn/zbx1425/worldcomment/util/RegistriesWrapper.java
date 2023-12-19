@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.util;
 
+import cn.zbx1425.worldcomment.item.GroupedItem;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -14,9 +16,9 @@ public interface RegistriesWrapper {
 
     void registerBlock(String id, RegistryObject<Block> block);
 
-    void registerItem(String id, RegistryObject<Item> item, ResourceKey<CreativeModeTab> tab);
+    void registerItem(String id, RegistryObject<GroupedItem> item);
 
-    void registerBlockAndItem(String id, RegistryObject<Block> block, ResourceKey<CreativeModeTab> tab);
+    void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab);
 
     void registerBlockEntityType(String id, RegistryObject<? extends BlockEntityType<? extends BlockEntity>> blockEntityType);
 

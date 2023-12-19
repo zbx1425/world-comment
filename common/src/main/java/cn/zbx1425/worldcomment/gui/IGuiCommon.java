@@ -1,8 +1,12 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.Main;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
 public interface IGuiCommon {
 
@@ -63,4 +67,25 @@ public interface IGuiCommon {
             );
         }
     }
+
+#if MC_VERSION < "12000"
+
+    default void renderScrollingString(GuiGraphics var0, Font var1, Component var2, int var3, int var4, int var5, int var6, int var7) {
+        int var8 = var1.width(var2);
+        int var9 = (var4 + var6 - 9) / 2 + 1;
+        int var10 = var5 - var3;
+        if (var8 > var10) {
+            int var11 = var8 - var10;
+            double var12 = (double) Util.getMillis() / 1000.0;
+            double var14 = Math.max((double)var11 * 0.5, 3.0);
+            double var16 = Math.sin(Math.PI / 2 * Math.cos(Math.PI * 2 * var12 / var14)) / 2.0 + 0.5;
+            double var18 = Mth.lerp(var16, 0.0, (double)var11);
+            var0.enableScissor(var3, var4, var5, var6);
+            var0.drawString(var1, var2, var3 - (int)var18, var9, var7);
+            var0.disableScissor();
+        } else {
+            var0.drawCenteredString(var1, var2, (var3 + var5) / 2, var9, var7);
+        }
+    }
+#endif
 }

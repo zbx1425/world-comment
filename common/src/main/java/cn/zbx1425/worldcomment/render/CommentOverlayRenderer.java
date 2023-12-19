@@ -4,12 +4,10 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.WidgetCommentEntry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class CommentOverlayRenderer {
 
@@ -38,12 +36,12 @@ public class CommentOverlayRenderer {
         if (cachedComments.size() > 0) {
             guiGraphics.pose().pushPose();
             int baseYOffset = guiGraphics.guiHeight() / 2
-                    - (cachedWidgets.get(ClientRayPicking.overlayOffset).getY() + WidgetCommentEntry.TOP_SINK);
+                    - (cachedWidgets.get(ClientRayPicking.overlayOffset) #if MC_VERSION >= "11903" .getY() #else .y #endif + WidgetCommentEntry.TOP_SINK);
             guiGraphics.pose().translate(0, baseYOffset, 0);
             for (WidgetCommentEntry widget : cachedWidgets) {
-                if (widget.getY() + baseYOffset + widget.getHeight() > 0
-                        && widget.getY() + baseYOffset < guiGraphics.guiHeight()) {
-                    widget.render(guiGraphics, 0, 0, 0);
+                if (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset + widget.getHeight() > 0
+                        && widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset < guiGraphics.guiHeight()) {
+                    widget.render(#if MC_VERSION >= "12000" guiGraphics #else guiGraphics.pose() #endif, 0, 0, 0);
                 }
             }
             guiGraphics.pose().popPose();

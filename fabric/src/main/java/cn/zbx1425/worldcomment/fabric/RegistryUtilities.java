@@ -3,7 +3,9 @@ package cn.zbx1425.worldcomment.fabric;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
+#if MC_VERSION >= "12000"
 import net.minecraft.core.registries.BuiltInRegistries;
+#endif
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -21,26 +23,26 @@ public interface RegistryUtilities {
     }
 
     static DefaultedRegistry<Item> registryGetItem() {
-        return BuiltInRegistries.ITEM;
+        return #if MC_VERSION >= "12000" BuiltInRegistries.ITEM #else Registry.ITEM #endif;
     }
 
     static DefaultedRegistry<Block> registryGetBlock() {
-        return BuiltInRegistries.BLOCK;
+        return #if MC_VERSION >= "12000" BuiltInRegistries.BLOCK #else Registry.BLOCK #endif;
     }
 
     static Registry<BlockEntityType<?>> registryGetBlockEntityType() {
-        return BuiltInRegistries.BLOCK_ENTITY_TYPE;
+        return #if MC_VERSION >= "12000" BuiltInRegistries.BLOCK_ENTITY_TYPE #else Registry.BLOCK_ENTITY_TYPE #endif;
     }
 
     static DefaultedRegistry<EntityType<?>> registryGetEntityType() {
-        return BuiltInRegistries.ENTITY_TYPE;
+        return #if MC_VERSION >= "12000" BuiltInRegistries.ENTITY_TYPE #else Registry.ENTITY_TYPE #endif;
     }
 
     static Registry<SoundEvent> registryGetSoundEvent() {
-        return BuiltInRegistries.SOUND_EVENT;
+        return #if MC_VERSION >= "12000" BuiltInRegistries.SOUND_EVENT #else Registry.SOUND_EVENT #endif;
     }
 
     static Registry<ParticleType<?>> registryGetParticleType() {
-        return BuiltInRegistries.PARTICLE_TYPE;
+        return #if MC_VERSION >= "12000" BuiltInRegistries.PARTICLE_TYPE #else Registry.PARTICLE_TYPE #endif;
     }
 }

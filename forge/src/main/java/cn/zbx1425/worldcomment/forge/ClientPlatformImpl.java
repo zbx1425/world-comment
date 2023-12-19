@@ -10,12 +10,16 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ClientPlatformImpl {
 
+    public static List<KeyMapping> KEY_MAPPINGS = new ArrayList<>();
+
     public static void registerKeyBinding(KeyMapping keyMapping) {
-        KeyMappingRegistry.register(keyMapping);
+        KEY_MAPPINGS.add(keyMapping);
     }
 
     public static void registerNetworkReceiver(ResourceLocation resourceLocation, Consumer<FriendlyByteBuf> consumer) {

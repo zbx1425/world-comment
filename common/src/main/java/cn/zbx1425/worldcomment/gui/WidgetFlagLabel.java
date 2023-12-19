@@ -1,9 +1,8 @@
 package cn.zbx1425.worldcomment.gui;
 
-import cn.zbx1425.worldcomment.Main;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
 
@@ -16,7 +15,13 @@ public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+#if MC_VERSION >= "12000"
+    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = guiParam;
+#else
+    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
+#endif
         guiGraphics.setColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,
                 (color & 0xFF) / 255f, 1);
         guiGraphics.blit(ATLAS_LOCATION, getX(), getY(), 10, getHeight(),
@@ -26,6 +31,10 @@ public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
         guiGraphics.blit(ATLAS_LOCATION, getX() + getWidth() - 10, getY(), 10, getHeight(),
                 118, 48, 10, 10, 256, 256);
         guiGraphics.setColor(1, 1, 1, 1);
-        super.renderWidget(guiGraphics, mouseX, mouseY, delta);
+#if MC_VERSION >= "12000"
+        super.renderWidget(guiParam, mouseX, mouseY, partialTick);
+#else
+        super.render(guiParam, mouseX, mouseY, partialTick);
+#endif
     }
 }

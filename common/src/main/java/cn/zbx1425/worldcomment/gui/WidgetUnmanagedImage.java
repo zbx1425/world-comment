@@ -2,13 +2,13 @@ package cn.zbx1425.worldcomment.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
-import org.joml.Matrix4f;
+#if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 
 public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseable {
 
@@ -27,7 +27,14 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    #if MC_VERSION >= "12000"
+    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = guiParam;
+#else
+    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
+        super.render(guiParam, mouseX, mouseY, partialTick);
+#endif
         int x1 = getX(), x2 = getX() + getWidth();
         int y1 = getY(), y2 = getY() + getHeight();
 
@@ -52,12 +59,21 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-
-    }
+#if MC_VERSION >= "12000"
+    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
+#else
+    public void updateNarration(NarrationElementOutput narrationElementOutput) { }
+#endif
 
     @Override
     public void close() {
         texture.close();
     }
+
+#if MC_VERSION < "12000"
+    private int getX() { return x; }
+    private int getY() { return y; }
+    private void setX(int x) { this.x = x; }
+    private void setY(int y) { this.y = y; }
+#endif
 }

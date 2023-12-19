@@ -56,7 +56,7 @@ public class WidgetLabel extends AbstractWidget {
                     if (textWidth > this.padWidth()) {
                         int offset = (int)(System.currentTimeMillis() / 25 % (textWidth + 40));
 #if MC_VERSION >= "12000"
-                        guiGraphics.enableScissor(this.padX(), this.getY(), this.padX() + this.padWidth(), this.getY() + this.height);
+                        guiGraphics.enableScissor(this.padX(), this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.padX() + this.padWidth(), this #if MC_VERSION >= "11903" .getY() #else .y #endif + this.height);
                         guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x - offset, y, -1);
                         guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
                         guiGraphics.disableScissor();
@@ -69,7 +69,7 @@ public class WidgetLabel extends AbstractWidget {
 #if MC_VERSION >= "12000"
                         guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x, y, -1);
 #else
-                        drawString(matrices, Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
+                        drawString(matrices, Minecraft.getInstance().font, lines[i], x, y, -1);
 #endif
                     }
                     if (!isActive()) {
@@ -108,7 +108,7 @@ public class WidgetLabel extends AbstractWidget {
 
 
     private int padX() {
-        return this.getX() + padding;
+        return this #if MC_VERSION >= "11903" .getX() #else .x #endif + padding;
     }
 
     private int padWidth() {

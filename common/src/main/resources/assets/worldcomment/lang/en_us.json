@@ -14,7 +14,7 @@
 
   "gui.worldcomment.message": "Enter feedback here (Optional)",
   "gui.worldcomment.message.placeholder": "(Example) I WANNA EAAAAAAAAAT TEA CAKE AHHHHHHH",
-  "gui.worldcomment.exclude_screenshot": "Exclude Screenshot",
+  "gui.worldcomment.exclude_screenshot": "No Image",
   "gui.worldcomment.anonymous": "Anonymous",
   "gui.worldcomment.save_screenshot": "Save Screenshot",
   "gui.worldcomment.require_comment_type": "Pick a comment type.",

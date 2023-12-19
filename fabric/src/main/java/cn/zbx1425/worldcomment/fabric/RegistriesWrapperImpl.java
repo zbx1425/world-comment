@@ -2,11 +2,17 @@ package cn.zbx1425.worldcomment.fabric;
 
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
+#if MC_VERSION >= "12000"
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+#else
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+#endif
+import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -27,17 +33,25 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
     @Override
-    public void registerBlockAndItem(String id, RegistryObject<Block> block, ResourceKey<CreativeModeTab> tab) {
+    public void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab) {
         Registry.register(RegistryUtilities.registryGetBlock(), new ResourceLocation(Main.MOD_ID, id), block.get());
-        final BlockItem blockItem = new BlockItem(block.get(), RegistryUtilities.createItemProperties());
+#if MC_VERSION >= "12000"
+        final BlockItem blockItem = new BlockItem(block.get(), new Item.Properties());
+#else
+        final BlockItem blockItem = new BlockItem(block.get(), new FabricItemSettings().group(tab));
+#endif
         Registry.register(RegistryUtilities.registryGetItem(), new ResourceLocation(Main.MOD_ID, id), blockItem);
+#if MC_VERSION >= "12000"
         ItemGroupEvents.modifyEntriesEvent(tab).register(consumer -> consumer.accept(blockItem));
+#endif
     }
 
     @Override
-    public void registerItem(String id, RegistryObject<Item> item, ResourceKey<CreativeModeTab> tab) {
+    public void registerItem(String id, RegistryObject<GroupedItem> item) {
         Registry.register(RegistryUtilities.registryGetItem(), new ResourceLocation(Main.MOD_ID, id), item.get());
-        ItemGroupEvents.modifyEntriesEvent(tab).register(consumer -> consumer.accept(item.get()));
+#if MC_VERSION >= "12000"
+        ItemGroupEvents.modifyEntriesEvent(item.get().tabSupplier.get()).register(consumer -> consumer.accept(item));
+#endif
     }
 
     @Override

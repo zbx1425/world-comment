@@ -6,7 +6,7 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+#if MC_VERSION >= "11903" import com.mojang.math.Axis; #else import com.mojang.math.Vector3f; #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -46,8 +46,12 @@ public class CommentWorldRenderer implements IGuiCommon {
                 cycleHoverY * 0.1,
                 RANDOM.nextFloat(-0.3f, 0.3f)
         );
-        float yaw = (float)Mth.atan2(comment.location.getX() - cameraPos.x(), comment.location.getZ() - cameraPos.z());
+        float yaw = (float)Mth.atan2(comment.location.getX() + 0.5 - cameraPos.x(), comment.location.getZ() + 0.5 - cameraPos.z());
+#if MC_VERSION >= "12000"
         matrices.mulPose(Axis.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
+#else
+        matrices.mulPose(Vector3f.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
+#endif
 
         int light = LightTexture.FULL_BRIGHT;
         {

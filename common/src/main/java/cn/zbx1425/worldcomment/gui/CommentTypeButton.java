@@ -1,15 +1,10 @@
 package cn.zbx1425.worldcomment.gui;
 
-import cn.zbx1425.worldcomment.Main;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-
-import java.util.function.Supplier;
 
 public class CommentTypeButton extends Button implements IGuiCommon {
 
@@ -27,13 +22,20 @@ public class CommentTypeButton extends Button implements IGuiCommon {
     public CommentTypeButton(int x, int y, int type, OnPress onPress) {
         super(x, y, BTN_WIDTH, BTN_HEIGHT,
                 Component.translatable("gui.worldcomment.comment_type." + type),
-                onPress, Supplier::get);
+                onPress #if MC_VERSION >= "12000" , Supplier::get #endif);
         this.commentType = type;
         this.topColor = COMMENT_TYPE_COLOR[type - 1];
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+#if MC_VERSION >= "12000"
+    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = guiParam;
+#else
+    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
+        super.render(guiParam, mouseX, mouseY, partialTick);
+#endif
         Minecraft minecraft = Minecraft.getInstance();
         RenderSystem.enableBlend();
         guiGraphics.setColor(((topColor >> 16) & 0xFF) / 255f, ((topColor >> 8) & 0xFF) / 255f,
@@ -52,4 +54,9 @@ public class CommentTypeButton extends Button implements IGuiCommon {
         renderScrollingString(guiGraphics, minecraft.font, getMessage(),
                 getX(), getY(), getX() + getWidth(), getY() + 12, active ? 0xFFFFFFFF : 0xFFA0A0A0);
     }
+
+#if MC_VERSION < "12000"
+    private int getX() { return x; }
+    private int getY() { return y; }
+#endif
 }

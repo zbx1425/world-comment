@@ -20,9 +20,6 @@
 		],
 		"client": [
 			"cn.zbx1425.worldcomment.fabric.MainFabricClient"
-		],
-		"modmenu": [
-			"cn.zbx1425.worldcomment.fabric.ModMenuApiImpl"
 		]
 	},
 	"mixins": [

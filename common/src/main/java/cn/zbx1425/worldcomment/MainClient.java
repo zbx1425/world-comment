@@ -11,9 +11,6 @@ import org.lwjgl.glfw.GLFW;
 
 public class MainClient {
 
-	public static final KeyMapping KEY_COMMENT_DETAIL = new KeyMapping("key.worldcomment.comment_detail",
-			InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_TAB, "key.categories.misc");
-
 	public static ClientConfig CLIENT_CONFIG = new ClientConfig();
 
 	public static void init() {
@@ -29,8 +26,6 @@ public class MainClient {
 		ClientPlatform.registerPlayerJoinEvent(ignored -> {
 			ClientWorldData.INSTANCE.clear();
 		});
-
-		ClientPlatform.registerKeyBinding(KEY_COMMENT_DETAIL);
 	}
 
 }

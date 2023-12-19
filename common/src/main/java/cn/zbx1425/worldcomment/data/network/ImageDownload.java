@@ -72,6 +72,7 @@ public class ImageDownload {
 
     private static byte[] getLocalImageData(String url) throws IOException {
         Path imageBaseDir = Minecraft.getInstance().gameDirectory.toPath().resolve("worldcomment-images");
+        if (!Files.isDirectory(imageBaseDir)) return null;
         try (Stream<Path> imageDirs = Files.list(imageBaseDir)) {
             for (Path imageDir : imageDirs.toArray(Path[]::new)) {
                 Path imagePath = imageDir.resolve("url-sha1-" + DigestUtils.sha1Hex(url) + ".png");

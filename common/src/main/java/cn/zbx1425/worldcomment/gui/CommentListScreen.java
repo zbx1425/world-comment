@@ -12,17 +12,15 @@ import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.components.Button; #else import cn.zbx1425.worldcomment.util.compat.Button; #endif
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
-import org.joml.Matrix4f;
-
+#if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 import java.util.*;
 
 public class CommentListScreen extends Screen implements IGuiCommon {
@@ -36,7 +34,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     int subScreen = 0, prevSubScreen = 0;
 
-    Button[] pageButtons = new Button[4];
+    net.minecraft.client.gui.components.Button[] pageButtons = new net.minecraft.client.gui.components.Button[4];
 
     List<CommentEntry> commentList = new ArrayList<>();
     int commentListOffset = 0;
@@ -55,14 +53,14 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     @Override
     protected void init() {
         super.init();
-        pageButtons[0] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.nearby_posts"), sender -> useSubScreen(0))
-                .bounds(10, 40, 80, 20).build());
-        pageButtons[1] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.recent_posts"), sender -> useSubScreen(1))
-                .bounds(10, 64, 80, 20).build());
-        pageButtons[2] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.my_posts"), sender -> useSubScreen(2))
-                .bounds(10, 88, 80, 20).build());
-        pageButtons[3] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.detail"), sender -> {})
-                .bounds(10, 122, 80, 20).build());
+        pageButtons[0] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.nearby_posts"),
+                        sender -> useSubScreen(0)).bounds(10, 40, 80, 20).build());
+        pageButtons[1] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.recent_posts"),
+                        sender -> useSubScreen(1)).bounds(10, 64, 80, 20).build());
+        pageButtons[2] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.my_posts"),
+                        sender -> useSubScreen(2)).bounds(10, 88, 80, 20).build());
+        pageButtons[3] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.detail"),
+                        sender -> {}).bounds(10, 122, 80, 20).build());
         for (int i = 0; i < pageButtons.length; i++) {
             pageButtons[i].active = i != subScreen;
         }
@@ -112,9 +110,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
         Minecraft minecraft = Minecraft.getInstance();
-        renderBackground(guiGraphics);
+        renderBackground(guiParam);
         guiGraphics.drawString(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
                 40, 15, 0xFFFFE6C0, true);
 
@@ -154,7 +153,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), 0, imgAreaWidth / 2);
             widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), height - 20 - widget.getHeight(),
                     imgAreaWidth / 2);
-            widget.render(guiGraphics, mouseX, mouseY, partialTick);
+            widget.render(guiParam, mouseX, mouseY, partialTick);
 
             boolean canDelete = minecraft.player.hasPermissions(3)
                     || minecraft.player.getGameProfile().getId().equals(comment.initiator);
@@ -183,7 +182,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 WidgetCommentEntry widget = getWidget(comment);
                 widget.showImage = true;
                 widget.setBounds(106, yOffset, width - 102 - 22 - 8 - 4 - 16);
-                widget.render(guiGraphics, mouseX, mouseY, partialTick);
+                widget.render(guiParam, mouseX, mouseY, partialTick);
 
                 guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
                         196, 60, 20, 20, 256, 256);
@@ -223,7 +222,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             }
         }
 
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiParam, mouseX, mouseY, partialTick);
     }
 
     @Override
@@ -283,8 +282,9 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics) {
-        super.renderBackground(guiGraphics);
+    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam) {
+        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        super.renderBackground(guiParam);
         graphicsBlit9(guiGraphics, 30, 10, width - 40, height - 20,
                 196, 40, 20, 20, 256, 256,
                 4, 4, 4, 4

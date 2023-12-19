@@ -1,8 +1,10 @@
 package cn.zbx1425.worldcomment.forge;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -15,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+#if MC_VERSION >= "12000" import net.minecraftforge.event.BuildCreativeModeTabContentsEvent; #endif
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -23,6 +25,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RegistriesWrapperImpl implements RegistriesWrapper {
@@ -39,7 +42,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
     @Override
-    public void registerBlockAndItem(String id, RegistryObject<Block> block, ResourceKey<CreativeModeTab> tab) {
+    public void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab) {
         BLOCKS.register(id, block::get);
         ITEMS.register(id, () -> {
             final BlockItem blockItem = new BlockItem(block.get(), RegistryUtilities.createItemProperties());
@@ -49,10 +52,10 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
     @Override
-    public void registerItem(String id, RegistryObject<Item> item, ResourceKey<CreativeModeTab> tab) {
+    public void registerItem(String id, RegistryObject<GroupedItem> item) {
         ITEMS.register(id, () -> {
-            final Item itemObject = item.get();
-            registerCreativeModeTab(tab, itemObject);
+            final GroupedItem itemObject = item.get();
+            registerCreativeModeTab(itemObject.tabSupplier.get(), itemObject);
             return itemObject;
         });
     }
@@ -72,6 +75,9 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
         SOUND_EVENTS.register(id, () -> soundEvent);
     }
 
+
+    public final List<KeyMapping> keyMappings = new ArrayList<>();
+
     public void registerAllDeferred() {
         ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
         BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
@@ -81,14 +87,15 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
 
-    private static final Map<ResourceKey<CreativeModeTab>, ArrayList<Item>> CREATIVE_TABS = new HashMap<>();
+    private static final Map<#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif, ArrayList<Item>> CREATIVE_TABS = new HashMap<>();
 
-    public static void registerCreativeModeTab(ResourceKey<CreativeModeTab> resourceLocation, Item item) {
+    public static void registerCreativeModeTab(#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif resourceLocation, Item item) {
         CREATIVE_TABS.computeIfAbsent(resourceLocation, ignored -> new ArrayList<>()).add(item);
     }
 
     public static class RegisterCreativeTabs {
 
+#if MC_VERSION >= "12000"
         @SubscribeEvent
         public static void onRegisterCreativeModeTabsEvent(BuildCreativeModeTabContentsEvent event) {
             CREATIVE_TABS.forEach((key, items) -> {
@@ -97,5 +104,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
                 }
             });
         }
+#endif
+
     }
 }
