@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
@@ -72,7 +73,15 @@ public class CommentToolScreen extends Screen {
 
         int baseY = CONTAINER_PADDING_Y;
         radioButtons.clear();
-        boolean canAccessBuildTools = minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
+
+        assert minecraft.player != null && minecraft.gameMode != null;
+        boolean canAccessBuildTools = switch (MainClient.CLIENT_CONFIG.allowMarkerUsage) {
+            case 0 -> minecraft.player.hasPermissions(2);
+            case 1 -> minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
+            case 2 -> true;
+            default -> false;
+        };
+
         for (int r = 0; r < (canAccessBuildTools ? 2 : 1); r++) {
             addRenderableWidget(new WidgetFlagLabel(
                     SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 4 + 10, SQ_SIZE / 2,

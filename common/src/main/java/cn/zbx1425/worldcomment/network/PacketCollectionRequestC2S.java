@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.List;
 import java.util.UUID;
 
 public class PacketCollectionRequestC2S {
@@ -46,7 +47,11 @@ public class PacketCollectionRequestC2S {
             case 2 -> {
                 int offset = buffer.readInt();
                 int limit = buffer.readInt();
-                PacketCollectionDataS2C.send(initiator, Main.DATABASE.comments.queryLatest(offset, limit), nonce);
+                if (initiator.hasPermissions(3) || limit <= 40) {
+                    PacketCollectionDataS2C.send(initiator, Main.DATABASE.comments.queryLatest(offset, limit), nonce);
+                } else {
+                    PacketCollectionDataS2C.send(initiator, List.of(), nonce);
+                }
             }
         }
     }

@@ -12,8 +12,11 @@ public class ClientConfig {
 
     public List<ImageUploadConfig> imageUploader;
 
+    public int allowMarkerUsage;
+
     public static ClientConfig fromServerConfig(ServerConfig serverConfig) {
         ClientConfig config = new ClientConfig();
+
         List<ImageUploadConfig> uploaderList = new ArrayList<>();
         for (String uploaderStr : serverConfig.imageUploadConfig.value.split(";")) {
             if (!uploaderStr.contains(":")) continue;
@@ -21,6 +24,14 @@ public class ClientConfig {
         }
         uploaderList.add(new ImageUploadConfig(":"));
         config.imageUploader = uploaderList;
+
+        config.allowMarkerUsage = switch (serverConfig.allowMarkerUsage.value) {
+            case "op" -> 0;
+            case "creative" -> 1;
+            case "all" -> 2;
+            default -> 1;
+        };
+
         return config;
     }
 
@@ -35,6 +46,7 @@ public class ClientConfig {
         for (int i = 0; i < uploaderCount; i++) {
             imageUploader.add(new ImageUploadConfig(packet.readUtf()));
         }
+        allowMarkerUsage = packet.readInt();
     }
 
     public void writePacket(FriendlyByteBuf packet) {
@@ -43,6 +55,7 @@ public class ClientConfig {
         for (ImageUploadConfig uploader : imageUploader) {
             packet.writeUtf(uploader.toString());
         }
+        packet.writeInt(allowMarkerUsage);
     }
 
 }

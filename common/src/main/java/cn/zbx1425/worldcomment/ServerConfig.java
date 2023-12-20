@@ -19,6 +19,8 @@ public class ServerConfig {
 
     public ConfigItem imageUploadConfig;
 
+    public ConfigItem allowMarkerUsage;
+
     public void load(Path configPath) throws IOException {
         JsonObject json = Files.exists(configPath)
                 ? JsonParser.parseString(Files.readString(configPath)).getAsJsonObject()
@@ -28,6 +30,7 @@ public class ServerConfig {
         uplinkUrl = new ConfigItem(json, "uplinkUrl", "");
         uplinkAuthKey = new ConfigItem(json, "uplinkAuthKey", "");
         imageUploadConfig = new ConfigItem(json, "imageUploadConfig", "");
+        allowMarkerUsage = new ConfigItem(json, "allowMarkerUsage", "creative");
 
         if (!Files.exists(configPath)) save(configPath);
     }
@@ -39,6 +42,7 @@ public class ServerConfig {
         uplinkUrl.writeJson(json);
         uplinkAuthKey.writeJson(json);
         imageUploadConfig.writeJson(json);
+        allowMarkerUsage.writeJson(json);
 
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }
