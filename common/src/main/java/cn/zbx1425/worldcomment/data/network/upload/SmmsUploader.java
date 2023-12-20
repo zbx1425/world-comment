@@ -11,6 +11,7 @@ import org.apache.commons.io.FilenameUtils;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -30,11 +31,11 @@ public class SmmsUploader extends ImageUploader {
         this.apiToken = config.config;
     }
 
-    public ThumbImage uploadImage(Path imagePath, CommentEntry comment) throws IOException, InterruptedException {
+    public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         int thumbWidth = 256;
-        BufferedImage fullSizeImage = ImageIO.read(imagePath.toFile());
-        String fullSizeUrl = uploadImage(Files.readAllBytes(imagePath),
-                "WorldComment from " + comment.initiatorName + " " + imagePath.getFileName().toString());
+        BufferedImage fullSizeImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
+        String fullSizeUrl = uploadImage(imageBytes,
+                "WorldComment from " + comment.initiatorName + ".png");
         String thumbUrl;
         if (fullSizeImage.getWidth() < thumbWidth) {
             thumbUrl = fullSizeUrl;
@@ -48,8 +49,7 @@ public class SmmsUploader extends ImageUploader {
             ByteArrayOutputStream oStream = new ByteArrayOutputStream(64 * 1024);
             ImageIO.write(thumbImage, "png", oStream);
             thumbUrl = uploadImage(oStream.toByteArray(),
-                    "WorldComment from " + comment.initiatorName + " " +
-                    FilenameUtils.removeExtension(imagePath.getFileName().toString()) + ".thumb.png");
+                    "WorldComment from " + comment.initiatorName + ".thumb.png");
         }
         return new ThumbImage(fullSizeUrl, thumbUrl);
     }

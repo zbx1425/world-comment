@@ -3,8 +3,10 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
+import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 #if MC_VERSION >= "12000" import net.minecraft.ChatFormatting; #endif
 import net.minecraft.client.Minecraft;
@@ -20,6 +22,7 @@ import net.minecraft.world.level.GameType;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ import java.util.List;
 
 public class CommentToolScreen extends Screen {
 
-    private final Path imagePath;
+    private final byte[] imageBytes;
 
     private static final int SQ_SIZE = 20;
     private static final int SIDEBAR_OFFSET = 100;
@@ -35,14 +38,19 @@ public class CommentToolScreen extends Screen {
     private static final int CONTAINER_PADDING_X = 8;
     private static final int CONTAINER_PADDING_Y = 5;
 
-    public CommentToolScreen(Path imagePath) {
+    public CommentToolScreen(byte[] imageBytes) {
         super(Component.literal("Comment Tool"));
-        this.imagePath = imagePath;
+        this.imageBytes = imageBytes;
         this.screenshotSaved = false;
-        try (FileInputStream fis = new FileInputStream(imagePath.toFile())) {
-            widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(fis)));
+        ByteBuffer offHeapBuffer = OffHeapAllocator.allocate(imageBytes.length);
+        try {
+            offHeapBuffer.put(imageBytes);
+            offHeapBuffer.rewind();
+            this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(offHeapBuffer)));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            OffHeapAllocator.free(offHeapBuffer);
         }
     }
 
@@ -178,10 +186,9 @@ public class CommentToolScreen extends Screen {
         btnSaveScreenshot = new WidgetColorButton(
                 containerOffsetX, btnSendFeedback #if MC_VERSION >= "11903" .getY() #else .y #endif, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
                 Component.translatable("gui.worldcomment.save_screenshot"), 0xFF81D4FA, sender -> {
-                    Path persistentPath = imagePath.resolveSibling(
-                            imagePath.getFileName().toString().replace("WorldComment", "WorldComment-Saved"));
+                    Path persistentPath = Screenshot.getAvailableFile().toPath();
                     try {
-                        Files.copy(imagePath, persistentPath);
+                        Files.write(persistentPath, imageBytes);
                         screenshotSaved = true;
                         btnSaveScreenshot.active = false;
                     } catch (IOException e) {
@@ -201,7 +208,7 @@ public class CommentToolScreen extends Screen {
                     selectedCommentType, textBoxMessage.getValue()
             );
             long jobId = SubmitDispatcher.addJob(
-                    comment, checkBoxNoImage.selected() ? null : imagePath,
+                    comment, checkBoxNoImage.selected() ? null : imageBytes,
                     (job, ex) -> Minecraft.getInstance().execute(() -> {
                         if (job == null) {
                             Minecraft.getInstance().player.displayClientMessage(

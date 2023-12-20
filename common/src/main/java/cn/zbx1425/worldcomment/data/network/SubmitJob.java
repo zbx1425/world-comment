@@ -14,15 +14,15 @@ import java.util.function.Consumer;
 public class SubmitJob {
 
     public final CommentEntry comment;
-    public final Path imagePath;
+    public final byte[] imageBytes;
     public boolean imageReady, blockPosReady;
     public BiConsumer<SubmitJob, Exception> callback;
     public Queue<ImageUploadConfig> uploaderToUse;
 
-    public SubmitJob(CommentEntry comment, Path imagePath, BiConsumer<SubmitJob, Exception> callback, ClientConfig config) {
+    public SubmitJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Exception> callback, ClientConfig config) {
         this.comment = comment;
-        this.imagePath = imagePath;
-        if (imagePath == null) {
+        this.imageBytes = imageBytes;
+        if (imageBytes == null) {
             comment.image = ThumbImage.NONE;
             imageReady = true;
         }

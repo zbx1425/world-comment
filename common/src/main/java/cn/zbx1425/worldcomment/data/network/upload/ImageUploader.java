@@ -11,7 +11,7 @@ public abstract class ImageUploader {
 
     protected static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
-    public abstract ThumbImage uploadImage(Path imagePath, CommentEntry comment) throws IOException, InterruptedException;
+    public abstract ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException;
 
     public static ImageUploader getUploader(ImageUploadConfig config) {
         return switch (config.service) {
@@ -28,7 +28,7 @@ public abstract class ImageUploader {
         protected static NoopUploader INSTANCE = new NoopUploader();
 
         @Override
-        public ThumbImage uploadImage(Path imagePath, CommentEntry comment) {
+        public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) {
             return new ThumbImage("", "");
         }
     }

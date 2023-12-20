@@ -24,39 +24,28 @@ public class SubmitDispatcher {
     private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final Long2ObjectMap<SubmitJob> pendingJobs = new Long2ObjectOpenHashMap<>();
 
-    public static long addJob(CommentEntry comment, Path imagePath, BiConsumer<SubmitJob, Exception> callback) {
+    public static long addJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Exception> callback) {
         long jobId = ServerWorldData.SNOWFLAKE.nextId();
-        SubmitJob job = new SubmitJob(comment, imagePath, callback, MainClient.CLIENT_CONFIG);
+        SubmitJob job = new SubmitJob(comment, imageBytes, callback, MainClient.CLIENT_CONFIG);
         addJob(jobId, job);
         return jobId;
     }
 
     private static void addJob(long jobId, SubmitJob job) {
         pendingJobs.put(jobId, job);
-        if (job.imagePath != null) {
+        if (job.imageBytes != null) {
             NETWORK_EXECUTOR.execute(() -> {
                 try {
                     ImageUploadConfig uploader = job.uploaderToUse.poll();
                     if (uploader == null) throw new IllegalStateException("All uploads failed");
-                    ThumbImage thumbImage = ImageUploader.getUploader(uploader).uploadImage(job.imagePath, job.comment);
+                    ThumbImage thumbImage = ImageUploader.getUploader(uploader).uploadImage(job.imageBytes, job.comment);
                     job.setImage(thumbImage);
                     trySendPackage(jobId);
-
-                    try {
-                        Files.deleteIfExists(job.imagePath);
-                    } catch (IOException ex) {
-                        Main.LOGGER.error("Delete image file", ex);
-                    }
                 } catch (Exception ex) {
                     Main.LOGGER.error("Upload Image", ex);
                     if (job.callback != null) job.callback.accept(job, ex);
                     if (job.uploaderToUse.isEmpty()) {
                         removeJob(jobId);
-                        try {
-                            Files.deleteIfExists(job.imagePath);
-                        } catch (IOException ex2) {
-                            Main.LOGGER.error("Delete image file", ex2);
-                        }
                     } else {
                         addJob(jobId, job);
                     }
@@ -86,7 +75,7 @@ public class SubmitDispatcher {
             if (job.callback != null) job.callback.accept(null, null);
             removeJob(jobId);
         } else {
-            if (job.imagePath != null && !job.imageReady) {
+            if (job.imageBytes != null && !job.imageReady) {
                 if (job.callback != null) job.callback.accept(job, null);
             }
         }

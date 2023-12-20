@@ -24,10 +24,10 @@ public class ImglocUploader extends ImageUploader {
         this.apiToken = config.config;
     }
 
-    public ThumbImage uploadImage(Path imagePath, CommentEntry comment) throws IOException, InterruptedException {
+    public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         MimeMultipartData body = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
-                .addFile("source", imagePath.getFileName().toString(), Files.readAllBytes(imagePath), "image/png")
+                .addFile("source", "image.png", imageBytes, "image/png")
                 .addText("title", "WorldComment from " + comment.initiatorName)
                 .addText("description", comment.message)
                 .build();

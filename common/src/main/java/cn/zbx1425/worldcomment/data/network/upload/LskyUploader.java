@@ -29,11 +29,10 @@ public class LskyUploader extends ImageUploader {
         }
     }
 
-    public ThumbImage uploadImage(Path imagePath, CommentEntry comment) throws IOException, InterruptedException {
+    public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         MimeMultipartData body = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
-                .addFile("file", imagePath.getFileName().toString(),
-                        Files.readAllBytes(imagePath), "application/octet-stream")
+                .addFile("file", "image.png", imageBytes, "application/octet-stream")
                 .addText("strategy_id", "1")
                 .build();
         HttpRequest request = HttpRequest.newBuilder(URI.create(apiUrl))

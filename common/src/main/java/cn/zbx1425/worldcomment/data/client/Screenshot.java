@@ -5,6 +5,9 @@ import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.Tag;
@@ -13,25 +16,28 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class Screenshot {
 
-    public static void grabScreenshot(Consumer<Path> callback) {
-        OverlayLayer.isTakingScreenshot = true;
-        Minecraft.getInstance().execute(() -> {
-            File targetFile = getAvailableFile();
-            net.minecraft.client.Screenshot.grab(Minecraft.getInstance().gameDirectory, targetFile.getName(),
-                    Minecraft.getInstance().getMainRenderTarget(),
-                    ignored -> {
-                        callback.accept(targetFile.toPath());
-                    });
+    public static void grabScreenshot(Consumer<byte[]> callback) {
+        RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
+        NativeImage nativeImage = new NativeImage(frameBuf.width, frameBuf.height, false);
+        try (nativeImage) {
+            RenderSystem.bindTexture(frameBuf.getColorTextureId());
+            nativeImage.downloadTexture(0, true);
+            nativeImage.flipY();
+            callback.accept(nativeImage.asByteArray());
+        } catch (IOException ex) {
+            Main.LOGGER.error("Failed to save screenshot", ex);
+        } finally {
             OverlayLayer.isTakingScreenshot = false;
-        });
+        }
     }
 
-    private static File getAvailableFile() {
+    public static File getAvailableFile() {
         File screenShotDirectory = new File(Minecraft.getInstance().gameDirectory,"screenshots");
         String s = "WorldComment-" + Util.getFilenameFormattedDateTime();
         int i = 1;
@@ -55,10 +61,10 @@ public class Screenshot {
         if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) return false;
 
         if (minecraft.screen == null) {
-            grabScreenshot(path -> {
+            grabScreenshot(imageBytes -> {
                 Minecraft.getInstance().execute(() -> {
                     minecraft.player.playSound(shutterSoundEvent);
-                    Minecraft.getInstance().setScreen(new CommentToolScreen(path));
+                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes));
                 });
             });
         }
