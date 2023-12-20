@@ -5,8 +5,6 @@ import net.minecraft.client.Minecraft;
 
 public class OverlayLayer {
 
-    public static boolean isTakingScreenshot = false;
-
     public static void render(GuiGraphics guiGraphics) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.screen != null) return;

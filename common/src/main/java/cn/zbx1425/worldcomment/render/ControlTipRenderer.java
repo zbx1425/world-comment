@@ -44,9 +44,14 @@ public class ControlTipRenderer implements IGuiCommon {
             Component.translatable("gui.worldcomment.control_tip.scroll"), 1,
             null, false
     );
+    public static final ControlTip TIP_INCLUDE_HUD = new ControlTip(
+            Component.translatable("gui.worldcomment.control_tip.screenshot_hud"), 2,
+            Minecraft.getInstance().options.keySprint, false
+    );
 
     public static final List<ControlTip> TIPS =
-            List.of(TIP_PLACE_COMMENT, TIP_TOGGLE_SHOW, TIP_TOGGLE_HIDE, TIP_CREATE, TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL);
+            List.of(TIP_PLACE_COMMENT, TIP_TOGGLE_SHOW, TIP_TOGGLE_HIDE, TIP_CREATE,
+                    TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL, TIP_INCLUDE_HUD);
 
     public static void render(GuiGraphics guiGraphics) {
         update();
@@ -71,6 +76,7 @@ public class ControlTipRenderer implements IGuiCommon {
                 return; // De-clutter
             } else {
                 TIP_CREATE.visible = true;
+                TIP_INCLUDE_HUD.visible = true;
                 if (MainClient.CLIENT_CONFIG.isCommentVisible) {
                     TIP_TOGGLE_HIDE.visible = true;
                 } else {
@@ -116,8 +122,16 @@ public class ControlTipRenderer implements IGuiCommon {
             guiGraphics.blit(ATLAS_LOCATION, x, y, 20, 20,
                     176 + imgIndex * 20, 0, 20, 20, 256, 256);
             if (key != null) {
-                guiGraphics.drawCenteredString(font, key.getTranslatedKeyMessage(),
-                        x + 10, y + 10 - 4, 0xFFFFECB3);
+                Component keyMessage = key.getTranslatedKeyMessage();
+                int keyMessageWidth = font.width(keyMessage);
+                if (keyMessageWidth < 30) {
+                    guiGraphics.drawCenteredString(font, keyMessage, x + 10, y + 10 - 4, 0xFFFFECB3);
+                } else {
+                    guiGraphics.enableScissor(x, y, x + 20, y + 20);
+                    int xOffset = (int)((System.currentTimeMillis() / 50) % (keyMessageWidth + 40));
+                    guiGraphics.drawString(font, keyMessage, x - xOffset + 20, y + 10 - 4, 0xFFFFECB3);
+                    guiGraphics.disableScissor();
+                }
             }
             guiGraphics.drawString(font, text, x + 20 + 4, y + 10 - 4, 0xFFFFFFFF, true);
         }

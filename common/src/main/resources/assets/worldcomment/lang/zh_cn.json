@@ -13,7 +13,7 @@
   "gui.worldcomment.comment_type.8": "留言",
 
   "gui.worldcomment.message": "请在此处留言 (非必须)",
-  "gui.worldcomment.message.placeholder": "(示例) 我要吃吃吃吃吃吃吃吃吃吃吃吃吃吃吃茶点啊啊啊啊啊",
+  "gui.worldcomment.message.placeholder": "(示例) 前有巨大宝箱",
   "gui.worldcomment.exclude_screenshot": "不包含截图",
   "gui.worldcomment.anonymous": "匿名评论",
   "gui.worldcomment.save_screenshot": "另存截图",
@@ -28,6 +28,7 @@
   "gui.worldcomment.control_tip.view_manage": "查看或管理所有评论",
   "gui.worldcomment.control_tip.detail": "查看详情",
   "gui.worldcomment.control_tip.scroll": "滚动",
+  "gui.worldcomment.control_tip.screenshot_hud": "截图包括叠加层",
 
   "gui.worldcomment.list.title": "§l随处随笔§r 评论管理",
   "gui.worldcomment.list.nearby_posts": "附近评论",

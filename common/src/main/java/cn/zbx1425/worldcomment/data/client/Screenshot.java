@@ -32,8 +32,6 @@ public class Screenshot {
             callback.accept(nativeImage.asByteArray());
         } catch (IOException ex) {
             Main.LOGGER.error("Failed to save screenshot", ex);
-        } finally {
-            OverlayLayer.isTakingScreenshot = false;
         }
     }
 
@@ -61,10 +59,15 @@ public class Screenshot {
         if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) return false;
 
         if (minecraft.screen == null) {
-            grabScreenshot(imageBytes -> {
-                Minecraft.getInstance().execute(() -> {
-                    minecraft.player.playSound(shutterSoundEvent);
-                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes));
+            minecraft.tell(() -> {
+                boolean prevHideGui = minecraft.options.hideGui;
+                minecraft.options.hideGui = !minecraft.options.keySprint.isDown();
+                RenderSystem.recordRenderCall(() -> {
+                    grabScreenshot(imageBytes -> minecraft.execute(() -> {
+                        minecraft.player.playSound(shutterSoundEvent);
+                        Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes));
+                    }));
+                    minecraft.options.hideGui = prevHideGui;
                 });
             });
         }

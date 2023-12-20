@@ -1,5 +1,5 @@
 {
-  "item.worldcomment.comment_tool": "§l§6Subnoteica§r Comment Tool",
+  "item.worldcomment.comment_tool": "§l§6World Comment§r Tool",
 
   "gui.worldcomment.comment_type.r1": "Your valuable opinion",
   "gui.worldcomment.comment_type.1": "Great",
@@ -13,7 +13,7 @@
   "gui.worldcomment.comment_type.8": "Memo",
 
   "gui.worldcomment.message": "Enter feedback here (Optional)",
-  "gui.worldcomment.message.placeholder": "(Example) I WANNA EAAAAAAAAAT TEA CAKE AHHHHHHH",
+  "gui.worldcomment.message.placeholder": "(Example) Amazing Chest Ahead",
   "gui.worldcomment.exclude_screenshot": "No Image",
   "gui.worldcomment.anonymous": "Anonymous",
   "gui.worldcomment.save_screenshot": "Save Screenshot",
@@ -28,8 +28,9 @@
   "gui.worldcomment.control_tip.view_manage": "View or Manage All Comments",
   "gui.worldcomment.control_tip.detail": "See Detail",
   "gui.worldcomment.control_tip.scroll": "Scroll",
+  "gui.worldcomment.control_tip.screenshot_hud": "Include HUD in Screenshot",
 
-  "gui.worldcomment.list.title": "Subnoteica Comment Management",
+  "gui.worldcomment.list.title": "World Comment Management",
   "gui.worldcomment.list.nearby_posts": "Nearby Posts",
   "gui.worldcomment.list.recent_posts": "Recent Posts",
   "gui.worldcomment.list.my_posts": "My Posts",
