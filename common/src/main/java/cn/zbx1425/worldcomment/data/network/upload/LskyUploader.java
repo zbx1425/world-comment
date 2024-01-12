@@ -20,10 +20,10 @@ public class LskyUploader extends ImageUploader {
     private final String token;
 
     public LskyUploader(ImageUploadConfig config) {
-        String[] configParts = config.config.split(":", 2);
+        String[] configParts = config.config.split("\\?", 2);
         if (configParts.length == 2) {
-            apiUrl = configParts[0];
-            token = configParts[1];
+            apiUrl = configParts[0].trim();
+            token = configParts[1].trim();
         } else {
             throw new RuntimeException("Invalid LskyUploader config: " + config.config);
         }
