@@ -13,7 +13,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.components.Button; #else import cn.zbx1425.worldcomment.util.compat.Button; #endif
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -53,14 +52,14 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     @Override
     protected void init() {
         super.init();
-        pageButtons[0] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.nearby_posts"),
-                        sender -> useSubScreen(0)).bounds(10, 40, 80, 20).build());
-        pageButtons[1] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.recent_posts"),
-                        sender -> useSubScreen(1)).bounds(10, 64, 80, 20).build());
-        pageButtons[2] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.my_posts"),
-                        sender -> useSubScreen(2)).bounds(10, 88, 80, 20).build());
-        pageButtons[3] = addRenderableWidget(Button.builder(Component.translatable("gui.worldcomment.list.detail"),
-                        sender -> {}).bounds(10, 122, 80, 20).build());
+        pageButtons[0] = addRenderableWidget(new WidgetColorButton(10, 40, 80, 20,
+                Component.translatable("gui.worldcomment.list.nearby_posts"), 0xffe57373, sender -> useSubScreen(0)));
+        pageButtons[1] = addRenderableWidget(new WidgetColorButton(10, 64, 80, 20,
+                Component.translatable("gui.worldcomment.list.recent_posts"), 0xffe57373, sender -> useSubScreen(1)));
+        pageButtons[2] = addRenderableWidget(new WidgetColorButton(10, 88, 80, 20,
+                Component.translatable("gui.worldcomment.list.my_posts"), 0xffe57373, sender -> useSubScreen(2)));
+        pageButtons[3] = addRenderableWidget(new WidgetColorButton(10, 122, 80, 20,
+                Component.translatable("gui.worldcomment.list.detail"), 0xffe57373, sender -> {}));
         for (int i = 0; i < pageButtons.length; i++) {
             pageButtons[i].active = i != subScreen;
         }
@@ -294,6 +293,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 196, 40, 20, 20, 256, 256,
                 4, 4, 4, 4
         );
+        RenderSystem.enableBlend();
+        guiGraphics.fill(30, 10, 50, height - 10, 0x66d32f2f);
     }
 
     private double accumulatedScroll = 0;

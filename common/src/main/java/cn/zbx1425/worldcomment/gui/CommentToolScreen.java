@@ -167,11 +167,6 @@ public class CommentToolScreen extends Screen {
         containerWidth = maxX;
         containerHeight = maxY;
 
-        addRenderableWidget(new WidgetColorButton(
-                maxX - SQ_SIZE, 0, SQ_SIZE, SQ_SIZE, Component.literal("X"), 0xFFEF9A9A,
-                sender -> onClose()
-        ));
-
         containerOffsetX = (width - (containerWidth + CONTAINER_PADDING_X * 2)) / 2 + CONTAINER_PADDING_X;
         containerOffsetY = (height - (containerHeight + CONTAINER_PADDING_Y * 2)) / 2 + CONTAINER_PADDING_Y;
         for (GuiEventListener child : children()) {
