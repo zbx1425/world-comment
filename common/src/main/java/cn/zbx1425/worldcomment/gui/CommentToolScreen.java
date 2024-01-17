@@ -11,6 +11,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 #if MC_VERSION >= "12000" import net.minecraft.ChatFormatting; #endif
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
+#if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -63,8 +64,8 @@ public class CommentToolScreen extends Screen {
     private List<CommentTypeButton> radioButtons = new ArrayList<>();
     private WidgetUnmanagedImage widgetImage;
     private MultiLineEditBox textBoxMessage;
-    private Checkbox checkBoxNoImage;
-    private Checkbox checkBoxAnonymous;
+    private net.minecraft.client.gui.components.Checkbox checkBoxNoImage;
+    private net.minecraft.client.gui.components.Checkbox checkBoxAnonymous;
     private WidgetColorButton btnSaveScreenshot;
     private Button btnSendFeedback;
     private int selectedCommentType = 0;
@@ -147,18 +148,14 @@ public class CommentToolScreen extends Screen {
         widgetImage.setBounds(0, baseY, SIDEBAR_OFFSET - SQ_SIZE);
         addRenderableWidget(widgetImage);
         baseY += widgetImage.getHeight() + SQ_SIZE / 2;
-        checkBoxNoImage = new Checkbox(
-                0, baseY, SIDEBAR_OFFSET - SQ_SIZE, SQ_SIZE,
-                Component.translatable("gui.worldcomment.exclude_screenshot"),
-                false, true
-        );
+        checkBoxNoImage = Checkbox
+                .builder(Component.translatable("gui.worldcomment.exclude_screenshot"), minecraft.font)
+                .pos(0, baseY).selected(false).build();
         addRenderableWidget(checkBoxNoImage);
         baseY += SQ_SIZE;
-        checkBoxAnonymous = new Checkbox(
-                0, baseY, SIDEBAR_OFFSET - SQ_SIZE, SQ_SIZE,
-                Component.translatable("gui.worldcomment.anonymous"),
-                false, true
-        );
+        checkBoxAnonymous = Checkbox
+                .builder(Component.translatable("gui.worldcomment.anonymous"), minecraft.font)
+                .pos(0, baseY).selected(false).build();
         addRenderableWidget(checkBoxAnonymous);
 
         int maxX = 0, maxY = 0;
@@ -238,9 +235,10 @@ public class CommentToolScreen extends Screen {
     @Override
     public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
         GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
-        renderBackground(guiParam);
+        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
         guiGraphics.pose().pushPose();
         setupAnimationTransform(guiGraphics);
+        guiGraphics.pose().translate(0, 0, 1);
 
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,

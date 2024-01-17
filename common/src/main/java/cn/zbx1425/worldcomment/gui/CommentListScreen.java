@@ -113,7 +113,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
         GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
         Minecraft minecraft = Minecraft.getInstance();
-        renderBackground(guiParam);
+        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 1);
+
         guiGraphics.drawString(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
                 40, 15, 0xFFFFE6C0, true);
 
@@ -222,6 +225,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             }
         }
 
+        guiGraphics.pose().popPose();
         super.render(guiParam, mouseX, mouseY, partialTick);
     }
 
@@ -282,9 +286,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam) {
+    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
+                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
         GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
-        super.renderBackground(guiParam);
+        super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
         graphicsBlit9(guiGraphics, 30, 10, width - 40, height - 20,
                 196, 40, 20, 20, 256, 256,
                 4, 4, 4, 4
@@ -294,18 +299,18 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     private double accumulatedScroll = 0;
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (this.accumulatedScroll != 0.0 && Math.signum(delta) != Math.signum(this.accumulatedScroll)) {
+    public boolean mouseScrolled(double mouseX, double mouseY #if MC_VERSION >= "12002", double deltaX #endif, double deltaY) {
+        if (this.accumulatedScroll != 0.0 && Math.signum(deltaY) != Math.signum(this.accumulatedScroll)) {
             this.accumulatedScroll = 0.0;
         }
-        this.accumulatedScroll += delta;
+        this.accumulatedScroll += deltaY;
         int scrollAmount = (int)this.accumulatedScroll;
-        if (scrollAmount == 0) return super.mouseScrolled(mouseX, mouseY, delta);
+        if (scrollAmount == 0) return super.mouseScrolled(mouseX, mouseY #if MC_VERSION >= "12002", deltaX #endif, deltaY);
         this.accumulatedScroll -= scrollAmount;
 
         if (commentList.size() <= 1) {
             commentListOffset = 0;
-            return super.mouseScrolled(mouseX, mouseY, delta);
+            return super.mouseScrolled(mouseX, mouseY #if MC_VERSION >= "12002", deltaX #endif, deltaY);
         }
         int dir = -(int)Math.signum(scrollAmount);
         commentListOffset = Mth.clamp(commentListOffset + dir, 0, Math.max(commentList.size() - 1, 0));

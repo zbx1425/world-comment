@@ -69,6 +69,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
 #endif
+
         graphicsBlit9(
                 guiGraphics, getX(), getY(), getWidth(), getHeight(),
                 0, 0, 128, 48, 256, 256,

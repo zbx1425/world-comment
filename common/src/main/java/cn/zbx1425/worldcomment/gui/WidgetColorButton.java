@@ -3,8 +3,10 @@ package cn.zbx1425.worldcomment.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
+#if MC_VERSION >= "12002" import net.minecraft.client.gui.components.WidgetSprites; #endif
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 #if MC_VERSION >= "12000" import java.util.function.Supplier; #endif
@@ -17,6 +19,10 @@ public class WidgetColorButton extends Button implements IGuiCommon {
         super(i, j, k, l, component, onPress #if MC_VERSION >= "12000" , Supplier::get #endif);
         this.color = color;
     }
+
+#if MC_VERSION >= "12002"
+    private static final WidgetSprites SPRITES = new WidgetSprites(new ResourceLocation("widget/button"), new ResourceLocation("widget/button_disabled"), new ResourceLocation("widget/button_highlighted"));
+#endif
 
     @Override
 #if MC_VERSION >= "12000"
@@ -36,7 +42,11 @@ public class WidgetColorButton extends Button implements IGuiCommon {
         }
         RenderSystem.enableBlend();
         RenderSystem.enableDepthTest();
+#if MC_VERSION >= "12002"
+        guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+#else
         guiGraphics.blitNineSliced(WIDGETS_LOCATION, this #if MC_VERSION >= "11903" .getX() #else .x #endif, this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+#endif
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.active ? 0xFFFFFF : 0xA0A0A0;
         this.renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0f) << 24);

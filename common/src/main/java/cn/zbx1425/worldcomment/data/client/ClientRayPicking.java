@@ -43,7 +43,9 @@ public class ClientRayPicking {
         pickedComments.clear();
         for (Map<BlockPos, List<CommentEntry>> region : ClientWorldData.INSTANCE.regions.values()) {
             for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
-                AABB blockHitArea = new AABB(blockData.getKey(), blockData.getKey().offset(1, 3, 1));
+                BlockPos bp = blockData.getKey();
+                AABB blockHitArea = new AABB(bp.getX(), bp.getY(), bp.getZ(),
+                        bp.getX() + 1, bp.getY() + 3, bp.getZ() + 1);
                 if (!((LevelRendererAccessor)minecraft.levelRenderer).getCullingFrustum().isVisible(blockHitArea)) continue;
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;

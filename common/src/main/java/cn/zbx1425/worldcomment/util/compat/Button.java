@@ -51,10 +51,4 @@ public class Button {
     }
 }
 
-#else
-
-public class Button {
-
-}
-
 #endif
