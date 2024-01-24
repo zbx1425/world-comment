@@ -8,7 +8,8 @@ import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
-#if MC_VERSION >= "12000" import net.minecraft.ChatFormatting; #endif
+#if MC_VERSION >= "12000" import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.ChatFormatting; #endif
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
@@ -29,7 +30,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommentToolScreen extends Screen {
+public class CommentToolScreen extends Screen implements IGuiCommon {
 
     private final byte[] imageBytes;
 
@@ -234,23 +235,33 @@ public class CommentToolScreen extends Screen {
         guiGraphics.pose().pushPose();
         setupAnimationTransform(guiGraphics);
         guiGraphics.pose().translate(0, 0, 1);
+        super.render(guiParam, mouseX, mouseY, partialTick);
+        guiGraphics.pose().popPose();
+    }
 
-        guiGraphics.fill(
+    @Override
+    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
+                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
+        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
+        guiGraphics.pose().pushPose();
+        setupAnimationTransform(guiGraphics);
+        graphicsBlit9(guiGraphics,
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY - CONTAINER_PADDING_Y,
-                containerOffsetX + containerWidth + CONTAINER_PADDING_X,
-                containerOffsetY + containerHeight - SQ_SIZE + CONTAINER_PADDING_Y,
-                0xBB111111
+                containerWidth + CONTAINER_PADDING_X * 2,
+                containerHeight + CONTAINER_PADDING_Y * 2,
+                196, 40, 20, 20, 256, 256,
+                4, 4, 4, 4
         );
+        RenderSystem.enableBlend();
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY + containerHeight - SQ_SIZE + CONTAINER_PADDING_Y,
                 containerOffsetX + containerWidth + CONTAINER_PADDING_X,
                 containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
-                0xBB444444
+                0x66546e7a
         );
-        super.render(guiParam, mouseX, mouseY, partialTick);
-
         guiGraphics.pose().popPose();
     }
 

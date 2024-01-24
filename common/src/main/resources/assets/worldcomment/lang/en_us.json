@@ -21,14 +21,14 @@
   "gui.worldcomment.message_too_long": "Message is too long.",
   "gui.worldcomment.submit": "Submit!",
 
-  "gui.worldcomment.control_tip.create": "Take Screenshot and Comment",
+  "gui.worldcomment.control_tip.create": "Make Comment",
   "gui.worldcomment.control_tip.toggle_show": "Show Hidden Comments",
   "gui.worldcomment.control_tip.toggle_hide": "Hide Comments",
   "gui.worldcomment.control_tip.place_comment": "Place Down the Comment",
-  "gui.worldcomment.control_tip.view_manage": "View or Manage All Comments",
+  "gui.worldcomment.control_tip.view_manage": "View / Manage Comments",
   "gui.worldcomment.control_tip.detail": "See Detail",
   "gui.worldcomment.control_tip.scroll": "Scroll",
-  "gui.worldcomment.control_tip.screenshot_hud": "Include HUD in Screenshot",
+  "gui.worldcomment.control_tip.screenshot_hud": "HUD in Screenshot",
 
   "gui.worldcomment.list.title": "World Comment Management",
   "gui.worldcomment.list.nearby_posts": "Nearby Posts",
@@ -37,6 +37,7 @@
   "gui.worldcomment.list.detail": "Detail",
   "gui.worldcomment.list.remove": "Remove",
   "gui.worldcomment.list.remove.confirm": "Click again to CONFIRM",
+  "gui.worldcomment.list.empty": "Nothing here",
   "gui.worldcomment.list.like": "Like",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down.",

@@ -221,6 +221,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
                         width - 10 - 10 - Minecraft.getInstance().font.width(pageStr),
                         15, 0xFFA5D6A7, true);
+            } else {
+                guiGraphics.drawCenteredString(Minecraft.getInstance().font,
+                        Component.translatable("gui.worldcomment.list.empty"),
+                        100 + (width - 120) / 2, 30 + (height - 50) / 2, 0xFFA5D6A7);
             }
         }
 
@@ -294,7 +298,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 4, 4, 4, 4
         );
         RenderSystem.enableBlend();
-        guiGraphics.fill(30, 10, 50, height - 10, 0x66d32f2f);
+        guiGraphics.fill(30, 10, 60, height - 10, 0x66d32f2f);
     }
 
     private double accumulatedScroll = 0;

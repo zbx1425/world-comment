@@ -21,12 +21,12 @@
   "gui.worldcomment.message_too_long": "留言内容太长",
   "gui.worldcomment.submit": "提交!",
 
-  "gui.worldcomment.control_tip.create": "截图并评论",
+  "gui.worldcomment.control_tip.create": "发表评论",
   "gui.worldcomment.control_tip.toggle_show": "显示被隐藏的评论",
   "gui.worldcomment.control_tip.toggle_hide": "隐藏评论",
   "gui.worldcomment.control_tip.place_comment": "在喜欢的位置放下评论",
-  "gui.worldcomment.control_tip.view_manage": "查看或管理所有评论",
-  "gui.worldcomment.control_tip.detail": "查看详情",
+  "gui.worldcomment.control_tip.view_manage": "查看/管理评论",
+  "gui.worldcomment.control_tip.detail": "详情",
   "gui.worldcomment.control_tip.scroll": "滚动",
   "gui.worldcomment.control_tip.screenshot_hud": "截图包括叠加层",
 
@@ -37,6 +37,7 @@
   "gui.worldcomment.list.detail": "详情",
   "gui.worldcomment.list.remove": "移除",
   "gui.worldcomment.list.remove.confirm": "再点击一次确认移除",
+  "gui.worldcomment.list.empty": "此处没有内容",
   "gui.worldcomment.list.like": "点赞",
 
   "gui.worldcomment.send_pending": "§6§l请选择放置评论的位置。",
