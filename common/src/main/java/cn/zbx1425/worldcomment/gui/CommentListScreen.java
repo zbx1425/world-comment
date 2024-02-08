@@ -221,7 +221,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
                         width - 10 - 10 - Minecraft.getInstance().font.width(pageStr),
                         15, 0xFFA5D6A7, true);
-            } else {
+            } else if (commentList.isEmpty()) {
                 guiGraphics.drawCenteredString(Minecraft.getInstance().font,
                         Component.translatable("gui.worldcomment.list.empty"),
                         100 + (width - 120) / 2, 30 + (height - 50) / 2, 0xFFA5D6A7);
