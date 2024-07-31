@@ -16,13 +16,23 @@ public class ServerPlatformImpl {
         return false;
     }
 
+    public static void registerPacket(ResourceLocation resourceLocation) {
+#if MC_VERSION >= "12100"
+        MainForge.PACKET_REGISTRY.registerPacket(resourceLocation);
+#endif
+    }
+
     public static void registerNetworkReceiver(ResourceLocation resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
+#if MC_VERSION >= "12100"
+        MainForge.PACKET_REGISTRY.registerNetworkReceiverC2S(resourceLocation, packetCallback);
+#else
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, resourceLocation, (packet, context) -> {
             final Player player = context.getPlayer();
             if (player != null) {
                 packetCallback.handlePacket(player.getServer(), (ServerPlayer) player, packet);
             }
         });
+#endif
     }
 
     public static void registerPlayerJoinEvent(Consumer<ServerPlayer> consumer) {
@@ -48,6 +58,10 @@ public class ServerPlatformImpl {
 
     public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
         packet.resetReaderIndex();
+#if MC_VERSION >= "12100"
+        MainForge.PACKET_REGISTRY.sendS2C(player, id, packet);
+#else
         NetworkManager.sendToPlayer(player, id, packet);
+#endif
     }
 }

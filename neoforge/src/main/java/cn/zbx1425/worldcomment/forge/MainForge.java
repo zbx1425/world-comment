@@ -21,6 +21,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class MainForge {
 
 	private static final RegistriesWrapperImpl registries = new RegistriesWrapperImpl();
+#if MC_VERSION >= "12100"
+	public static final CompatPacketRegistry PACKET_REGISTRY = new CompatPacketRegistry();
+#endif
 
 	static {
 		Main.init(registries);

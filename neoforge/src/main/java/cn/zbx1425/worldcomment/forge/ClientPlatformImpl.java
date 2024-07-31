@@ -23,7 +23,11 @@ public class ClientPlatformImpl {
     }
 
     public static void registerNetworkReceiver(ResourceLocation resourceLocation, Consumer<FriendlyByteBuf> consumer) {
+#if MC_VERSION >= "12100"
+        MainForge.PACKET_REGISTRY.registerNetworkReceiverS2C(resourceLocation, consumer);
+#else
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, resourceLocation, (packet, context) -> consumer.accept(packet));
+#endif
     }
 
     public static void registerPlayerJoinEvent(Consumer<LocalPlayer> consumer) {
@@ -35,6 +39,11 @@ public class ClientPlatformImpl {
     }
 
     public static void sendPacketToServer(ResourceLocation id, FriendlyByteBuf packet) {
+        packet.resetReaderIndex();
+#if MC_VERSION >= "12100"
+        MainForge.PACKET_REGISTRY.sendC2S(id, packet);
+#else
         NetworkManager.sendToServer(id, packet);
+#endif
     }
 }

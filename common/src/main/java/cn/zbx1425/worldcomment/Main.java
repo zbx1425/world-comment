@@ -38,6 +38,15 @@ public class Main {
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL);
 
+		ServerPlatform.registerPacket(PacketClientConfigS2C.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketCollectionDataS2C.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketCollectionRequestC2S.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketEntryActionC2S.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketEntryCreateC2S.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketEntryUpdateS2C.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketRegionDataS2C.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketRegionRequestC2S.IDENTIFIER);
+
 		ServerPlatform.registerNetworkReceiver(
 				PacketRegionRequestC2S.IDENTIFIER, PacketRegionRequestC2S::handle);
 		ServerPlatform.registerNetworkReceiver(

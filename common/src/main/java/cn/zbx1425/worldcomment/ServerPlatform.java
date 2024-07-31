@@ -17,6 +17,11 @@ public class ServerPlatform {
     }
 
     @ExpectPlatform
+    public static void registerPacket(ResourceLocation resourceLocation) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static void registerNetworkReceiver(ResourceLocation resourceLocation, C2SPacketHandler packetCallback) {
         throw new AssertionError();
     }

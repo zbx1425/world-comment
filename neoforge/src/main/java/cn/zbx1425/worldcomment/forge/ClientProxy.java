@@ -14,6 +14,8 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 #else
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -67,6 +69,14 @@ public class ClientProxy {
                 event.register(keyMapping);
             }
         }
+
+#if MC_VERSION >= "12100"
+        @SubscribeEvent
+        public static void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
+            PayloadRegistrar registrar = event.registrar("1");
+            MainForge.PACKET_REGISTRY.commit(registrar);
+        }
+#endif
     }
 
     public static class ForgeEventBusListener {
