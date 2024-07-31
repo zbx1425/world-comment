@@ -71,7 +71,7 @@ public class ControlTipRenderer implements IGuiCommon {
         }
         ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
         if (item != null) {
-            if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
+            if (CommentToolItem.getUploadJobId(item) != null) {
                 TIP_PLACE_COMMENT.visible = true;
                 return; // De-clutter
             } else {
@@ -85,7 +85,7 @@ public class ControlTipRenderer implements IGuiCommon {
             }
             TIP_VIEW_MANAGE.visible = true;
         }
-        if (ClientRayPicking.pickedComments.size() > 0) {
+        if (!ClientRayPicking.pickedComments.isEmpty()) {
             if (ClientRayPicking.pickedComments.size() > 1) {
                 TIP_SCROLL.visible = true;
             }
