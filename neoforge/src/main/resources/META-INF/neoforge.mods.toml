@@ -1,0 +1,33 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+issueTrackerURL="https://github.com/zbx1425/world-comment/issues"
+
+[[mods]]
+modId = "worldcomment"
+version = "${version}"
+displayName = "Subnoteica World Comment"
+displayURL = "https://github.com/zbx1425/world-comment/"
+
+authors = "Zbx1425"
+description = "Subnoteica World Comment"
+logoFile = "icon.png"
+
+displayTest = "IGNORE_ALL_VERSION"
+
+[[dependencies.worldcomment]]
+modId = "forge"
+mandatory = true
+versionRange = "[36,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.worldcomment]]
+modId = "minecraft"
+mandatory = true
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "worldcomment.mixins.json"

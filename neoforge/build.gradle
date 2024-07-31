@@ -3,14 +3,12 @@ plugins {
 }
 
 loom {
-	forge {
-		mixinConfig "worldcomment.mixins.json"
-	}
+
 }
 
 architectury {
 	platformSetupLoomIde()
-	forge()
+	neoForge()
 }
 
 configurations {
@@ -22,8 +20,8 @@ configurations {
 }
 
 dependencies {
-	forge "net.minecraftforge:forge:${rootProject.forge_version}"
-	modApi "${rootProject.architectury_id}:architectury-forge:${rootProject.architectury_version}"
+	neoForge "net.neoforged:neoforge:${rootProject.forge_version}"
+	modApi "${rootProject.architectury_id}:architectury-neoforge:${rootProject.architectury_version}"
 
 	forgeRuntimeLibrary 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 
@@ -34,7 +32,7 @@ dependencies {
 processResources {
 	inputs.property "version", project.version
 
-	filesMatching("META-INF/mods.toml") {
+	filesMatching("META-INF/neoforge.mods.toml") {
 		expand (
 			"version": project.version,
 			"minecraft_version_range": rootProject.supports_minecraft_version_range
@@ -70,7 +68,7 @@ components.java {
 }
 
 repositories {
-	maven { url "https://maven.minecraftforge.net/" }
+	maven { url "https://maven.neoforged.net/releases/" }
 }
 
 afterEvaluate {
