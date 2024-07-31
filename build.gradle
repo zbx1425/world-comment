@@ -84,8 +84,10 @@ allprojects {
 			}
 		} else if (minecraft_main_version == 17) {
 			options.release.set(16)
-		} else {
+		} else if (minecraft_main_version < 21) {
 			options.release.set(17)
+		} else {
+			options.release.set(21)
 		}
 
         options.compilerArgs += ['-Xplugin:Manifold', '-AMC_VERSION=' + minecraft_version_int]

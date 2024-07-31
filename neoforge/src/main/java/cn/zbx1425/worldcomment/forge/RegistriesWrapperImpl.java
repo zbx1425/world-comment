@@ -17,11 +17,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+#if MC_VERSION >= "12100"
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+#else
 #if MC_VERSION >= "12000" import net.minecraftforge.event.BuildCreativeModeTabContentsEvent; #endif
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.eventbus.api.IEventBus;
+#endif
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,11 +39,19 @@ import java.util.Map;
 
 public class RegistriesWrapperImpl implements RegistriesWrapper {
 
+#if MC_VERSION >= "12100"
+private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Main.MOD_ID);
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Main.MOD_ID);
+    private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, Main.MOD_ID);
+    private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, Main.MOD_ID);
+    private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Main.MOD_ID);
+#else
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Main.MOD_ID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MOD_ID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Main.MOD_ID);
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Main.MOD_ID);
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, Main.MOD_ID);
+#endif
 
     @Override
     public void registerBlock(String id, RegistryObject<Block> block) {
@@ -78,12 +95,12 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
 
     public final List<KeyMapping> keyMappings = new ArrayList<>();
 
-    public void registerAllDeferred() {
-        ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        BLOCK_ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
-        ENTITY_TYPES.register(FMLJavaModLoadingContext.get().getModEventBus());
-        SOUND_EVENTS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    public void registerAllDeferred(IEventBus eventBus) {
+        ITEMS.register(eventBus);
+        BLOCKS.register(eventBus);
+        BLOCK_ENTITY_TYPES.register(eventBus);
+        ENTITY_TYPES.register(eventBus);
+        SOUND_EVENTS.register(eventBus);
     }
 
 
@@ -100,7 +117,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
         public static void onRegisterCreativeModeTabsEvent(BuildCreativeModeTabContentsEvent event) {
             CREATIVE_TABS.forEach((key, items) -> {
                 if (event.getTabKey().equals(key)) {
-                    items.forEach(item -> event.getEntries().put(new ItemStack(item), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+                    items.forEach(item -> #if MC_VERSION >= "12100" event.accept( #else event.getEntries().put( #endif new ItemStack(item), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
                 }
             });
         }
