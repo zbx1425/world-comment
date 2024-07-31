@@ -1,21 +1,25 @@
-package cn.zbx1425.worldcomment.forge;
+package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.gui.CommentListScreen;
+import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 #if MC_VERSION >= "12000" import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 #if MC_VERSION >= "12100"
 import net.minecraft.client.gui.LayeredDraw;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 #else
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -69,18 +73,35 @@ public class ClientProxy {
                 event.register(keyMapping);
             }
         }
-
-#if MC_VERSION >= "12100"
-        @SubscribeEvent
-        public static void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
-            PayloadRegistrar registrar = event.registrar("1");
-            MainForge.PACKET_REGISTRY.commit(registrar);
-        }
-#endif
     }
 
     public static class ForgeEventBusListener {
 
+        private static boolean world_comment$lastFrameKeyPlayerListDown = false;
+
+        @SubscribeEvent
+        public static void onRenderLevelStage(RenderLevelStageEvent event) {
+            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+                ClientWorldData.INSTANCE.tick();
+                ClientRayPicking.tick(event.getPartialTick().getGameTimeDeltaTicks(), 20);
+
+                if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
+                    if (!world_comment$lastFrameKeyPlayerListDown) {
+                        CommentListScreen.handleKeyTab();
+                    }
+                    world_comment$lastFrameKeyPlayerListDown = true;
+                } else {
+                    world_comment$lastFrameKeyPlayerListDown = false;
+                }
+
+                PoseStack matrices = event.getPoseStack();
+                matrices.pushPose();
+                Vec3 cameraPos = event.getCamera().getPosition();
+                matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+                CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
+                matrices.popPose();
+            }
+        }
     }
 
     private static class NoConflictKeyConflictContext implements IKeyConflictContext {

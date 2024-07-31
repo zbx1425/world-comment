@@ -16,13 +16,6 @@ logoFile = "icon.png"
 displayTest = "IGNORE_ALL_VERSION"
 
 [[dependencies.worldcomment]]
-modId = "forge"
-mandatory = true
-versionRange = "[36,)"
-ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.worldcomment]]
 modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_version_range}"

@@ -16,6 +16,10 @@ public class ServerPlatformImpl {
         return false;
     }
 
+    public static void registerPacket(ResourceLocation resourceLocation) {
+
+    }
+
     public static void registerNetworkReceiver(ResourceLocation resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, resourceLocation, (packet, context) -> {
             final Player player = context.getPlayer();

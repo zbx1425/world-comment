@@ -6,8 +6,7 @@
   "client": [
     "InventoryMixin",
     "KeyMappingMixin",
-    "LevelRendererAccessor",
-    "LevelRendererMixin"
+    "LevelRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

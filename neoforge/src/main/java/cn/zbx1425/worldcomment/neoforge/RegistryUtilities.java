@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.forge;
+package cn.zbx1425.worldcomment.neoforge;
 
 
 import com.mojang.brigadier.CommandDispatcher;

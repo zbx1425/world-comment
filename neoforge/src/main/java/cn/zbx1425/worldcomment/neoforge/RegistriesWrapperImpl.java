@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.forge;
+package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.item.GroupedItem;
@@ -6,7 +6,6 @@ import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;

@@ -1,12 +1,10 @@
-package cn.zbx1425.worldcomment.forge;
+package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.ServerPlatform;
-import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 
 import java.util.function.Consumer;
 

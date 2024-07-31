@@ -1,9 +1,7 @@
-package cn.zbx1425.worldcomment.forge;
+package cn.zbx1425.worldcomment.neoforge;
 
 import dev.architectury.event.events.client.ClientPlayerEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;

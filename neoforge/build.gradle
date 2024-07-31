@@ -16,7 +16,7 @@ configurations {
 	shadowCommon
 	compileClasspath.extendsFrom common
 	runtimeClasspath.extendsFrom common
-	developmentForge.extendsFrom common
+	developmentNeoForge.extendsFrom common
 }
 
 dependencies {
@@ -26,7 +26,7 @@ dependencies {
 	forgeRuntimeLibrary 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
-	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+	shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 }
 
 processResources {

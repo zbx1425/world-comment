@@ -1,12 +1,15 @@
-package cn.zbx1425.worldcomment.forge;
+package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 #if MC_VERSION >= "12100"
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 #else
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraftforge.api.distmarker.Dist;
@@ -40,6 +43,7 @@ public class MainForge {
 		eventBus.register(RegistriesWrapperImpl.RegisterCreativeTabs.class);
 
 #if MC_VERSION >= "12100"
+		eventBus.register(ModEventBusListener.class);
 		if (FMLEnvironment.dist.isClient()) {
 #else
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -55,4 +59,14 @@ public class MainForge {
 #endif
 	}
 
+	public static class ModEventBusListener {
+
+#if MC_VERSION >= "12100"
+		@SubscribeEvent
+		public static void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
+			PayloadRegistrar registrar = event.registrar("1");
+			MainForge.PACKET_REGISTRY.commit(registrar);
+		}
+#endif
+	}
 }
