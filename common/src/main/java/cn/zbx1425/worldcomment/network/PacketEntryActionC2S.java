@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class PacketEntryActionC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "entry_action");
+    public static final ResourceLocation IDENTIFIER = Main.id("entry_action");
 
     public static final int ACTION_DELETE = -1;
     public static final int ACTION_LIKE = 1;

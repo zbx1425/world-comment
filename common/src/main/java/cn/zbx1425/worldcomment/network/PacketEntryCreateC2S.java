@@ -15,7 +15,7 @@ import java.io.IOException;
 
 public class PacketEntryCreateC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "entry_create");
+    public static final ResourceLocation IDENTIFIER = Main.id("entry_create");
 
     public static class ClientLogics {
 

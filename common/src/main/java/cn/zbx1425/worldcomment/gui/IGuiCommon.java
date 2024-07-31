@@ -10,7 +10,7 @@ import net.minecraft.util.Mth;
 
 public interface IGuiCommon {
 
-    ResourceLocation ATLAS_LOCATION = new ResourceLocation(Main.MOD_ID, "textures/gui/comment-tool.png");
+    ResourceLocation ATLAS_LOCATION = Main.id("textures/gui/comment-tool.png");
 
     default void graphicsBlit9(GuiGraphics guiGraphics, int x, int y, int width, int height,
             int uOffset, int vOffset, int uWidth, int vHeight, int texWidth, int texHeight,

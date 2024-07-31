@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class PacketCollectionRequestC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "collection_request");
+    public static final ResourceLocation IDENTIFIER = Main.id("collection_request");
 
     public static class ClientLogics {
 

@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class PacketRegionDataS2C {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "region_data");
+    public static final ResourceLocation IDENTIFIER = Main.id("region_data");
 
     public static void send(ServerPlayer target, ResourceLocation level, Map<ChunkPos, List<CommentEntry>> data) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());

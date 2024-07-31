@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class PacketClientConfigS2C {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "client_config");
+    public static final ResourceLocation IDENTIFIER = Main.id("client_config");
 
     public static void send(ServerPlayer target, ServerConfig config) {
         ClientConfig clientCfg = ClientConfig.fromServerConfig(config);

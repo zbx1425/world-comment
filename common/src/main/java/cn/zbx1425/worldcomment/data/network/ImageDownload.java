@@ -113,9 +113,9 @@ public class ImageDownload {
             if (state.texture != null) return state.texture;
             TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             if (state.failed) return textureManager.getTexture(
-                    new ResourceLocation(Main.MOD_ID, "textures/gui/placeholder-failed.png"));
+                    Main.id("textures/gui/placeholder-failed.png"));
             return textureManager.getTexture(
-                    new ResourceLocation(Main.MOD_ID, "textures/gui/placeholder-loading.png"));
+                    Main.id("textures/gui/placeholder-loading.png"));
         }
     }
 

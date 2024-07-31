@@ -20,7 +20,9 @@ public class WidgetColorButton extends Button implements IGuiCommon {
         this.color = color;
     }
 
-#if MC_VERSION >= "12002"
+#if MC_VERSION >= "12100"
+private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.withDefaultNamespace("widget/button"), ResourceLocation.withDefaultNamespace("widget/button_disabled"), ResourceLocation.withDefaultNamespace("widget/button_highlighted"));
+#elif MC_VERSION >= "12002"
     private static final WidgetSprites SPRITES = new WidgetSprites(new ResourceLocation("widget/button"), new ResourceLocation("widget/button_disabled"), new ResourceLocation("widget/button_highlighted"));
 #endif
 

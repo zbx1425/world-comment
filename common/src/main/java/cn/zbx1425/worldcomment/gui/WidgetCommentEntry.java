@@ -91,6 +91,17 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
             RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image, true).getId());
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             Matrix4f matrix4f = guiGraphics.pose().last().pose();
+#if MC_VERSION >= "12100"
+            BufferBuilder bufferBuilder = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            int x1 = getX() + width - 4 - picWidth, x2 = getX() + width - 4;
+            int y1 = getY() + 20, y2 = getY() + 20 + picHeight;
+            bufferBuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 0);
+            bufferBuilder.addVertex(matrix4f, x1, y2, 0).setUv(0, 1);
+            bufferBuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 1);
+            bufferBuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 0);
+            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+#else
             BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             int x1 = getX() + width - 4 - picWidth, x2 = getX() + width - 4;
@@ -100,6 +111,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
             bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
             bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
             BufferUploader.drawWithShader(bufferBuilder.end());
+#endif
         }
 
         Component nameComponent = comment.initiatorName.isEmpty() ? Component.translatable("gui.worldcomment.anonymous")

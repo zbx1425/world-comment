@@ -8,6 +8,7 @@ import cn.zbx1425.worldcomment.mixin.CreativeModeTabsAccessor;
 import cn.zbx1425.worldcomment.network.*;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
@@ -26,6 +27,14 @@ public class Main {
 
 	public static final RegistryObject<GroupedItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
+	public static ResourceLocation id(String path) {
+#if MC_VERSION >= "12100"
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+#else
+		return new ResourceLocation(MOD_ID, path);
+#endif
+	}
+
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL);
 
@@ -40,7 +49,11 @@ public class Main {
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {
+#if MC_VERSION >= "12100"
+				SERVER_CONFIG.load(server.getServerDirectory()
+#else
 				SERVER_CONFIG.load(server.getServerDirectory().toPath()
+#endif
 						.resolve("config").resolve("world-comment.json"));
 
 				DATABASE = new ServerWorldData(server, SERVER_CONFIG.syncRole.value.equalsIgnoreCase("host"));

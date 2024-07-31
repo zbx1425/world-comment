@@ -29,18 +29,18 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
 
     @Override
     public void registerBlock(String id, RegistryObject<Block> block) {
-        Registry.register(RegistryUtilities.registryGetBlock(), new ResourceLocation(Main.MOD_ID, id), block.get());
+        Registry.register(RegistryUtilities.registryGetBlock(), Main.id(id), block.get());
     }
 
     @Override
     public void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab) {
-        Registry.register(RegistryUtilities.registryGetBlock(), new ResourceLocation(Main.MOD_ID, id), block.get());
+        Registry.register(RegistryUtilities.registryGetBlock(), Main.id(id), block.get());
 #if MC_VERSION >= "12000"
         final BlockItem blockItem = new BlockItem(block.get(), new Item.Properties());
 #else
         final BlockItem blockItem = new BlockItem(block.get(), new FabricItemSettings().group(tab));
 #endif
-        Registry.register(RegistryUtilities.registryGetItem(), new ResourceLocation(Main.MOD_ID, id), blockItem);
+        Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), blockItem);
 #if MC_VERSION >= "12000"
         ItemGroupEvents.modifyEntriesEvent(tab).register(consumer -> consumer.accept(blockItem));
 #endif
@@ -48,7 +48,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
 
     @Override
     public void registerItem(String id, RegistryObject<GroupedItem> item) {
-        Registry.register(RegistryUtilities.registryGetItem(), new ResourceLocation(Main.MOD_ID, id), item.get());
+        Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), item.get());
 #if MC_VERSION >= "12000"
         ItemGroupEvents.modifyEntriesEvent(item.get().tabSupplier.get()).register(consumer -> consumer.accept(item.get()));
 #endif
@@ -56,16 +56,16 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
 
     @Override
     public void registerBlockEntityType(String id, RegistryObject<? extends BlockEntityType<? extends BlockEntity>> blockEntityType) {
-        Registry.register(RegistryUtilities.registryGetBlockEntityType(), new ResourceLocation(Main.MOD_ID, id), blockEntityType.get());
+        Registry.register(RegistryUtilities.registryGetBlockEntityType(), Main.id(id), blockEntityType.get());
     }
 
     @Override
     public void registerEntityType(String id, RegistryObject<? extends EntityType<? extends Entity>> entityType) {
-        Registry.register(RegistryUtilities.registryGetEntityType(), new ResourceLocation(Main.MOD_ID, id), entityType.get());
+        Registry.register(RegistryUtilities.registryGetEntityType(), Main.id(id), entityType.get());
     }
 
     @Override
     public void registerSoundEvent(String id, SoundEvent soundEvent) {
-        Registry.register(RegistryUtilities.registryGetSoundEvent(), new ResourceLocation(Main.MOD_ID, id), soundEvent);
+        Registry.register(RegistryUtilities.registryGetSoundEvent(), Main.id(id), soundEvent);
     }
 }

@@ -222,7 +222,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                     Component.translatable("gui.worldcomment.send_pending"), false);
             ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
             if (item != null) {
-                item.getOrCreateTag().putLong("uploadJobId", jobId);
+                CommentToolItem.setUploadJobId(item, jobId);
             }
         });
         onClose();

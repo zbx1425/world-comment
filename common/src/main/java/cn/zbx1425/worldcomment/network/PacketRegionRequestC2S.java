@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class PacketRegionRequestC2S {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "request_region");
+    public static final ResourceLocation IDENTIFIER = Main.id("request_region");
 
     public static class ClientLogics {
 

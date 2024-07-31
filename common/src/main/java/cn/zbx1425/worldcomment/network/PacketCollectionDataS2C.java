@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PacketCollectionDataS2C {
 
-    public static final ResourceLocation IDENTIFIER = new ResourceLocation(Main.MOD_ID, "collection_data");
+    public static final ResourceLocation IDENTIFIER = Main.id("collection_data");
 
     public static void send(ServerPlayer target, List<CommentEntry> data, long nonce) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());

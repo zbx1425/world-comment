@@ -28,7 +28,11 @@ public class FileSerializer {
         } catch (FileAlreadyExistsException ignored) { }
         try (Stream<Path> levelFiles = Files.list(basePath.resolve("region"))) {
             for (Path levelPath : levelFiles.toList()) {
+#if MC_VERSION >= "12100"
+                ResourceLocation dimension = ResourceLocation.parse(levelPath.getFileName().toString().replace("+", ":"));
+#else
                 ResourceLocation dimension = new ResourceLocation(levelPath.getFileName().toString().replace("+", ":"));
+#endif
                 try (Stream<Path> files = Files.list(levelPath)) {
                     for (Path file : files.toList()) {
                         String[] fileNameParts = file.getFileName().toString().split("\\.");

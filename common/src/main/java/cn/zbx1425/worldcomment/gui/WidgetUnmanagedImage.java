@@ -49,6 +49,15 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
         RenderSystem.setShaderTexture(0, texture.getId());
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         Matrix4f matrix4f = guiGraphics.pose().last().pose();
+#if MC_VERSION >= "12100"
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+            .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 0);
+        bufferBuilder.addVertex(matrix4f, x1, y2, 0).setUv(0, 1);
+        bufferBuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 1);
+        bufferBuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 0);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+#else
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
@@ -56,6 +65,7 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
         bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
         bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
         BufferUploader.drawWithShader(bufferBuilder.end());
+#endif
     }
 
     @Override

@@ -7,6 +7,8 @@ import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 #if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.mixin.CreativeModeTabsAccessor; #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+#if MC_VERSION >= "12100" import net.minecraft.core.component.DataComponents; #endif
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+#if MC_VERSION >= "12100" import net.minecraft.world.item.component.CustomData; #endif
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,8 +65,8 @@ public class CommentToolItem extends GroupedItem {
         }
 
         public static boolean placeUploadJob(Level level, Player player, ItemStack item) {
-            if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
-                long jobId = item.getOrCreateTag().getLong("uploadJobId");
+            Long jobId = getUploadJobId(item);
+            if (jobId != null) {
                 HitResult hitResult = Minecraft.getInstance().hitResult;
                 if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                     BlockHitResult blockHitResult = (BlockHitResult) hitResult;
@@ -77,7 +80,7 @@ public class CommentToolItem extends GroupedItem {
                     }
                     if (hasClearance) {
                         SubmitDispatcher.placeJobAt(jobId, facePos);
-                        item.getOrCreateTag().remove("uploadJobId");
+                        setUploadJobId(item, null);
                         return true;
                     } else {
                         player.displayClientMessage(
@@ -89,5 +92,40 @@ public class CommentToolItem extends GroupedItem {
             }
             return false;
         }
+    }
+
+    public static Long getUploadJobId(ItemStack item) {
+#if MC_VERSION >= "12100"
+        CustomData customData = item.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        if (customData.contains("uploadJobId")) {
+            return customData.copyTag().getLong("uploadJobId");
+        } else {
+            return null;
+        }
+#else
+        if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
+            return item.getOrCreateTag().getLong("uploadJobId");
+        } else {
+            return null;
+        }
+#endif
+    }
+
+    public static void setUploadJobId(ItemStack item, Long jobId) {
+#if MC_VERSION >= "12100"
+        if (jobId == null) {
+            item.remove(DataComponents.CUSTOM_DATA);
+        } else {
+            CompoundTag tag = new CompoundTag();
+            tag.putLong("uploadJobId", jobId);
+            item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        }
+#else
+        if (jobId == null) {
+            item.getOrCreateTag().remove("uploadJobId");
+        } else {
+            item.getOrCreateTag().putLong("uploadJobId", jobId);
+        }
+#endif
     }
 }

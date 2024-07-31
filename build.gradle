@@ -40,6 +40,12 @@ subprojects {
 		implementation 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 		shadowCommon 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 	}
+
+	tasks.withType(JavaCompile) {
+		options.encoding = "UTF-8"
+
+		options.verbose = true
+	}
 }
 
 task setupLibrary() {

@@ -47,7 +47,7 @@ public class Screenshot {
     }
 
     private static final SoundEvent shutterSoundEvent = #if MC_VERSION >= "11903" SoundEvent.createFixedRangeEvent #else new SoundEvent #endif (
-            new ResourceLocation("worldcomment:shutter"), 16
+            Main.id("shutter"), 16
     );
 
     public static boolean handleKeyF2() {
@@ -56,7 +56,7 @@ public class Screenshot {
 
         ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
         if (item == null) return false;
-        if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) return false;
+        if (CommentToolItem.getUploadJobId(item) != null) return false;
 
         if (minecraft.screen == null) {
             minecraft.tell(() -> {
