@@ -24,7 +24,7 @@ def getMinecraftVersion() {
 		}
 		minecraft_version = dotted
 	} else {
-		minecraft_version = rootProject.properties.containsKey("buildVersion") ? rootProject.properties.get("buildVersion") : default_minecraft_version
+		minecraft_version = getProperties().containsKey("buildVersion") ? getProperties().get("buildVersion") : default_minecraft_version
 	}
 	minecraft_version_int = (minecraft_version.split("\\.")[0] +
 			minecraft_version.split("\\.")[1].padLeft(2, '0') +
