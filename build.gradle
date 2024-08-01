@@ -7,7 +7,7 @@ plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
 	id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
 	id "de.undercouch.download" version "4.1.2"
-	id "com.github.johnrengelman.shadow" version "7.1.0"
+	id "com.github.johnrengelman.shadow" version "8.1.1"
 	id "io.github.pacifistmc.forgix" version "1.2.9"
 	id "base"
 }
@@ -44,7 +44,7 @@ subprojects {
 	tasks.withType(JavaCompile) {
 		options.encoding = "UTF-8"
 
-		options.verbose = true
+//		options.verbose = true
 	}
 }
 
