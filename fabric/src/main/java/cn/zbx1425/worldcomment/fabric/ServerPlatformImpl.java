@@ -19,8 +19,18 @@ public class ServerPlatformImpl {
         return true;
     }
 
+    public static void registerPacket(ResourceLocation resourceLocation) {
+#if MC_VERSION >= "12100"
+        MainFabric.PACKET_REGISTRY.registerPacket(resourceLocation);
+#endif
+    }
+
     public static void registerNetworkReceiver(ResourceLocation resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
+#if MC_VERSION >= "12100"
+        MainFabric.PACKET_REGISTRY.registerNetworkReceiverC2S(resourceLocation, packetCallback);
+#else
         ServerPlayNetworking.registerGlobalReceiver(resourceLocation, (server, player, handler, packet, responseSender) -> packetCallback.handlePacket(server, player, packet));
+#endif
     }
 
     public static void registerPlayerJoinEvent(Consumer<ServerPlayer> consumer) {
@@ -48,6 +58,10 @@ public class ServerPlatformImpl {
     }
 
     public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
+#if MC_VERSION >= "12100"
+        MainFabric.PACKET_REGISTRY.sendS2C(player, id, packet);
+#else
         ServerPlayNetworking.send(player, id, packet);
+#endif
     }
 }

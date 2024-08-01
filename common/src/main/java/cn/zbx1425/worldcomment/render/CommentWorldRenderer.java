@@ -53,71 +53,18 @@ public class CommentWorldRenderer implements IGuiCommon {
         matrices.mulPose(Vector3f.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
 #endif
 
-        int light = LightTexture.FULL_BRIGHT;
         {
-            int bgColor = 0xFFFFFFFF;
             matrices.scale(0.9f, 0.9f, 0.9f);
-            float u1 = 0.5f, v1 = 0f, u2 = u1 + 0.125f, v2 = v1 + 0.375f;
+            float u1 = 0.5f, v1 = 0f, u2 = u1 + 0.125f - (1f / 256), v2 = v1 + 0.375f;
             PoseStack.Pose pose = matrices.last();
-#if MC_VERSION >= "12100"
-            vertices
-                    .addVertex(pose.pose(), -0.5f, 1f, 0f).setColor(bgColor).setUv(u1, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), -0.5f, -2f, 0f).setColor(bgColor).setUv(u1, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, -2f, 0f).setColor(bgColor).setUv(u2, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, 1f, 0f).setColor(bgColor).setUv(u2, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, 1f, 0f).setColor(bgColor).setUv(u1, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, -2f, 0f).setColor(bgColor).setUv(u1, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), -0.5f, -2f, 0f).setColor(bgColor).setUv(u2, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), -0.5f, 1f, 0f).setColor(bgColor).setUv(u2, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);       
-#else
-            vertices
-                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(bgColor).uv(u1, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), -0.5f, -2f, 0f).color(bgColor).uv(u1, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, -2f, 0f).color(bgColor).uv(u2, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(bgColor).uv(u2, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, 1f, 0f).color(bgColor).uv(u1, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, -2f, 0f).color(bgColor).uv(u1, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), -0.5f, -2f, 0f).color(bgColor).uv(u2, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), -0.5f, 1f, 0f).color(bgColor).uv(u2, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-#endif
+//            vertex(vertices, pose, -0.5f, 1f, 0f, u1, v1);
+//            vertex(vertices, pose, -0.5f, -2f, 0f, u1, v2);
+//            vertex(vertices, pose, 0.5f, -2f, 0f, u2, v2);
+//            vertex(vertices, pose, 0.5f, 1f, 0f, u2, v1);
+            vertex(vertices, pose, 0.5f, 1f, 0f, u1, v1);
+            vertex(vertices, pose, 0.5f, -2f, 0f, u1, v2);
+            vertex(vertices, pose, -0.5f, -2f, 0f, u2, v2);
+            vertex(vertices, pose, -0.5f, 1f, 0f, u2, v1);
         }
 
         if (showIcon) {
@@ -127,67 +74,26 @@ public class CommentWorldRenderer implements IGuiCommon {
             float v1 = (int)((comment.messageType - 1) / 4) * 0.25f + 0.5f;
             float u2 = u1 + 0.25f, v2 = v1 + 0.25f;
             PoseStack.Pose pose = matrices.last();
-#if MC_VERSION >= "12100"
-            vertices
-                    .addVertex(pose.pose(), -0.5f, 1f, 0.05f).setColor(0xFFFFFFFF).setUv(u1, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), -0.5f, 0f, 0.05f).setColor(0xFFFFFFFF).setUv(u1, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, 0f, 0.05f).setColor(0xFFFFFFFF).setUv(u2, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, 1f, 0.05f).setColor(0xFFFFFFFF).setUv(u2, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, 1f, -0.05f).setColor(0xFFFFFFFF).setUv(u1, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), 0.5f, 0f, -0.05f).setColor(0xFFFFFFFF).setUv(u1, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), -0.5f, 0f, -0.05f).setColor(0xFFFFFFFF).setUv(u2, v2)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-            vertices
-                    .addVertex(pose.pose(), -0.5f, 1f, -0.05f).setColor(0xFFFFFFFF).setUv(u2, v1)
-                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, 0, 1, 0);
-#else
-            vertices
-                    .vertex(pose.pose(), -0.5f, 1f, 0.05f).color(0xFFFFFFFF).uv(u1, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), -0.5f, 0f, 0.05f).color(0xFFFFFFFF).uv(u1, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, 0f, 0.05f).color(0xFFFFFFFF).uv(u2, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, 1f, 0.05f).color(0xFFFFFFFF).uv(u2, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, 1f, -0.05f).color(0xFFFFFFFF).uv(u1, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), 0.5f, 0f, -0.05f).color(0xFFFFFFFF).uv(u1, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), -0.5f, 0f, -0.05f).color(0xFFFFFFFF).uv(u2, v2)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-            vertices
-                    .vertex(pose.pose(), -0.5f, 1f, -0.05f).color(0xFFFFFFFF).uv(u2, v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(pose.normal(), 0, 1, 0)
-                    .endVertex();
-#endif
+//            vertex(vertices, pose, -0.5f, 1f, 0.05f, u1, v1);
+//            vertex(vertices, pose, -0.5f, 0f, 0.05f, u1, v2);
+//            vertex(vertices, pose, 0.5f, 0f, 0.05f, u2, v2);
+//            vertex(vertices, pose, 0.5f, 1f, 0.05f, u2, v1);
+            vertex(vertices, pose, 0.5f, 1f, -0.05f, u1, v1);
+            vertex(vertices, pose, 0.5f, 0f, -0.05f, u1, v2);
+            vertex(vertices, pose, -0.5f, 0f, -0.05f, u2, v2);
+            vertex(vertices, pose, -0.5f, 1f, -0.05f, u2, v1);
         }
         matrices.popPose();
+    }
+
+    private static void vertex(VertexConsumer vertices, PoseStack.Pose pose, float x, float y, float z, float u, float v) {
+#if MC_VERSION >= "12100"
+        vertices.addVertex(pose.pose(), x, y, z).setColor(0xFFFFFFFF).setUv(u, v)
+            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
+#else
+        vertices.vertex(pose.pose(), x, y, z).color(0xFFFFFFFF).uv(u, v)
+            .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(pose.normal(), 0, 1, 0).endVertex();
+#endif
     }
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
