@@ -26,9 +26,14 @@ public class MainFabricClient implements ClientModInitializer {
 			OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphics.withPose(guiGraphics) #endif);
 		});
 
+#if MC_VERSION >= "12100"
 		WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
 			ClientWorldData.INSTANCE.tick();
+#if MC_VERSION >= "12100"
 			ClientRayPicking.tick(context.tickCounter().getGameTimeDeltaTicks(), 20);
+#else
+			ClientRayPicking.tick(context.tickDelta(), 20);
+#endif
 
 			if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
 				if (!world_comment$lastFrameKeyPlayerListDown) {
@@ -46,6 +51,6 @@ public class MainFabricClient implements ClientModInitializer {
 			CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
 			matrices.popPose();
 		});
+#endif
 	}
-
 }

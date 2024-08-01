@@ -34,6 +34,7 @@ def getMinecraftVersion() {
 	return [minecraft_version, minecraft_version_int]
 }
 
+System.out.println("Minecraft version: " + getMinecraftVersion()[0])
 int minecraft_version_int = getMinecraftVersion()[1]
 
 include("common")
