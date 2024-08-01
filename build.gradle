@@ -165,6 +165,7 @@ class DummyArchiveTask extends AbstractArchiveTask {
 task dummyForgixOutput(type: DummyArchiveTask) {
 	// Forgix's mergeJars task doesn't extend AbstractArchiveTask.
 	// This is to make github.com/teaconmc/longjing happy.
+	dependsOn(mergeJars)
 	destinationDirectory = file("build/")
 	archiveBaseName = "WorldComment"
 	archiveVersion = rootProject.mod_version + "+" + minecraft_version
