@@ -4,7 +4,11 @@ dependencies {
 }
 
 architectury {
-	common()
+	if (rootProject.minecraft_version_int < 12100) {
+		common("fabric", "forge")
+	} else {
+		common("fabric", "neoforge")
+	}
 }
 
 loom {
