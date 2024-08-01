@@ -113,6 +113,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
         Minecraft minecraft = Minecraft.getInstance();
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
+        #if MC_VERSION >= "12100" super.render(guiParam, mouseX, mouseY, partialTick); #endif
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 1);
 
@@ -239,7 +240,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         }
 
         guiGraphics.pose().popPose();
-        super.render(guiParam, mouseX, mouseY, partialTick);
+        #if MC_VERSION < "12100" super.render(guiParam, mouseX, mouseY, partialTick); #endif
     }
 
     @Override

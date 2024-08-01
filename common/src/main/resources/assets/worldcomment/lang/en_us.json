@@ -6,7 +6,7 @@
   "gui.worldcomment.comment_type.2": "Good",
   "gui.worldcomment.comment_type.3": "Advice",
   "gui.worldcomment.comment_type.4": "NoGood",
-  "gui.worldcomment.comment_type.r2": "Markers for builder",
+  "gui.worldcomment.comment_type.r2": "Utility markers",
   "gui.worldcomment.comment_type.5": "ToDo",
   "gui.worldcomment.comment_type.6": "Warn",
   "gui.worldcomment.comment_type.7": "Tip",
@@ -17,7 +17,7 @@
   "gui.worldcomment.exclude_screenshot": "No Image",
   "gui.worldcomment.anonymous": "Anonymous",
   "gui.worldcomment.save_screenshot": "Save Screenshot",
-  "gui.worldcomment.require_comment_type": "Pick a comment type.",
+  "gui.worldcomment.require_comment_type": "Pick an emoji.",
   "gui.worldcomment.message_too_long": "Message is too long.",
   "gui.worldcomment.submit": "Submit!",
 
@@ -28,7 +28,7 @@
   "gui.worldcomment.control_tip.view_manage": "View / Manage Comments",
   "gui.worldcomment.control_tip.detail": "See Detail",
   "gui.worldcomment.control_tip.scroll": "Scroll",
-  "gui.worldcomment.control_tip.screenshot_hud": "HUD in Screenshot",
+  "gui.worldcomment.control_tip.screenshot_hud": "(Hold) HUD in Screenshot",
 
   "gui.worldcomment.list.title": "World Comment Management",
   "gui.worldcomment.list.nearby_posts": "Nearby Posts",
@@ -40,7 +40,7 @@
   "gui.worldcomment.list.empty": "Nothing here",
   "gui.worldcomment.list.like": "Like",
 
-  "gui.worldcomment.send_pending": "§6§lPlease place your message down.",
+  "gui.worldcomment.send_pending": "§6§lPlease place your message down!",
   "gui.worldcomment.send_upload_incomplete": "§bYour image is still being uploaded. Please wait.",
   "gui.worldcomment.send_insufficient_clearance": "Please choose a place with more clearance as the comment object is 3 blocks tall.",
   "gui.worldcomment.send_finish": "§aYour message is sent successfully.",
