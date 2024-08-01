@@ -22,7 +22,7 @@ public class CommentOverlayRenderer {
         int yOffset = 0;
         for (CommentEntry comment : cachedComments) {
             WidgetCommentEntry widget = new WidgetCommentEntry(comment);
-            widget.setBounds(width / 2 + 10, yOffset, width / 2 - 30);
+            widget.setBounds(width / 2 + 10, yOffset, Math.min(width / 2 - 30, 250));
             yOffset += widget.getHeight() + 10;
             cachedWidgets.add(widget);
         }
