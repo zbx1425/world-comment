@@ -37,7 +37,7 @@ public class ClientPlatformImpl {
     }
 
     public static void sendPacketToServer(ResourceLocation id, FriendlyByteBuf packet) {
-        packet.resetReaderIndex();
+        packet.readerIndex(0);
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.sendC2S(id, packet);
 #else

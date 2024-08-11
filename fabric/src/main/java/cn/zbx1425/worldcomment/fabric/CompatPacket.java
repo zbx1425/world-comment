@@ -35,7 +35,7 @@ public class CompatPacket {
     public final StreamCodec<ByteBuf, Payload> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public void encode(ByteBuf dest, Payload src) {
-            src.buffer.resetReaderIndex();
+            src.buffer.readerIndex(0);
             dest.writeInt(src.buffer.readableBytes());
             dest.writeBytes(src.buffer);
         }
@@ -44,7 +44,7 @@ public class CompatPacket {
         public Payload decode(ByteBuf src) {
             final int length = src.readInt();
             FriendlyByteBuf result = new FriendlyByteBuf(src.readBytes(length));
-            result.resetReaderIndex();
+            result.readerIndex(0);
             return new Payload(result);
         }
     };

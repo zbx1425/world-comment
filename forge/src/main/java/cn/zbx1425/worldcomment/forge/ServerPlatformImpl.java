@@ -51,7 +51,7 @@ public class ServerPlatformImpl {
     }
 
     public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
-        packet.resetReaderIndex();
+        packet.readerIndex(0);
         NetworkManager.sendToPlayer(player, id, packet);
     }
 }

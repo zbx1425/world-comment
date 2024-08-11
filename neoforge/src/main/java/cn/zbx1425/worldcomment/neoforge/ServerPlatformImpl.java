@@ -55,7 +55,7 @@ public class ServerPlatformImpl {
     }
 
     public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
-        packet.resetReaderIndex();
+        packet.readerIndex(0);
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.sendS2C(player, id, packet);
 #else
