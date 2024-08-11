@@ -37,14 +37,13 @@ public class CompatPacket {
         public void encode(ByteBuf dest, Payload src) {
             src.buffer.readerIndex(0);
             dest.writeInt(src.buffer.readableBytes());
-            dest.writeBytes(src.buffer);
+            dest.writeBytes(src.buffer, 0, src.buffer.readableBytes());
         }
 
         @Override
         public Payload decode(ByteBuf src) {
             final int length = src.readInt();
             FriendlyByteBuf result = new FriendlyByteBuf(src.readBytes(length));
-            result.readerIndex(0);
             return new Payload(result);
         }
     };
