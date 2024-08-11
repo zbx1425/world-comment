@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.interop.ProximityCommentSet;
 import cn.zbx1425.worldcomment.network.PacketRegionRequestC2S;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
@@ -19,7 +20,6 @@ import java.util.Map;
 
 public class ClientWorldData {
 
-    public ResourceLocation level;
     public Long2ObjectMap<Map<BlockPos, List<CommentEntry>>> regions = new Long2ObjectOpenHashMap<>();
     public Long2LongMap regionExpiry = new Long2LongOpenHashMap();
 
@@ -27,7 +27,10 @@ public class ClientWorldData {
 
     public static final long REGION_TTL = 300000;
 
+    public ResourceLocation level;
     private long lastTickTime = 0;
+
+    public ProximityCommentSet proximityCommentSet = new ProximityCommentSet(16, 30000);
 
     public void tick() {
         synchronized (this) {
@@ -67,6 +70,8 @@ public class ClientWorldData {
                     it.remove();
                 }
             }
+
+            proximityCommentSet.tick(this);
         }
     }
 
@@ -74,6 +79,7 @@ public class ClientWorldData {
         synchronized (this) {
             regions.clear();
             regionExpiry.clear();
+            proximityCommentSet.clear();
         }
     }
 

@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.interop.BulletChatInterop;
 import cn.zbx1425.worldcomment.network.PacketClientConfigS2C;
 import cn.zbx1425.worldcomment.network.PacketCollectionDataS2C;
 import cn.zbx1425.worldcomment.network.PacketRegionDataS2C;
@@ -14,6 +15,10 @@ public class MainClient {
 	public static ClientConfig CLIENT_CONFIG = new ClientConfig();
 
 	public static void init() {
+		ClientWorldData.INSTANCE.proximityCommentSet.onCommentApproach = (comment -> {
+			BulletChatInterop.addMessage(comment);
+		});
+
 		ClientPlatform.registerNetworkReceiver(
 				PacketRegionDataS2C.IDENTIFIER, PacketRegionDataS2C.ClientLogics::handle);
 		ClientPlatform.registerNetworkReceiver(

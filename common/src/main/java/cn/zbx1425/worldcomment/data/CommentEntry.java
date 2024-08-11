@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 
 public class CommentEntry {
@@ -151,5 +152,10 @@ public class CommentEntry {
         FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(Base64.decodeBase64(str)));
         ResourceLocation level = src.readResourceLocation();
         return new CommentEntry(level, src, false);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
