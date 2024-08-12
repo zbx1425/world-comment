@@ -35,13 +35,13 @@ public class CompatPacket {
     public final StreamCodec<ByteBuf, Payload> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public void encode(ByteBuf dest, Payload src) {
-            dest.writeBytes(src.buffer);
+            dest.writeBytes(src.buffer, 0, src.buffer.writerIndex());
         }
 
         @Override
         public Payload decode(ByteBuf src) {
             ByteBuf data = src.retainedDuplicate();
-            src.readerIndex(src.readerIndex() + src.readableBytes());
+            src.readerIndex(src.writerIndex());
             return new Payload(new FriendlyByteBuf(data));
         }
     };
