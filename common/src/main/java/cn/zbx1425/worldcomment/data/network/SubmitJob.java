@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.network;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploadConfig;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import net.minecraft.core.BlockPos;
 
 import java.nio.file.Path;
@@ -17,7 +18,7 @@ public class SubmitJob {
     public final byte[] imageBytes;
     public boolean imageReady, blockPosReady;
     public BiConsumer<SubmitJob, Exception> callback;
-    public Queue<ImageUploadConfig> uploaderToUse;
+    public Queue<ImageUploader> uploaderToUse;
 
     public SubmitJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Exception> callback, ClientConfig config) {
         this.comment = comment;

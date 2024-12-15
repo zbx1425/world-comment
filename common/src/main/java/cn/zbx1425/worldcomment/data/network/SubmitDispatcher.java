@@ -36,9 +36,9 @@ public class SubmitDispatcher {
         if (job.imageBytes != null) {
             NETWORK_EXECUTOR.execute(() -> {
                 try {
-                    ImageUploadConfig uploader = job.uploaderToUse.poll();
+                    ImageUploader uploader = job.uploaderToUse.poll();
                     if (uploader == null) throw new IllegalStateException("All uploads failed");
-                    ThumbImage thumbImage = ImageUploader.getUploader(uploader).uploadImage(job.imageBytes, job.comment);
+                    ThumbImage thumbImage = uploader.uploadImage(job.imageBytes, job.comment);
                     job.setImage(thumbImage);
                     trySendPackage(jobId);
                 } catch (Exception ex) {

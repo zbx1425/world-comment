@@ -23,12 +23,16 @@ import java.nio.file.Path;
 
 public class SmmsUploader extends ImageUploader {
 
-
-    private static final String apiUrl = "https://smms.app/api/v2/upload";
+    private final String apiUrl;
     private final String apiToken;
 
-    public SmmsUploader(ImageUploadConfig config) {
-        this.apiToken = config.config;
+    public SmmsUploader(JsonObject config) {
+        if (config.has("apiUrl")) {
+            this.apiUrl = config.get("apiUrl").getAsString();
+        } else {
+            this.apiUrl = "https://smms.app/api/v2/upload";
+        }
+        this.apiToken = config.get("apiToken").getAsString();
     }
 
     public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
@@ -79,5 +83,13 @@ public class SmmsUploader extends ImageUploader {
         } else {
             return respObj.get("data").getAsJsonObject().get("url").getAsString();
         }
+    }
+
+    public JsonObject serialize() {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("service", "smms");
+        obj.addProperty("apiUrl", apiUrl);
+        obj.addProperty("apiToken", apiToken);
+        return obj;
     }
 }

@@ -60,12 +60,8 @@ public class ServerConfig {
                 this.value = System.getenv("SUBNOTEICA_" + snakeKey);
                 this.isFromJson = false;
             } else if (jsonObject.has(camelKey)) {
-                if (jsonObject.get(camelKey).isJsonArray()) {
-                    StringBuilder configValue = new StringBuilder();
-                    for (int i = 0; i < jsonObject.get(camelKey).getAsJsonArray().size(); i++) {
-                        configValue.append(jsonObject.get(camelKey).getAsJsonArray().get(i).getAsString());
-                    }
-                    this.value = configValue.toString();
+                if (jsonObject.get(camelKey).isJsonArray() || jsonObject.get(camelKey).isJsonObject()) {
+                    this.value = jsonObject.get(camelKey).toString();
                 } else {
                     this.value = jsonObject.get(camelKey).getAsString();
                 }
@@ -82,4 +78,6 @@ public class ServerConfig {
             }
         }
     }
+
+
 }

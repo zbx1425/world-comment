@@ -11,22 +11,15 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class LskyUploader extends ImageUploader {
 
     private final String apiUrl;
-    private final String token;
+    private final String apiToken;
 
-    public LskyUploader(ImageUploadConfig config) {
-        String[] configParts = config.config.split("\\?", 2);
-        if (configParts.length == 2) {
-            apiUrl = configParts[0].trim();
-            token = configParts[1].trim();
-        } else {
-            throw new RuntimeException("Invalid LskyUploader config: " + config.config);
-        }
+    public LskyUploader(JsonObject config) {
+        this.apiUrl = config.get("apiUrl").getAsString();
+        this.apiToken = config.get("apiToken").getAsString();
     }
 
     public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
@@ -37,7 +30,7 @@ public class LskyUploader extends ImageUploader {
                 .build();
         HttpRequest request = HttpRequest.newBuilder(URI.create(apiUrl))
                 .header("Content-Type", body.getContentType())
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", "Bearer " + apiToken)
                 .POST(body.getBodyPublisher())
                 .build();
         HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
@@ -45,5 +38,13 @@ public class LskyUploader extends ImageUploader {
         JsonObject linkObj = JsonParser.parseString(response.body()).getAsJsonObject()
                 .get("data").getAsJsonObject().get("links").getAsJsonObject();
         return new ThumbImage(linkObj.get("url").getAsString(), linkObj.get("thumbnail_url").getAsString());
+    }
+
+    public JsonObject serialize() {
+        JsonObject json = new JsonObject();
+        json.addProperty("service", "lsky");
+        json.addProperty("apiUrl", apiUrl);
+        json.addProperty("apiToken", apiToken);
+        return json;
     }
 }

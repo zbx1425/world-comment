@@ -17,11 +17,16 @@ import java.nio.file.Path;
 
 public class ImglocUploader extends ImageUploader {
 
-    private static final String apiUrl = "https://imgloc.com/api/1/upload";
+    private final String apiUrl;
     private final String apiToken;
 
-    public ImglocUploader(ImageUploadConfig config) {
-        this.apiToken = config.config;
+    public ImglocUploader(JsonObject config) {
+        if (config.has("apiUrl")) {
+            this.apiUrl = config.get("apiUrl").getAsString();
+        } else {
+            this.apiUrl = "https://imgloc.com/api/1/upload";
+        }
+        this.apiToken = config.get("apiToken").getAsString();
     }
 
     public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
@@ -50,5 +55,14 @@ public class ImglocUploader extends ImageUploader {
                     respObj.get("image").getAsJsonObject().get("medium").getAsJsonObject().get("url").getAsString()
             );
         }
+    }
+
+    @Override
+    public JsonObject serialize() {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("service", "imgloc");
+        obj.addProperty("apiUrl", apiUrl);
+        obj.addProperty("apiToken", apiToken);
+        return obj;
     }
 }
