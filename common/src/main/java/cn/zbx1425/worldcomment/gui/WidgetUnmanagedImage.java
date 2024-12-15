@@ -38,7 +38,7 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
         int x1 = getX(), x2 = getX() + getWidth();
         int y1 = getY(), y2 = getY() + getHeight();
 
-        int shadowColor = 0xFF333333;
+        int shadowColor = 0xFF111111;
         int shadowOffset = 2;
         guiGraphics.fill(
                 (int) (x1 + shadowOffset), (int) (y1 + shadowOffset),

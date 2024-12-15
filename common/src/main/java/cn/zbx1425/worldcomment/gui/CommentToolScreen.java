@@ -246,15 +246,14 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
         guiGraphics.pose().pushPose();
         setupAnimationTransform(guiGraphics);
-        graphicsBlit9(guiGraphics,
+        RenderSystem.enableBlend();
+        guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY - CONTAINER_PADDING_Y,
-                containerWidth + CONTAINER_PADDING_X * 2,
-                containerHeight + CONTAINER_PADDING_Y * 2,
-                196, 40, 20, 20, 256, 256,
-                4, 4, 4, 4
+                containerOffsetX + containerWidth + CONTAINER_PADDING_X,
+                containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
+                0x99222222
         );
-        RenderSystem.enableBlend();
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY + containerHeight - SQ_SIZE + CONTAINER_PADDING_Y,
@@ -271,11 +270,24 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         long timestampNow = System.currentTimeMillis();
         if (timestampOpenGui == 0) timestampOpenGui = timestampNow;
 
-        float animProgress = Mth.clamp((timestampNow - timestampOpenGui) / 400f, 0f, 1f);
-        float x1 = Mth.lerp(animProgress, 0, containerOffsetX);
-        float x2 = Mth.lerp(animProgress, width, containerOffsetX + widgetImage.getWidth());
-        float y1 = Mth.lerp(animProgress, 0, containerOffsetY + CONTAINER_PADDING_Y);
-        float y2 = Mth.lerp(animProgress, height, containerOffsetY + CONTAINER_PADDING_Y + widgetImage.getHeight());
+        float animProgress = Mth.clamp((timestampNow - timestampOpenGui) / 600f, 0f, 1f);
+        float x1, x2, y1, y2;
+        float s1PadW = width / 10f, s1PadH = height / 10f;
+        if (animProgress < 0.4) {
+            float subProgress = (float)Mth.map(animProgress, 0, 0.4, 0, 1);
+            float easedProgress = 1 - (float)Math.pow(1 - subProgress, 3);
+            x1 = Mth.lerp(easedProgress, 0, s1PadW);
+            x2 = Mth.lerp(easedProgress, width, width - s1PadW);
+            y1 = Mth.lerp(easedProgress, 0, s1PadH);
+            y2 = Mth.lerp(easedProgress, height, height - s1PadH);
+        } else {
+            float x = (float)Mth.map(animProgress, 0.4, 1, 0, 1);
+            float easedProgress = x < 0.5f ? 4 * x * x * x : 1 - (float)Math.pow(-2 * x + 2, 3) / 2;
+            x1 = Mth.lerp(easedProgress, s1PadW, containerOffsetX);
+            x2 = Mth.lerp(easedProgress, width - s1PadW, containerOffsetX + widgetImage.getWidth());
+            y1 = Mth.lerp(easedProgress, s1PadH, containerOffsetY + CONTAINER_PADDING_Y);
+            y2 = Mth.lerp(easedProgress, height - s1PadH, containerOffsetY + CONTAINER_PADDING_Y + widgetImage.getHeight());
+        }
 
         float scaleX = (x2 - x1) / widgetImage.getWidth();
         float scaleY = (y2 - y1) / widgetImage.getHeight();
