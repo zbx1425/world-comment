@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
@@ -68,18 +69,24 @@ public class Screenshot {
         if (CommentToolItem.getUploadJobId(item) != null) return false;
 
         if (minecraft.screen == null) {
-            minecraft.tell(() -> {
-                boolean prevHideGui = minecraft.options.hideGui;
-                minecraft.options.hideGui = !minecraft.options.keySprint.isDown();
-                RenderSystem.recordRenderCall(() -> {
-                    grabScreenshot(imageBytes -> minecraft.execute(() -> {
-                        minecraft.player.playSound(shutterSoundEvent);
-                        Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes));
-                    }));
-                    minecraft.options.hideGui = prevHideGui;
-                });
-            });
+            boolean prevHideGui = minecraft.options.hideGui;
+            boolean prevIsCommentVisible = MainClient.CLIENT_CONFIG.isCommentVisible;
+            applyClientConfigForScreenshot();
+            // This is a workaround for the issue that the screenshot will be taken before CommentWorldRenderer is hidden
+            minecraft.tell(() -> RenderSystem.recordRenderCall(() -> minecraft.tell(() -> RenderSystem.recordRenderCall(() -> {
+                grabScreenshot(imageBytes -> minecraft.execute(() -> {
+                    minecraft.player.playSound(shutterSoundEvent);
+                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes));
+                }));
+                minecraft.options.hideGui = prevHideGui;
+                MainClient.CLIENT_CONFIG.isCommentVisible = prevIsCommentVisible;
+            }))));
         }
         return true;
+    }
+
+    public static void applyClientConfigForScreenshot() {
+        Minecraft.getInstance().options.hideGui = !MainClient.CLIENT_CONFIG.screenshotIncludeGui;
+        MainClient.CLIENT_CONFIG.isCommentVisible = MainClient.CLIENT_CONFIG.screenshotIncludeComments;
     }
 }

@@ -50,8 +50,7 @@ public class ClientRayPicking {
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;
                 for (CommentEntry comment : blockData.getValue()) {
-                    boolean isVisible = (comment.messageType - 1) >= 4
-                            || MainClient.CLIENT_CONFIG.isCommentVisible;
+                    boolean isVisible = (comment.messageType - 1) >= 4 || MainClient.CLIENT_CONFIG.isCommentVisible;
                     if (isVisible) {
                         visibleComments.computeIfAbsent(comment.location, ignored -> new ArrayList<>()).add(comment);
                         if (isPicked) {

@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.render;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
@@ -102,6 +103,8 @@ public class CommentWorldRenderer implements IGuiCommon {
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
             for (int i = 0; i < blockData.getValue().size(); i++) {
                 CommentEntry comment = blockData.getValue().get(i);
+                boolean isVisible = (comment.messageType - 1) >= 4 || MainClient.CLIENT_CONFIG.isCommentVisible;
+                if (!isVisible) continue;
                 boolean showIcon = blockData.getValue().size() < 2 ||
                         ((currentTime / 1000) % blockData.getValue().size() == i);
                 renderComment(vertices, matrices, comment, ClientRayPicking.pickedComments.contains(comment), showIcon);

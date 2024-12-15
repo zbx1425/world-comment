@@ -34,7 +34,6 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
 
     private final byte[] imageBytes;
 
-    private static final int SQ_SIZE = 20;
     private static final int SIDEBAR_OFFSET = 100;
 
     private static final int CONTAINER_PADDING_X = 8;
@@ -80,6 +79,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     protected void init() {
         super.init();
 
+        clearWidgets();
         Minecraft minecraft = Minecraft.getInstance();
 
         int baseY = CONTAINER_PADDING_Y;
@@ -153,7 +153,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         btnScreenshotConfig = new WidgetColorButton(
                 0, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
                 Component.translatable("gui.worldcomment.screenshot_config"), 0xFFAAAAAA, sender -> {
-
+                    minecraft.setScreen(new ScreenshotConfigScreen());
                 }
         );
         addRenderableWidget(btnScreenshotConfig);
@@ -168,14 +168,8 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                 .pos(0, baseY).selected(false).build();
         addRenderableWidget(checkBoxAnonymous);
 
-        int maxX = 0, maxY = 0;
-        for (GuiEventListener child : children()) {
-            AbstractWidget widget = (AbstractWidget)child;
-            maxX = Math.max(maxX, widget #if MC_VERSION >= "11903" .getX() #else .x #endif + widget.getWidth());
-            maxY = Math.max(maxY, widget #if MC_VERSION >= "11903" .getY() #else .y #endif + widget.getHeight());
-        }
-        containerWidth = maxX;
-        containerHeight = maxY;
+        containerWidth = SIDEBAR_OFFSET - 4 + CommentTypeButton.BTN_WIDTH * 5 + 10;
+        containerHeight = btnSendFeedback #if MC_VERSION >= "11903" .getY() #else .y #endif + btnSendFeedback.getHeight();
 
         containerOffsetX = (width - (containerWidth + CONTAINER_PADDING_X * 2)) / 2 + CONTAINER_PADDING_X;
         containerOffsetY = (height - (containerHeight + CONTAINER_PADDING_Y * 2)) / 2 + CONTAINER_PADDING_Y;
@@ -242,7 +236,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
         guiGraphics.pose().pushPose();
-        setupAnimationTransform(guiGraphics);
+        boolean animationDone = setupAnimationTransform(guiGraphics);
         guiGraphics.pose().translate(0, 0, 1);
         super.render(guiParam, mouseX, mouseY, partialTick);
         guiGraphics.pose().popPose();
@@ -275,7 +269,8 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
 
     private long timestampOpenGui = 0L;
 
-    private void setupAnimationTransform(GuiGraphics guiGraphics) {
+    /** @return true if animation is done */
+    private boolean setupAnimationTransform(GuiGraphics guiGraphics) {
         long timestampNow = System.currentTimeMillis();
         if (timestampOpenGui == 0) timestampOpenGui = timestampNow;
 
@@ -289,13 +284,15 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             x2 = Mth.lerp(easedProgress, width, width - s1PadW);
             y1 = Mth.lerp(easedProgress, 0, s1PadH);
             y2 = Mth.lerp(easedProgress, height, height - s1PadH);
-        } else {
+        } else if (animProgress < 1) {
             float x = (float)Mth.map(animProgress, 0.4, 1, 0, 1);
             float easedProgress = x < 0.5f ? 4 * x * x * x : 1 - (float)Math.pow(-2 * x + 2, 3) / 2;
             x1 = Mth.lerp(easedProgress, s1PadW, containerOffsetX);
             x2 = Mth.lerp(easedProgress, width - s1PadW, containerOffsetX + widgetImage.getWidth());
             y1 = Mth.lerp(easedProgress, s1PadH, containerOffsetY + CONTAINER_PADDING_Y);
             y2 = Mth.lerp(easedProgress, height - s1PadH, containerOffsetY + CONTAINER_PADDING_Y + widgetImage.getHeight());
+        } else {
+            return true;
         }
 
         float scaleX = (x2 - x1) / widgetImage.getWidth();
@@ -303,6 +300,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         guiGraphics.pose().translate(x1, y1, 0);
         guiGraphics.pose().scale(scaleX, scaleY, 1);
         guiGraphics.pose().translate(-containerOffsetX, -(containerOffsetY + CONTAINER_PADDING_Y), 0);
+        return false;
     }
 
     @Override

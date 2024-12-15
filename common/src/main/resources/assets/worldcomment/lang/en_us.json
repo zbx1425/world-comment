@@ -14,7 +14,7 @@
 
   "gui.worldcomment.message": "Enter feedback here (Optional)",
   "gui.worldcomment.message.placeholder": "(Example) Amazing Chest Ahead",
-  "gui.worldcomment.screenshot_config": "Don't hide ... in screenshot?",
+  "gui.worldcomment.screenshot_config": "Include ... in screenshot?",
   "gui.worldcomment.exclude_screenshot": "No Image",
   "gui.worldcomment.anonymous": "Anonymous",
   "gui.worldcomment.save_screenshot": "Save Screenshot",

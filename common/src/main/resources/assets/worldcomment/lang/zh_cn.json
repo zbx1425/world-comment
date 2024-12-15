@@ -14,8 +14,8 @@
 
   "gui.worldcomment.message": "在此处留言 (非必填)",
   "gui.worldcomment.message.placeholder": "(示例) 前有巨大宝箱",
-  "gui.worldcomment.screenshot_config": "在截图中不要隐藏……?",
-  "gui.worldcomment.exclude_screenshot": "不包含截图",
+  "gui.worldcomment.screenshot_config": "在截图中包括…?",
+  "gui.worldcomment.exclude_screenshot": "不发送截图",
   "gui.worldcomment.anonymous": "匿名评论",
   "gui.worldcomment.save_screenshot": "另存截图",
   "gui.worldcomment.require_comment_type": "请选择一个表情符号",

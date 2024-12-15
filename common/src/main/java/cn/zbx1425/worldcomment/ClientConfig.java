@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment;
 
-import cn.zbx1425.worldcomment.data.network.upload.ImageUploadConfig;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -12,6 +11,9 @@ import java.util.List;
 public class ClientConfig {
 
     public boolean isCommentVisible = true;
+
+    public boolean screenshotIncludeGui = false;
+    public boolean screenshotIncludeComments = true;
 
     public List<ImageUploader> imageUploader;
 
