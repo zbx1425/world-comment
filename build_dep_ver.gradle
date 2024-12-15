@@ -55,7 +55,7 @@ rootProject.ext.parchment_version = [
         "1.21": "2024.07.28"
 ][minecraft_version]
 
-rootProject.ext.fabric_loader_version = "0.15.3"
+rootProject.ext.fabric_loader_version = "0.15.11"
 rootProject.ext.fabric_api_version = [
         "1.16.5": "0.42.0",
         "1.17.1": "0.46.1+1.17", "1.18.2": "0.77.0+1.18.2",

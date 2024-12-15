@@ -12,6 +12,9 @@ public class MainFabric implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		Main.init(new RegistriesWrapperImpl());
+#if MC_VERSION >= "12100"
+		PACKET_REGISTRY.commitCommon();
+#endif
 	}
 
 }

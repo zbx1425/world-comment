@@ -21,6 +21,9 @@ public class MainFabricClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		MainClient.init();
+#if MC_VERSION >= "12100"
+		MainFabric.PACKET_REGISTRY.commitClient();
+#endif
 
 		HudRenderCallback.EVENT.register((guiGraphics, delta) -> {
 			OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphics.withPose(guiGraphics) #endif);
