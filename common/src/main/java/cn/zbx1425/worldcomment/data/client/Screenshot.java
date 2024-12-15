@@ -17,19 +17,28 @@ import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class Screenshot {
 
     public static void grabScreenshot(Consumer<byte[]> callback) {
         RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
-        NativeImage nativeImage = new NativeImage(frameBuf.width, frameBuf.height, false);
-        try (nativeImage) {
+        NativeImage fullSizeImage = new NativeImage(frameBuf.width, frameBuf.height, false);
+        try (fullSizeImage) {
             RenderSystem.bindTexture(frameBuf.getColorTextureId());
-            nativeImage.downloadTexture(0, true);
-            nativeImage.flipY();
-            callback.accept(nativeImage.asByteArray());
+            fullSizeImage.downloadTexture(0, true);
+            fullSizeImage.flipY();
+            if (fullSizeImage.getWidth() > 2000) {
+                int newWidth = 1920;
+                int newHeight = (int) (fullSizeImage.getHeight() * (newWidth / (double) fullSizeImage.getWidth()));
+                NativeImage scaledImage = new NativeImage(newWidth, newHeight, false);
+                try (scaledImage) {
+                    fullSizeImage.resizeSubRectTo(0, 0, fullSizeImage.getWidth(), fullSizeImage.getHeight(), scaledImage);
+                    callback.accept(scaledImage.asByteArray());
+                    return;
+                }
+            }
+            callback.accept(fullSizeImage.asByteArray());
         } catch (IOException ex) {
             Main.LOGGER.error("Failed to save screenshot", ex);
         }
