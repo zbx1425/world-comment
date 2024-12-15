@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ public class ClientConfig {
 
     public boolean screenshotIncludeGui = false;
     public boolean screenshotIncludeComments = true;
+
+    public float commentHideTimer = 0f;
 
     public List<ImageUploader> imageUploader;
 
@@ -46,6 +49,15 @@ public class ClientConfig {
         };
 
         return config;
+    }
+
+    public void tick(DeltaTracker deltaTracker) {
+        if (commentHideTimer > 0) {
+            commentHideTimer -= deltaTracker.getGameTimeDeltaTicks();
+            if (commentHideTimer <= 0) {
+                isCommentVisible = true;
+            }
+        }
     }
 
     public ClientConfig() {

@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ControlTipRenderer implements IGuiCommon {
 
@@ -25,7 +26,8 @@ public class ControlTipRenderer implements IGuiCommon {
             null, true
     );
     public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.toggle_show"), 0,
+            () -> Component.translatable("gui.worldcomment.control_tip.toggle_show",
+                    (int)Math.ceil(MainClient.CLIENT_CONFIG.commentHideTimer / 20)), 0,
             null, true
     );
     public static final ControlTip TIP_TOGGLE_HIDE = new ControlTip(
@@ -61,6 +63,7 @@ public class ControlTipRenderer implements IGuiCommon {
 
     public static void update() {
         Minecraft minecraft = Minecraft.getInstance();
+        MainClient.CLIENT_CONFIG.tick(minecraft.getTimer());
         for (ControlTip tip : TIPS) tip.visible = false;
         if (minecraft.player == null) {
             return;
@@ -93,11 +96,18 @@ public class ControlTipRenderer implements IGuiCommon {
         public int imgIndex;
         public KeyMapping key;
         public boolean critical;
-        public Component text;
+        public Supplier<Component> text;
 
         public boolean visible = false;
 
         public ControlTip(Component text, int imgIndex, KeyMapping key, boolean critical) {
+            this.text = () -> text;
+            this.imgIndex = imgIndex;
+            this.key = key;
+            this.critical = critical;
+        }
+
+        public ControlTip(Supplier<Component> text, int imgIndex, KeyMapping key, boolean critical) {
             this.text = text;
             this.imgIndex = imgIndex;
             this.key = key;
@@ -107,7 +117,7 @@ public class ControlTipRenderer implements IGuiCommon {
         public void render(GuiGraphics guiGraphics, int x, int y) {
             Font font = Minecraft.getInstance().font;
             if (critical) {
-                int innerWidth = 20 + 4 + font.width(text);
+                int innerWidth = 20 + 4 + font.width(text.get());
                 long currentTime = System.currentTimeMillis();
                 if (currentTime % 400 < 200) {
                     guiGraphics.fill(x + 1, y + 1, x + innerWidth + 4 + 1, y + 20 + 1, 0xFF444444);
@@ -128,7 +138,7 @@ public class ControlTipRenderer implements IGuiCommon {
                     guiGraphics.disableScissor();
                 }
             }
-            guiGraphics.drawString(font, text, x + 20 + 4, y + 10 - 4, 0xFFFFFFFF, true);
+            guiGraphics.drawString(font, text.get(), x + 20 + 4, y + 10 - 4, 0xFFFFFFFF, true);
         }
     }
 }

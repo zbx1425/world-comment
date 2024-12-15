@@ -26,7 +26,7 @@
   "gui.worldcomment.config.screenshot_comments": "截图中包括其他评论",
 
   "gui.worldcomment.control_tip.create": "发表评论",
-  "gui.worldcomment.control_tip.toggle_show": "显示被隐藏的评论",
+  "gui.worldcomment.control_tip.toggle_show": "显示被隐藏的评论 (%d)",
   "gui.worldcomment.control_tip.toggle_hide": "隐藏评论",
   "gui.worldcomment.control_tip.place_comment": "在喜欢的位置放下评论",
   "gui.worldcomment.control_tip.view_manage": "查看/管理评论",
