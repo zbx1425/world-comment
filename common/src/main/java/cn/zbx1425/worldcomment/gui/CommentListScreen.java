@@ -52,13 +52,20 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     @Override
     protected void init() {
         super.init();
-        pageButtons[0] = addRenderableWidget(new WidgetColorButton(10, 40, 80, 20,
+        clearWidgets();
+
+        int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
+        int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;
+        int xOffset = (width - bookWidth) / 2;
+        int xOffsetR = width - xOffset;
+
+        pageButtons[0] = addRenderableWidget(new WidgetColorButton(xOffset + 10, 40, 80, 20,
                 Component.translatable("gui.worldcomment.list.nearby_posts"), 0xffe57373, sender -> useSubScreen(0)));
-        pageButtons[1] = addRenderableWidget(new WidgetColorButton(10, 64, 80, 20,
+        pageButtons[1] = addRenderableWidget(new WidgetColorButton(xOffset + 10, 64, 80, 20,
                 Component.translatable("gui.worldcomment.list.recent_posts"), 0xffe57373, sender -> useSubScreen(1)));
-        pageButtons[2] = addRenderableWidget(new WidgetColorButton(10, 88, 80, 20,
+        pageButtons[2] = addRenderableWidget(new WidgetColorButton(xOffset + 10, 88, 80, 20,
                 Component.translatable("gui.worldcomment.list.my_posts"), 0xffe57373, sender -> useSubScreen(2)));
-        pageButtons[3] = addRenderableWidget(new WidgetColorButton(10, 122, 80, 20,
+        pageButtons[3] = addRenderableWidget(new WidgetColorButton(xOffset + 10, 122, 80, 20,
                 Component.translatable("gui.worldcomment.list.detail"), 0xffe57373, sender -> {}));
         for (int i = 0; i < pageButtons.length; i++) {
             pageButtons[i].active = i != subScreen;
@@ -104,7 +111,6 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 }
             }
         }
-        clearWidgets();
         init();
     }
 
@@ -117,8 +123,16 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 1);
 
+        int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
+        int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;
+        int xOffset = (width - bookWidth) / 2;
+        int xOffsetR = width - xOffset;
+
         guiGraphics.drawString(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
-                40, 15, 0xFFFFE6C0, true);
+                xOffset + 40, 15, 0xFFFFE6C0, true);
+        for (net.minecraft.client.gui.components.Button button : pageButtons) {
+            button.setX(xOffset + 10);
+        }
 
         if (subScreen == 3) {
             CommentEntry comment = commentForDetail;
@@ -184,24 +198,24 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 }
             }
         } else {
-            graphicsBlit9(guiGraphics, 100, 30, width - 120, height - 50,
+            graphicsBlit9(guiGraphics, xOffset + 100, 30, bookWidth - 120, height - 50,
                     176, 40, 20, 20, 256, 256,
                     4, 4, 4, 4
             );
-            guiGraphics.enableScissor(102, 32, width - 22, height - 22);
+            guiGraphics.enableScissor(0, 32, width, height - 22);
             int yOffset = 32 + 4;
             for (int i = commentListOffset; i < commentList.size(); i++) {
                 CommentEntry comment = commentList.get(i);
                 WidgetCommentEntry widget = getWidget(comment);
                 widget.showImage = true;
-                widget.setBounds(106, yOffset, width - 102 - 22 - 8 - 4 - 16);
+                widget.setBounds(xOffset + 106, yOffset, bookWidth - 102 - 22 - 8 - 4 - 16);
                 widget.render(guiParam, mouseX, mouseY, partialTick);
 
-                guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
+                guiGraphics.blit(ATLAS_LOCATION, xOffsetR - 22 - 4 - 16, yOffset + 4, 16, 16,
                         196, 60, 20, 20, 256, 256);
-                if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
+                if (mouseX > xOffsetR - 22 - 4 - 16 && mouseX < xOffsetR - 22 - 4
                         && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
-                    guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
+                    guiGraphics.blit(ATLAS_LOCATION, xOffsetR - 22 - 4 - 16, yOffset + 4, 16, 16,
                             236, 60, 20, 20, 256, 256);
                     }
 
@@ -209,11 +223,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                         || minecraft.player.getGameProfile().getId().equals(comment.initiator);
                 if (canDelete) {
                     yOffset += 16;
-                    guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
+                    guiGraphics.blit(ATLAS_LOCATION, xOffsetR - 22 - 4 - 16, yOffset + 4, 16, 16,
                             216, 60, 20, 20, 256, 256);
-                    if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
+                    if (mouseX > xOffsetR - 22 - 4 - 16 && mouseX < xOffsetR - 22 - 4
                             && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
-                        guiGraphics.blit(ATLAS_LOCATION, width - 22 - 4 - 16, yOffset + 4, 16, 16,
+                        guiGraphics.blit(ATLAS_LOCATION, xOffsetR - 22 - 4 - 16, yOffset + 4, 16, 16,
                                 236, 60, 20, 20, 256, 256);
                         if (commentToDelete == comment) {
                             guiGraphics.renderTooltip(font, Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
@@ -230,12 +244,12 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             if (commentList.size() > 1) {
                 String pageStr = String.format("↕ %d / %d", commentListOffset + 1, commentList.size());
                 guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
-                        width - 10 - 10 - Minecraft.getInstance().font.width(pageStr),
+                        xOffsetR - 10 - 10 - Minecraft.getInstance().font.width(pageStr),
                         15, 0xFFA5D6A7, true);
             } else if (commentList.isEmpty()) {
                 guiGraphics.drawCenteredString(Minecraft.getInstance().font,
                         Component.translatable("gui.worldcomment.list.empty"),
-                        100 + (width - 120) / 2, 30 + (height - 50) / 2, 0xFFA5D6A7);
+                        xOffset + 100 + (bookWidth - 120) / 2, 30 + (height - 50) / 2, 0xFFA5D6A7);
             }
         }
 
@@ -245,6 +259,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
+        int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;
+        int xOffset = (width - bookWidth) / 2;
+        int xOffsetR = width - xOffset;
+
         if (subScreen == 3) {
             CommentEntry comment = commentForDetail;
             boolean canDelete = minecraft.player.hasPermissions(3)
@@ -270,7 +289,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 CommentEntry comment = commentList.get(i);
                 WidgetCommentEntry widget = getWidget(comment);
 
-                if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
+                if (mouseX > xOffsetR - 22 - 4 - 16 && mouseX < xOffsetR - 22 - 4
                         && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
                     this.commentForDetail = comment;
                     useSubScreen(3);
@@ -278,7 +297,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 }
 
                 yOffset += 16;
-                if (mouseX > width - 22 - 4 - 16 && mouseX < width - 22 - 4
+                if (mouseX > xOffsetR - 22 - 4 - 16 && mouseX < xOffsetR - 22 - 4
                         && mouseY > yOffset + 4 && mouseY < yOffset + 4 + 16) {
                     if (comment == commentToDelete) {
                         PacketEntryActionC2S.ClientLogics.send(comment, PacketEntryActionC2S.ACTION_DELETE);
@@ -304,12 +323,18 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
         GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
         super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
-        graphicsBlit9(guiGraphics, 30, 10, width - 40, height - 20,
+
+        int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
+        int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;
+        int xOffset = (width - bookWidth) / 2;
+        int xOffsetR = width - xOffset;
+
+        graphicsBlit9(guiGraphics, xOffset + 30, 10, bookWidth - 40, height - 20,
                 196, 40, 20, 20, 256, 256,
                 4, 4, 4, 4
         );
         RenderSystem.enableBlend();
-        guiGraphics.fill(30, 10, 60, height - 10, 0x66d32f2f);
+        guiGraphics.fill(xOffset + 30, 10, xOffset + 60, height - 10, 0x66d32f2f);
     }
 
     private double accumulatedScroll = 0;

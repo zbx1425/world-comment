@@ -14,12 +14,16 @@
 
   "gui.worldcomment.message": "在此处留言 (非必填)",
   "gui.worldcomment.message.placeholder": "(示例) 前有巨大宝箱",
+  "gui.worldcomment.screenshot_config": "在截图中不要隐藏……?",
   "gui.worldcomment.exclude_screenshot": "不包含截图",
   "gui.worldcomment.anonymous": "匿名评论",
   "gui.worldcomment.save_screenshot": "另存截图",
   "gui.worldcomment.require_comment_type": "请选择一个表情符号",
   "gui.worldcomment.message_too_long": "留言内容太长",
   "gui.worldcomment.submit": "提交!",
+
+  "gui.worldcomment.config.screenshot_hud": "截图中包括叠加层 (HUD)",
+  "gui.worldcomment.config.screenshot_comments": "截图中包括其他评论",
 
   "gui.worldcomment.control_tip.create": "发表评论",
   "gui.worldcomment.control_tip.toggle_show": "显示被隐藏的评论",
@@ -28,7 +32,6 @@
   "gui.worldcomment.control_tip.view_manage": "查看/管理评论",
   "gui.worldcomment.control_tip.detail": "详情",
   "gui.worldcomment.control_tip.scroll": "滚动",
-  "gui.worldcomment.control_tip.screenshot_hud": "(按住) 截图包括叠加层",
 
   "gui.worldcomment.list.title": "§l随处随笔§r 评论管理",
   "gui.worldcomment.list.nearby_posts": "附近评论",

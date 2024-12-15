@@ -65,6 +65,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     private List<CommentTypeButton> radioButtons = new ArrayList<>();
     private WidgetUnmanagedImage widgetImage;
     private MultiLineEditBox textBoxMessage;
+    private Button btnScreenshotConfig;
     private net.minecraft.client.gui.components.Checkbox checkBoxNoImage;
     private net.minecraft.client.gui.components.Checkbox checkBoxAnonymous;
     private WidgetColorButton btnSaveScreenshot;
@@ -149,6 +150,14 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         widgetImage.setBounds(0, baseY, SIDEBAR_OFFSET - SQ_SIZE);
         addRenderableWidget(widgetImage);
         baseY += widgetImage.getHeight() + SQ_SIZE / 2;
+        btnScreenshotConfig = new WidgetColorButton(
+                0, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+                Component.translatable("gui.worldcomment.screenshot_config"), 0xFFAAAAAA, sender -> {
+
+                }
+        );
+        addRenderableWidget(btnScreenshotConfig);
+        baseY += SQ_SIZE + SQ_SIZE / 2;
         checkBoxNoImage = Checkbox
                 .builder(Component.translatable("gui.worldcomment.exclude_screenshot"), minecraft.font)
                 .pos(0, baseY).selected(false).build();

@@ -14,12 +14,16 @@
 
   "gui.worldcomment.message": "Enter feedback here (Optional)",
   "gui.worldcomment.message.placeholder": "(Example) Amazing Chest Ahead",
+  "gui.worldcomment.screenshot_config": "Don't hide ... in screenshot?",
   "gui.worldcomment.exclude_screenshot": "No Image",
   "gui.worldcomment.anonymous": "Anonymous",
   "gui.worldcomment.save_screenshot": "Save Screenshot",
   "gui.worldcomment.require_comment_type": "Pick an emoji.",
   "gui.worldcomment.message_too_long": "Message is too long.",
   "gui.worldcomment.submit": "Submit!",
+
+  "gui.worldcomment.config.screenshot_hud": "Include HUD in Screenshot",
+  "gui.worldcomment.config.screenshot_comments": "Include other comments in Screenshot",
 
   "gui.worldcomment.control_tip.create": "Make Comment",
   "gui.worldcomment.control_tip.toggle_show": "Show Hidden Comments",
@@ -28,7 +32,6 @@
   "gui.worldcomment.control_tip.view_manage": "View / Manage Comments",
   "gui.worldcomment.control_tip.detail": "See Detail",
   "gui.worldcomment.control_tip.scroll": "Scroll",
-  "gui.worldcomment.control_tip.screenshot_hud": "(Hold) HUD in Screenshot",
 
   "gui.worldcomment.list.title": "World Comment Management",
   "gui.worldcomment.list.nearby_posts": "Nearby Posts",
