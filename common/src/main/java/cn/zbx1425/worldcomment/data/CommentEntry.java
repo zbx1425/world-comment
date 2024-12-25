@@ -4,18 +4,17 @@ import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -145,11 +144,11 @@ public class CommentEntry {
         writeBuffer(dest, false);
         byte[] destArray = new byte[dest.writerIndex()];
         dest.getBytes(0, destArray);
-        return Base64.encodeBase64String(destArray);
+        return Base64.getEncoder().encodeToString(destArray);
     }
 
     public static CommentEntry fromBinaryString(String str) {
-        FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(Base64.decodeBase64(str)));
+        FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(Base64.getDecoder().decode(str)));
         ResourceLocation level = src.readResourceLocation();
         return new CommentEntry(level, src, false);
     }
