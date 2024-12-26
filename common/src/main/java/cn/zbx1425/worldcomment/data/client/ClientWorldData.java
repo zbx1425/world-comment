@@ -30,7 +30,7 @@ public class ClientWorldData {
     public ResourceLocation level;
     private long lastTickTime = 0;
 
-    public ProximityCommentSet proximityCommentSet = new ProximityCommentSet(16, 30000);
+    public ProximityCommentSet proximityCommentSet = new ProximityCommentSet(16, 150 * 1000);
 
     public void tick() {
         synchronized (this) {
