@@ -3,44 +3,67 @@ package cn.zbx1425.worldcomment.data.sync;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import io.lettuce.core.api.StatefulRedisConnection;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
+
+import java.io.IOException;
 
 public class RedisMessage {
 
     public static final String COMMAND_CHANNEL = "WORLD_COMMENT_COMMAND_CHANNEL";
 
-    private static final String INSTANCE_ID = Long.toHexString(ServerWorldData.SNOWFLAKE.nextId());
+    private static final long INSTANCE_ID = ServerWorldData.SNOWFLAKE.nextId();
 
-    public String initiator;
-    public String action;
-    public String content;
+    public long initiator;
+    public Action action;
+    public ByteBuf content;
 
-    public RedisMessage(String action, String content) {
+    public RedisMessage(Action action, ByteBuf content) {
         this.initiator = INSTANCE_ID;
         this.action = action;
         this.content = content;
     }
 
-    public RedisMessage(String redisCommand) {
-        int firstHash = redisCommand.indexOf(':');
-        int lastHash = redisCommand.lastIndexOf(':');
-        this.action = redisCommand.substring(0, firstHash);
-        this.initiator = redisCommand.substring(firstHash + 1, lastHash);
-        this.content = redisCommand.substring(lastHash + 1);
+    public RedisMessage(ByteBuf src) {
+        this.action = Action.values()[src.readByte()];
+        this.initiator = src.readLong();
+        int length = src.readInt();
+        this.content = src.readBytes(length);
     }
 
     public static RedisMessage insert(CommentEntry entry) {
-        return new RedisMessage("INSERT", entry.toBinaryString());
+        return new RedisMessage(Action.INSERT, entry.toBinaryBuffer());
     }
 
     public static RedisMessage update(CommentEntry entry) {
-        return new RedisMessage("UPDATE", entry.toBinaryString());
+        return new RedisMessage(Action.UPDATE, entry.toBinaryBuffer());
     }
 
-    public void publishAsync(StatefulRedisConnection<String, String> connection) {
-        connection.async().publish(COMMAND_CHANNEL, String.format("%s:%s:%s", action, initiator, content));
+    public void publishAsync(StatefulRedisConnection<String, ByteBuf> connection) {
+        ByteBuf buffer = Unpooled.buffer(content.readableBytes() + 1 + Long.BYTES);
+        buffer.writeByte(action.ordinal());
+        buffer.writeLong(initiator);
+        connection.async().publish(COMMAND_CHANNEL, buffer);
+    }
+
+    public void handle(RedisSynchronizer synchronizer) throws IOException {
+        if (isFromSelf()) return;
+        switch (action) {
+            case INSERT:
+                synchronizer.handleInsert(CommentEntry.fromBinaryBuffer(content));
+                break;
+            case UPDATE:
+                synchronizer.handleUpdate(CommentEntry.fromBinaryBuffer(content));
+                break;
+        }
     }
 
     public boolean isFromSelf() {
-        return initiator.equals(INSTANCE_ID);
+        return initiator == INSTANCE_ID;
+    }
+
+    public enum Action {
+        INSERT, UPDATE
     }
 }

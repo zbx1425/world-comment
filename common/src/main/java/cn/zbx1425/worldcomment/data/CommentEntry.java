@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -138,17 +138,15 @@ public class CommentEntry {
         return json;
     }
 
-    public String toBinaryString() {
-        FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer());
+    public ByteBuf toBinaryBuffer() {
+        FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer(256));
         dest.writeResourceLocation(level);
         writeBuffer(dest, false);
-        byte[] destArray = new byte[dest.writerIndex()];
-        dest.getBytes(0, destArray);
-        return Base64.getEncoder().encodeToString(destArray);
+        return dest;
     }
 
-    public static CommentEntry fromBinaryString(String str) {
-        FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(Base64.getDecoder().decode(str)));
+    public static CommentEntry fromBinaryBuffer(ByteBuf buf) {
+        FriendlyByteBuf src = new FriendlyByteBuf(buf);
         ResourceLocation level = src.readResourceLocation();
         return new CommentEntry(level, src, false);
     }

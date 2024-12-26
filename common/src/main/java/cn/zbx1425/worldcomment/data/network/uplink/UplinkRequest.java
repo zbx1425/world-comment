@@ -4,7 +4,6 @@ import cn.zbx1425.worldcomment.Main;
 import com.google.common.hash.Hashing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -50,7 +50,7 @@ public class UplinkRequest {
                     byte[] signatureBytes = Hashing
                             .hmacSha1(Main.SERVER_CONFIG.uplinkAuthKey.value.getBytes(StandardCharsets.UTF_8))
                             .hashBytes(postDataBytes).asBytes();
-                    conn.setRequestProperty("Authorization", "NEX-HMAC-SHA1 Signature=" + Base64.encodeBase64String(signatureBytes));
+                    conn.setRequestProperty("Authorization", "NEX-HMAC-SHA1 Signature=" + Base64.getEncoder().encodeToString(signatureBytes));
                 }
 
                 conn.setDoOutput(true);
