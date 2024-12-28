@@ -41,9 +41,11 @@ public class RedisMessage {
     }
 
     public void publishAsync(StatefulRedisConnection<String, ByteBuf> connection) {
-        ByteBuf buffer = Unpooled.buffer(content.readableBytes() + 1 + Long.BYTES);
+        ByteBuf buffer = Unpooled.buffer(content.readableBytes() + 16);
         buffer.writeByte(action.ordinal());
         buffer.writeLong(initiator);
+        buffer.writeInt(content.readableBytes());
+        buffer.writeBytes(content);
         connection.async().publish(COMMAND_CHANNEL, buffer);
     }
 

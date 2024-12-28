@@ -104,7 +104,7 @@ public class CommentEntry {
     }
 
     public void writeFileStream(FileOutputStream oStream) throws IOException {
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer(256));
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer(512));
         writeBuffer(buf, true);
         fileOffset = oStream.getChannel().position();
         oStream.write(buf.array(), 0, buf.writerIndex());
@@ -139,7 +139,7 @@ public class CommentEntry {
     }
 
     public ByteBuf toBinaryBuffer() {
-        FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer(256));
+        FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer(512));
         dest.writeResourceLocation(level);
         writeBuffer(dest, false);
         return dest;
