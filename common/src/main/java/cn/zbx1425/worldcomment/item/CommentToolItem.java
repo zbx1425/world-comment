@@ -54,7 +54,7 @@ public class CommentToolItem extends GroupedItem {
 
     public static class Client {
 
-        public static final int COMMENT_HIDE_TICKS = 60 * 20;
+        public static final int COMMENT_HIDE_TICKS = 60 * 4 * 20;
 
         public static ItemStack getHoldingCommentTool() {
             Player player = Minecraft.getInstance().player;
@@ -92,10 +92,14 @@ public class CommentToolItem extends GroupedItem {
             } else {
                 if (MainClient.CLIENT_CONFIG.isCommentVisible) {
                     MainClient.CLIENT_CONFIG.isCommentVisible = false;
-                    MainClient.CLIENT_CONFIG.commentHideTimer = COMMENT_HIDE_TICKS;
+                    if (COMMENT_HIDE_TICKS - (MainClient.CLIENT_CONFIG.commentHideTimer % COMMENT_HIDE_TICKS) < 60) {
+                        MainClient.CLIENT_CONFIG.commentHideTimer =
+                                Math.min(Math.round((MainClient.CLIENT_CONFIG.commentHideTimer + COMMENT_HIDE_TICKS) / COMMENT_HIDE_TICKS), 4) * COMMENT_HIDE_TICKS;
+                    } else {
+                        MainClient.CLIENT_CONFIG.commentHideTimer = COMMENT_HIDE_TICKS;
+                    }
                 } else {
                     MainClient.CLIENT_CONFIG.isCommentVisible = true;
-                    MainClient.CLIENT_CONFIG.commentHideTimer = 0;
                 }
             }
             return false;

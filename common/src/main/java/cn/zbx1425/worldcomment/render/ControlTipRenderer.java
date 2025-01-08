@@ -27,7 +27,10 @@ public class ControlTipRenderer implements IGuiCommon {
     );
     public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
             () -> Component.translatable("gui.worldcomment.control_tip.toggle_show",
-                    (int)Math.ceil(MainClient.CLIENT_CONFIG.commentHideTimer / 20)), 0,
+                    String.format("%02d:%02d",
+                            (int)Math.floor((MainClient.CLIENT_CONFIG.commentHideTimer / 20) / 60),
+                            (int)Math.floor((MainClient.CLIENT_CONFIG.commentHideTimer / 20) % 60)
+                    )), 0,
             null, true
     );
     public static final ControlTip TIP_TOGGLE_HIDE = new ControlTip(
