@@ -30,7 +30,7 @@ public class ImageConvert {
             }
             try {
                 try (ByteArrayWriteCallback writeCallback = new ByteArrayWriteCallback(pngImageBytes.length)) {
-                    if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, width.get(0), height.get(0), 4, pixels, 100) == 0) {
+                    if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, width.get(0), height.get(0), 4, pixels, 90) == 0) {
                         throw new IllegalStateException("Failed to write JPEG image: " + STBImage.stbi_failure_reason());
                     }
                     return writeCallback.array();
@@ -92,7 +92,7 @@ public class ImageConvert {
                         throw new IllegalStateException("Failed to resize image: " + STBImage.stbi_failure_reason());
                     }
                     try (ByteArrayWriteCallback writeCallback = new ByteArrayWriteCallback(pngImageBytes.length)) {
-                        if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, newWidth, newHeight, 4, scaledPixels, 100) == 0) {
+                        if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, newWidth, newHeight, 4, scaledPixels, 90) == 0) {
                             throw new IllegalStateException("Failed to write JPEG image: " + STBImage.stbi_failure_reason());
                         }
                         return writeCallback.array();
