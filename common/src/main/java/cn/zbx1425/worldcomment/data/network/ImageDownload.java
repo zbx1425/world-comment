@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -29,7 +31,6 @@ public class ImageDownload {
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final MemoryUtil.MemoryAllocator OFF_HEAP_ALLOCATOR = MemoryUtil.getAllocator(false);
 
     private static final Map<String, ImageState> images = new HashMap<>();
 
@@ -84,10 +85,15 @@ public class ImageDownload {
         return null;
     }
 
-    private static void applyImageData(String url, byte[] imageData) {
+    private static void applyImageData(String url, byte[] pngOrJpgImageData) {
         Minecraft.getInstance().execute(() -> {
+            byte[] imageData = pngOrJpgImageData;
+            if (url.toLowerCase(Locale.ROOT).endsWith(".jpg")) {
+                // Actually maybe directly construct NativeImage from jpg
+                imageData = ImageConvert.toPng(imageData);
+            }
             DynamicTexture dynamicTexture;
-            ByteBuffer buffer = MemoryUtil.memByteBuffer(OFF_HEAP_ALLOCATOR.malloc(imageData.length), imageData.length);
+            ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
             try {
                 buffer.put(imageData);
                 buffer.rewind();
@@ -101,7 +107,7 @@ public class ImageDownload {
                     images.get(url).failed = true;
                 }
             } finally {
-                OFF_HEAP_ALLOCATOR.free(MemoryUtil.memAddress0(buffer));
+                OffHeapAllocator.free(buffer);
             }
         });
     }

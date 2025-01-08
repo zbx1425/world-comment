@@ -29,16 +29,6 @@ public class Screenshot {
             RenderSystem.bindTexture(frameBuf.getColorTextureId());
             fullSizeImage.downloadTexture(0, true);
             fullSizeImage.flipY();
-            if (fullSizeImage.getWidth() > 2000) {
-                int newWidth = 1920;
-                int newHeight = (int) (fullSizeImage.getHeight() * (newWidth / (double) fullSizeImage.getWidth()));
-                NativeImage scaledImage = new NativeImage(newWidth, newHeight, false);
-                try (scaledImage) {
-                    fullSizeImage.resizeSubRectTo(0, 0, fullSizeImage.getWidth(), fullSizeImage.getHeight(), scaledImage);
-                    callback.accept(scaledImage.asByteArray());
-                    return;
-                }
-            }
             callback.accept(fullSizeImage.asByteArray());
         } catch (IOException ex) {
             Main.LOGGER.error("Failed to save screenshot", ex);

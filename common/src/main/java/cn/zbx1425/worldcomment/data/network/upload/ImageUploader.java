@@ -3,10 +3,21 @@ package cn.zbx1425.worldcomment.data.network.upload;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.google.gson.JsonObject;
+import org.lwjgl.stb.STBIWriteCallback;
+import org.lwjgl.stb.STBImage;
+import org.lwjgl.stb.STBImageResize;
+import org.lwjgl.stb.STBImageWrite;
+import org.lwjgl.system.MemoryStack;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
 import java.util.Locale;
 
@@ -45,4 +56,7 @@ public abstract class ImageUploader {
             return new JsonObject();
         }
     }
+
+    public static int IMAGE_MAX_WIDTH = 1920;
+    public static int THUMBNAIL_MAX_WIDTH = 256;
 }

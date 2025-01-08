@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.ImageConvert;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonObject;
@@ -38,22 +39,14 @@ public class SmmsUploader extends ImageUploader {
     public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         int thumbWidth = 256;
         BufferedImage fullSizeImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
-        String fullSizeUrl = uploadImage(imageBytes,
-                "WorldComment from " + comment.initiatorName + ".png");
+        String fullSizeUrl = uploadImage(ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH),
+                "WorldComment from " + comment.initiatorName + ".jpg");
         String thumbUrl;
         if (fullSizeImage.getWidth() < thumbWidth) {
             thumbUrl = fullSizeUrl;
         } else {
-            BufferedImage thumbImage = new BufferedImage(thumbWidth,
-                    (int)((float)fullSizeImage.getHeight() / fullSizeImage.getWidth() * thumbWidth),
-                    fullSizeImage.getType());
-            thumbImage.getGraphics().drawImage(
-                    fullSizeImage.getScaledInstance(thumbWidth, thumbImage.getHeight(), Image.SCALE_DEFAULT),
-                    0, 0, null);
-            ByteArrayOutputStream oStream = new ByteArrayOutputStream(64 * 1024);
-            ImageIO.write(thumbImage, "png", oStream);
-            thumbUrl = uploadImage(oStream.toByteArray(),
-                    "WorldComment from " + comment.initiatorName + ".thumb.png");
+            thumbUrl = uploadImage(ImageConvert.toJpegScaled(imageBytes, THUMBNAIL_MAX_WIDTH),
+                    "WorldComment from " + comment.initiatorName + ".thumb.jpg");
         }
         return new ThumbImage(fullSizeUrl, thumbUrl);
     }
@@ -61,7 +54,7 @@ public class SmmsUploader extends ImageUploader {
     private String uploadImage(byte[] data, String fileName) throws IOException, InterruptedException {
         MimeMultipartData body = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
-                .addFile("smfile", fileName, data, "image/png")
+                .addFile("smfile", fileName, data, "image/jpg")
                 .build();
         HttpRequest reqUpload = HttpRequest.newBuilder(URI.create(apiUrl))
                 .header("Content-Type", body.getContentType())

@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.ImageConvert;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonObject;
@@ -29,7 +30,8 @@ public class LskyUploader extends ImageUploader {
     public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         MimeMultipartData.Builder bodyBuilder = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
-                .addFile("file", "image.png", imageBytes, "application/octet-stream");
+                .addFile("file", "WorldComment from " + comment.initiatorName + ".jpg",
+                        ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "application/octet-stream");
         if (strategyId != null) bodyBuilder.addText("strategy_id", Integer.toString(strategyId));
         if (albumId != null) bodyBuilder.addText("album_id", Integer.toString(albumId));
         MimeMultipartData body = bodyBuilder.build();

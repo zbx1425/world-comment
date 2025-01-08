@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.ImageConvert;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonObject;
@@ -32,7 +33,8 @@ public class ImglocUploader extends ImageUploader {
     public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         MimeMultipartData body = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
-                .addFile("source", "image.png", imageBytes, "image/png")
+                .addFile("source", "WorldComment from " + comment.initiatorName + ".jpg",
+                        ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "image/jpg")
                 .addText("title", "WorldComment from " + comment.initiatorName)
                 .addText("description", comment.message)
                 .build();
