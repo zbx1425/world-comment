@@ -22,6 +22,8 @@ import java.util.function.Consumer;
 
 public class Screenshot {
 
+    public static boolean isGrabbing = false;
+
     public static void grabScreenshot(Consumer<byte[]> callback) {
         RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
         NativeImage fullSizeImage = new NativeImage(frameBuf.width, frameBuf.height, false);
@@ -73,12 +75,14 @@ public class Screenshot {
                 minecraft.options.hideGui = prevHideGui;
                 MainClient.CLIENT_CONFIG.isCommentVisible = prevIsCommentVisible;
                 MainClient.CLIENT_CONFIG.commentHideTimer = prevCommentHideTimer;
+                isGrabbing = false;
             }))));
         }
         return true;
     }
 
     public static void applyClientConfigForScreenshot() {
+        isGrabbing = true;
         Minecraft.getInstance().options.hideGui = !MainClient.CLIENT_CONFIG.screenshotIncludeGui;
         MainClient.CLIENT_CONFIG.isCommentVisible = MainClient.CLIENT_CONFIG.screenshotIncludeComments;
     }

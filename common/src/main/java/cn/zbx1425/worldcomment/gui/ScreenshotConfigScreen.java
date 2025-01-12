@@ -103,6 +103,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     public void onClose() {
         minecraft.options.hideGui = prevHideGui;
         MainClient.CLIENT_CONFIG.isCommentVisible = !prevHideComments;
+        Screenshot.isGrabbing = false;
         super.onClose();
     }
 }

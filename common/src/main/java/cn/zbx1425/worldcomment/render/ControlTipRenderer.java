@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.render;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
@@ -19,11 +20,11 @@ public class ControlTipRenderer implements IGuiCommon {
 
     public static final ControlTip TIP_CREATE = new ControlTip(
             Component.translatable("gui.worldcomment.control_tip.create"), 2,
-            Minecraft.getInstance().options.keyScreenshot, false
+            Minecraft.getInstance().options.keyScreenshot, false, true
     );
     public static final ControlTip TIP_PLACE_COMMENT = new ControlTip(
             Component.translatable("gui.worldcomment.control_tip.place_comment"), 0,
-            null, true
+            null, true, true
     );
     public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
             () -> Component.translatable("gui.worldcomment.control_tip.toggle_show",
@@ -60,7 +61,7 @@ public class ControlTipRenderer implements IGuiCommon {
         for (ControlTip tip : TIPS) {
             if (!tip.visible) continue;
             tip.render(guiGraphics, 10, yOffset);
-            yOffset += 20 + 2;
+            if (!tip.atCursor) yOffset += 20 + 2;
         }
     }
 
@@ -71,11 +72,11 @@ public class ControlTipRenderer implements IGuiCommon {
         if (minecraft.player == null) {
             return;
         }
+        if (Screenshot.isGrabbing) return;
         ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
         if (item != null) {
             if (CommentToolItem.getUploadJobId(item) != null) {
                 TIP_PLACE_COMMENT.visible = true;
-                return; // De-clutter
             } else {
                 TIP_CREATE.visible = true;
                 if (MainClient.CLIENT_CONFIG.isCommentVisible) {
@@ -96,10 +97,11 @@ public class ControlTipRenderer implements IGuiCommon {
 
     public static class ControlTip {
 
-        public int imgIndex;
-        public KeyMapping key;
-        public boolean critical;
-        public Supplier<Component> text;
+        public final int imgIndex;
+        public final KeyMapping key;
+        public final boolean critical;
+        public final boolean atCursor;
+        public final Supplier<Component> text;
 
         public boolean visible = false;
 
@@ -108,6 +110,15 @@ public class ControlTipRenderer implements IGuiCommon {
             this.imgIndex = imgIndex;
             this.key = key;
             this.critical = critical;
+            this.atCursor = false;
+        }
+
+        public ControlTip(Component text, int imgIndex, KeyMapping key, boolean critical, boolean atCursor) {
+            this.text = () -> text;
+            this.imgIndex = imgIndex;
+            this.key = key;
+            this.critical = critical;
+            this.atCursor = atCursor;
         }
 
         public ControlTip(Supplier<Component> text, int imgIndex, KeyMapping key, boolean critical) {
@@ -115,12 +126,17 @@ public class ControlTipRenderer implements IGuiCommon {
             this.imgIndex = imgIndex;
             this.key = key;
             this.critical = critical;
+            this.atCursor = false;
         }
 
         public void render(GuiGraphics guiGraphics, int x, int y) {
             Font font = Minecraft.getInstance().font;
+            int innerWidth = 20 + 4 + font.width(text.get());
+            if (atCursor) {
+                x = guiGraphics.guiWidth() / 2 - innerWidth / 2;
+                y = guiGraphics.guiHeight() / 2 - 20 - 4;
+            }
             if (critical) {
-                int innerWidth = 20 + 4 + font.width(text.get());
                 long currentTime = System.currentTimeMillis();
                 if (currentTime % 400 < 200) {
                     guiGraphics.fill(x + 1, y + 1, x + innerWidth + 4 + 1, y + 20 + 1, 0xFF444444);
