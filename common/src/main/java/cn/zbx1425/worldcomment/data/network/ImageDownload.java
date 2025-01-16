@@ -33,28 +33,30 @@ import java.util.stream.Stream;
 public class ImageDownload {
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+    private static final Executor IO_EXECUTOR = Executors.newCachedThreadPool();
 
     private static final Map<String, ImageState> images = new HashMap<>();
 
     public static AbstractTexture getTexture(ThumbImage image, boolean thumb) {
-        try {
-            byte[] localImageData = getLocalImageData(image.url);
-            if (localImageData != null) {
-                if (!images.containsKey(image.url)) {
-                    images.put(image.url, new ImageState());
-                    applyImageData(image.url, localImageData);
-                }
-                return queryTexture(image.url);
-            }
-        } catch (IOException ex) {
-            Main.LOGGER.warn("Cannot read local image " + image.url, ex);
+        String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
+        synchronized (images) {
+            if (images.containsKey(targetUrl)) return queryTexture(targetUrl);
+            images.put(targetUrl, new ImageState());
         }
 
-        String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
-        if (!images.containsKey(targetUrl)) {
-            images.put(targetUrl, new ImageState());
+        IO_EXECUTOR.execute(() -> {
+            try {
+                byte[] localImageData = getLocalImageData(image.url);
+                if (localImageData != null) {
+                    applyImageData(targetUrl, localImageData);
+                }
+            } catch (IOException ex) {
+                Main.LOGGER.warn("Cannot read local image {}", image.url, ex);
+            }
+
             downloadImage(targetUrl);
-        }
+        });
+
         return queryTexture(targetUrl);
     }
 
@@ -72,6 +74,7 @@ public class ImageDownload {
                     if (response.statusCode() != 200) {
                         Main.LOGGER.warn("Cannot download image {}: HTTP {}", url, response.statusCode());
                         synchronized (images) {
+                            if (!images.containsKey(url)) return;
                             images.get(url).failed = true;
                         }
                         return;
@@ -82,6 +85,7 @@ public class ImageDownload {
                 .exceptionally(ex -> {
                     Main.LOGGER.warn("Cannot download image {}", url, ex);
                     synchronized (images) {
+                        if (!images.containsKey(url)) return null;
                         images.get(url).failed = true;
                     }
                     return null;
@@ -90,38 +94,34 @@ public class ImageDownload {
 
     private static byte[] getLocalImageData(String url) throws IOException {
         Path imageBaseDir = Minecraft.getInstance().gameDirectory.toPath().resolve("worldcomment-images");
-        if (!Files.isDirectory(imageBaseDir)) return null;
-        try (Stream<Path> imageDirs = Files.list(imageBaseDir)) {
-            for (Path imageDir : imageDirs.toArray(Path[]::new)) {
-                Path imagePath = imageDir.resolve("url-sha1-" + DigestUtils.sha1Hex(url)
-                    + (url.endsWith(".jpg") ? ".jpg" : ".png"));
-                if (Files.exists(imagePath)) {
-                    return Files.readAllBytes(imagePath);
-                }
-            }
+        Path imagePath = imageBaseDir.resolve("url-sha1-" + DigestUtils.sha1Hex(url)
+            + (url.endsWith(".jpg") ? ".jpg" : ".png"));
+        if (Files.exists(imagePath)) {
+            return Files.readAllBytes(imagePath);
         }
         return null;
     }
 
     private static void applyImageData(String url, byte[] pngOrJpgImageData) {
+        byte[] imageData = pngOrJpgImageData;
+        if (url.toLowerCase(Locale.ROOT).endsWith(".jpg")) {
+            // Actually maybe directly construct NativeImage from jpg
+            imageData = ImageConvert.toPng(imageData);
+        }
+        ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
+        buffer.put(imageData);
+        buffer.rewind();
         Minecraft.getInstance().execute(() -> {
-            byte[] imageData = pngOrJpgImageData;
-            if (url.toLowerCase(Locale.ROOT).endsWith(".jpg")) {
-                // Actually maybe directly construct NativeImage from jpg
-                imageData = ImageConvert.toPng(imageData);
-            }
-            DynamicTexture dynamicTexture;
-            ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
             try {
-                buffer.put(imageData);
-                buffer.rewind();
-                dynamicTexture = new DynamicTexture(NativeImage.read(buffer));
+                DynamicTexture dynamicTexture = new DynamicTexture(NativeImage.read(buffer));
                 synchronized (images) {
+                    if (!images.containsKey(url)) return;
                     images.get(url).texture = dynamicTexture;
                 }
             } catch (Throwable ex) {
                 Main.LOGGER.warn("Cannot store image " + url, ex);
                 synchronized (images) {
+                    if (!images.containsKey(url)) return;
                     images.get(url).failed = true;
                 }
             } finally {
@@ -145,11 +145,13 @@ public class ImageDownload {
 
     public static void purgeUnused() {
         long currentTime = System.currentTimeMillis();
-        for (Iterator<Map.Entry<String, ImageState>> it = images.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry<String, ImageState> entry = it.next();
-            if (currentTime - entry.getValue().queryTime > 60000) {
-                if (entry.getValue().texture != null) entry.getValue().texture.close();
-                it.remove();
+        synchronized (images) {
+            for (Iterator<Map.Entry<String, ImageState>> it = images.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, ImageState> entry = it.next();
+                if (currentTime - entry.getValue().queryTime > 60000) {
+                    if (entry.getValue().texture != null) entry.getValue().texture.close();
+                    it.remove();
+                }
             }
         }
     }
