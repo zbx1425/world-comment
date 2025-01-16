@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.data.network;
 
+import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -19,6 +20,8 @@ import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -30,7 +33,6 @@ import java.util.stream.Stream;
 public class ImageDownload {
 
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
-    private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
 
     private static final Map<String, ImageState> images = new HashMap<>();
 
@@ -51,24 +53,39 @@ public class ImageDownload {
         String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
         if (!images.containsKey(targetUrl)) {
             images.put(targetUrl, new ImageState());
-            NETWORK_EXECUTOR.execute(() -> downloadImage(targetUrl));
+            downloadImage(targetUrl);
         }
         return queryTexture(targetUrl);
     }
 
     private static void downloadImage(String url) {
-        try {
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).GET().build();
-            HttpResponse<byte[]> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            if (response.statusCode() != 200) throw new IOException("HTTP Status " + response.statusCode());
-            byte[] imageData = response.body();
-            applyImageData(url, imageData);
-        } catch (Throwable ex) {
-            Main.LOGGER.warn("Cannot download image " + url, ex);
-            synchronized (images) {
-                images.get(url).failed = true;
-            }
-        }
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                .header("User-Agent",
+                        "Mozilla/5.0 WorldComment/" + BuildConfig.MOD_VERSION + " +https://www.zbx1425.cn")
+                .header("X-Minecraft-Username", Minecraft.getInstance().getUser().getName())
+                .header("X-Minecraft-UUID", Minecraft.getInstance().getUser().getProfileId().toString())
+                .timeout(Duration.of(10, ChronoUnit.SECONDS))
+                .GET()
+                .build();
+        HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+                .thenAccept(response -> {
+                    if (response.statusCode() != 200) {
+                        Main.LOGGER.warn("Cannot download image {}: HTTP {}", url, response.statusCode());
+                        synchronized (images) {
+                            images.get(url).failed = true;
+                        }
+                        return;
+                    }
+                    byte[] imageData = response.body();
+                    applyImageData(url, imageData);
+                })
+                .exceptionally(ex -> {
+                    Main.LOGGER.warn("Cannot download image {}", url, ex);
+                    synchronized (images) {
+                        images.get(url).failed = true;
+                    }
+                    return null;
+                });
     }
 
     private static byte[] getLocalImageData(String url) throws IOException {
@@ -76,7 +93,8 @@ public class ImageDownload {
         if (!Files.isDirectory(imageBaseDir)) return null;
         try (Stream<Path> imageDirs = Files.list(imageBaseDir)) {
             for (Path imageDir : imageDirs.toArray(Path[]::new)) {
-                Path imagePath = imageDir.resolve("url-sha1-" + DigestUtils.sha1Hex(url) + ".png");
+                Path imagePath = imageDir.resolve("url-sha1-" + DigestUtils.sha1Hex(url)
+                    + (url.endsWith(".jpg") ? ".jpg" : ".png"));
                 if (Files.exists(imagePath)) {
                     return Files.readAllBytes(imagePath);
                 }

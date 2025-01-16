@@ -58,7 +58,8 @@ public class ImageDump {
                 CommentEntry comment = comments.get(i);
                 String targetUrl = comment.image.url;
                 if (targetUrl.isEmpty()) continue;
-                Path filePath = storeDir.resolve("url-sha1-" + DigestUtils.sha1Hex(targetUrl) + ".png");
+                Path filePath = storeDir.resolve("url-sha1-" + DigestUtils.sha1Hex(targetUrl)
+                        + (targetUrl.endsWith(".jpg") ? ".jpg" : ".png"));
                 if (!Files.exists(filePath)) {
                     try {
                         byte[] imageData = HTTP_CLIENT.send(
