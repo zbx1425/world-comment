@@ -59,33 +59,41 @@ public class FileSerializer {
     }
 
     public void insert(CommentEntry newEntry) throws IOException {
-        try {
-            Files.createDirectory(getLevelPath(newEntry.level));
-        } catch (FileAlreadyExistsException ignored) { }
-        Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
-        try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), true)) {
-            newEntry.writeFileStream(oStream);
+        synchronized (this) {
+            try {
+                Files.createDirectory(getLevelPath(newEntry.level));
+            } catch (FileAlreadyExistsException ignored) {
+            }
+            Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
+            try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), true)) {
+                newEntry.writeFileStream(oStream);
+            }
         }
     }
 
     public void update(CommentEntry existingEntry) throws IOException {
-        assert existingEntry.fileOffset > 0;
-        Path targetFile = getLevelRegionPath(existingEntry.level, existingEntry.region);
-        try (RandomAccessFile oStream = new RandomAccessFile(targetFile.toFile(), "rw")) {
-            existingEntry.updateInFile(oStream);
+        synchronized (this) {
+            assert existingEntry.fileOffset > 0;
+            Path targetFile = getLevelRegionPath(existingEntry.level, existingEntry.region);
+            try (RandomAccessFile oStream = new RandomAccessFile(targetFile.toFile(), "rw")) {
+                existingEntry.updateInFile(oStream);
+            }
         }
     }
 
     public void updateRegion(List<CommentEntry> regionEntries) throws IOException {
-        if (regionEntries.isEmpty()) return;
-        CommentEntry pivot = regionEntries.getFirst();
-        try {
-            Files.createDirectory(getLevelPath(pivot.level));
-        } catch (FileAlreadyExistsException ignored) { }
-        Path targetFile = getLevelRegionPath(pivot.level, pivot.region);
-        try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), false)) {
-            for (CommentEntry entry : regionEntries) {
-                entry.writeFileStream(oStream);
+        synchronized (this) {
+            if (regionEntries.isEmpty()) return;
+            CommentEntry pivot = regionEntries.getFirst();
+            try {
+                Files.createDirectory(getLevelPath(pivot.level));
+            } catch (FileAlreadyExistsException ignored) {
+            }
+            Path targetFile = getLevelRegionPath(pivot.level, pivot.region);
+            try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), false)) {
+                for (CommentEntry entry : regionEntries) {
+                    entry.writeFileStream(oStream);
+                }
             }
         }
     }
