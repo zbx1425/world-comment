@@ -21,6 +21,11 @@ public class NoopSynchronizer implements Synchronizer {
     }
 
     @Override
+    public void notifyUpdateAllFields(CommentEntry trustedEntry) {
+
+    }
+
+    @Override
     public void notifyInsert(CommentEntry newEntry) {
 
     }
