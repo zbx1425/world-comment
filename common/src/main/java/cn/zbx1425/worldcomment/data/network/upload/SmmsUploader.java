@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.BuildConfig;
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageConvert;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
@@ -38,32 +39,32 @@ public class SmmsUploader extends ImageUploader {
         this.apiToken = config.get("apiToken").getAsString();
     }
 
-    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
-        int thumbWidth = 256;
-        BufferedImage fullSizeImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
-        CompletableFuture<String> fullSizeUrlFuture = uploadImage(ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH),
+    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
+        CompletableFuture<String> fullSizeUrlFuture = uploadImage(imageBytes, IMAGE_MAX_WIDTH,
                 "WorldComment from " + comment.initiatorName + ".jpg");
-        if (fullSizeImage.getWidth() < thumbWidth) {
-            return fullSizeUrlFuture.thenApply(fullSizeUrl -> new ThumbImage(fullSizeUrl, fullSizeUrl));
-        } else {
-            CompletableFuture<String> thumbnailFuture = uploadImage(ImageConvert.toJpegScaled(imageBytes, THUMBNAIL_MAX_WIDTH),
-                    "WorldComment from " + comment.initiatorName + ".thumb.jpg");
-            return CompletableFuture.allOf(fullSizeUrlFuture, thumbnailFuture).thenApply(ignored ->
-                    new ThumbImage(fullSizeUrlFuture.join(), thumbnailFuture.join()));
-        }
+        CompletableFuture<String> thumbnailFuture = uploadImage(imageBytes, THUMBNAIL_MAX_WIDTH,
+                "WorldComment from " + comment.initiatorName + ".thumb.jpg");
+        return CompletableFuture.allOf(fullSizeUrlFuture, thumbnailFuture).thenApply(ignored ->
+                new ThumbImage(fullSizeUrlFuture.join(), thumbnailFuture.join()));
     }
 
-    private CompletableFuture<String> uploadImage(byte[] data, String fileName) throws IOException, InterruptedException {
-        MimeMultipartData body = MimeMultipartData.newBuilder()
-                .withCharset(StandardCharsets.UTF_8)
-                .addFile("smfile", fileName, data, "image/jpg")
-                .build();
-        HttpRequest reqUpload = ImageUploader.requestBuilder(URI.create(apiUrl))
-                .header("Content-Type", body.getContentType())
-                .header("Authorization", "Basic " + apiToken)
-                .POST(body.getBodyPublisher())
-                .build();
-        return HTTP_CLIENT.sendAsync(reqUpload, HttpResponse.BodyHandlers.ofString())
+    private CompletableFuture<String> uploadImage(byte[] imageBytes, int maxWidth, String fileName) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                MimeMultipartData body = MimeMultipartData.newBuilder()
+                        .withCharset(StandardCharsets.UTF_8)
+                        .addFile("smfile", fileName, ImageConvert.toJpegScaled(imageBytes, maxWidth), "image/jpg")
+                        .build();
+                return ImageUploader.requestBuilder(URI.create(apiUrl))
+                        .header("Content-Type", body.getContentType())
+                        .header("Authorization", "Basic " + apiToken)
+                        .POST(body.getBodyPublisher())
+                        .build();
+            } catch (IOException ex) {
+                throw new CompletionException(ex);
+            }
+        }, Main.IO_EXECUTOR)
+                .thenCompose(reqUpload -> Main.HTTP_CLIENT.sendAsync(reqUpload, HttpResponse.BodyHandlers.ofString()))
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
                         throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode() + "\n" + response.body()));

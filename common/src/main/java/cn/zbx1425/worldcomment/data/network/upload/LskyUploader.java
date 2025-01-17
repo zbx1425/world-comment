@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageConvert;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
@@ -29,20 +30,26 @@ public class LskyUploader extends ImageUploader {
         this.albumId = config.has("albumId") ? config.get("albumId").getAsInt() : null;
     }
 
-    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException {
-        MimeMultipartData.Builder bodyBuilder = MimeMultipartData.newBuilder()
-                .withCharset(StandardCharsets.UTF_8)
-                .addFile("file", "WorldComment from " + comment.initiatorName + ".jpg",
-                        ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "application/octet-stream");
-        if (strategyId != null) bodyBuilder.addText("strategy_id", Integer.toString(strategyId));
-        if (albumId != null) bodyBuilder.addText("album_id", Integer.toString(albumId));
-        MimeMultipartData body = bodyBuilder.build();
-        HttpRequest request = ImageUploader.requestBuilder(URI.create(apiUrl))
-                .header("Content-Type", body.getContentType())
-                .header("Authorization", "Bearer " + apiToken)
-                .POST(body.getBodyPublisher())
-                .build();
-        return HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+            MimeMultipartData.Builder bodyBuilder = MimeMultipartData.newBuilder()
+                    .withCharset(StandardCharsets.UTF_8)
+                    .addFile("file", "WorldComment from " + comment.initiatorName + ".jpg",
+                            ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "application/octet-stream");
+            if (strategyId != null) bodyBuilder.addText("strategy_id", Integer.toString(strategyId));
+            if (albumId != null) bodyBuilder.addText("album_id", Integer.toString(albumId));
+            MimeMultipartData body = bodyBuilder.build();
+            return ImageUploader.requestBuilder(URI.create(apiUrl))
+                    .header("Content-Type", body.getContentType())
+                    .header("Authorization", "Bearer " + apiToken)
+                    .POST(body.getBodyPublisher())
+                    .build();
+            } catch (IOException ex) {
+                throw new CompletionException(ex);
+            }
+        }, Main.IO_EXECUTOR)
+                .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
                         throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode() + "\n" + response.body()));

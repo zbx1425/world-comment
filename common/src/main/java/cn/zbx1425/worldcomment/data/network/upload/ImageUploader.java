@@ -25,12 +25,11 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public abstract class ImageUploader {
 
-    protected static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
-
-    public abstract CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException;
+    public abstract CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment);
 
     public static ImageUploader getUploader(JsonObject config) {
         String service = config.has("service") ? config.get("service").getAsString() : "";

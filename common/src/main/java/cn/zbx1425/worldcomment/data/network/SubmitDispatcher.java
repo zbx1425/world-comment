@@ -21,10 +21,9 @@ import java.util.function.Consumer;
 
 public class SubmitDispatcher {
 
-    private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final Long2ObjectMap<SubmitJob> pendingJobs = new Long2ObjectOpenHashMap<>();
 
-    public static long addJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Exception> callback) {
+    public static long addJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Throwable> callback) {
         long jobId = ServerWorldData.SNOWFLAKE.nextId();
         SubmitJob job = new SubmitJob(comment, imageBytes, callback, MainClient.CLIENT_CONFIG);
         addJob(jobId, job);
@@ -34,23 +33,23 @@ public class SubmitDispatcher {
     private static void addJob(long jobId, SubmitJob job) {
         pendingJobs.put(jobId, job);
         if (job.imageBytes != null) {
-            NETWORK_EXECUTOR.execute(() -> {
-                try {
-                    ImageUploader uploader = job.uploaderToUse.poll();
-                    if (uploader == null) throw new IllegalStateException("All uploads failed");
-                    ThumbImage thumbImage = uploader.uploadImage(job.imageBytes, job.comment);
-                    job.setImage(thumbImage);
-                    trySendPackage(jobId);
-                } catch (Exception ex) {
-                    Main.LOGGER.error("Upload Image", ex);
-                    if (job.callback != null) job.callback.accept(job, ex);
-                    if (job.uploaderToUse.isEmpty()) {
-                        removeJob(jobId);
-                    } else {
-                        addJob(jobId, job);
-                    }
-                }
-            });
+                ImageUploader uploader = job.uploaderToUse.poll();
+                if (uploader == null) throw new IllegalStateException("All uploads failed");
+                uploader.uploadImage(job.imageBytes, job.comment)
+                        .thenAccept(thumbImage -> {
+                            job.setImage(thumbImage);
+                            trySendPackage(jobId);
+                        })
+                        .exceptionally(ex -> {
+                            Main.LOGGER.error("Upload Image", ex);
+                            if (job.callback != null) job.callback.accept(job, ex);
+                            if (job.uploaderToUse.isEmpty()) {
+                                removeJob(jobId);
+                            } else {
+                                addJob(jobId, job);
+                            }
+                            return null;
+                        });
         }
     }
 

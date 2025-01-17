@@ -17,10 +17,10 @@ public class SubmitJob {
     public final CommentEntry comment;
     public final byte[] imageBytes;
     public boolean imageReady, blockPosReady;
-    public BiConsumer<SubmitJob, Exception> callback;
+    public BiConsumer<SubmitJob, Throwable> callback;
     public Queue<ImageUploader> uploaderToUse;
 
-    public SubmitJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Exception> callback, ClientConfig config) {
+    public SubmitJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Throwable> callback, ClientConfig config) {
         this.comment = comment;
         this.imageBytes = imageBytes;
         if (imageBytes == null) {

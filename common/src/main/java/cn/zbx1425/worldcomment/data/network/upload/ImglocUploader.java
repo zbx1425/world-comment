@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.BuildConfig;
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageConvert;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
@@ -32,20 +33,26 @@ public class ImglocUploader extends ImageUploader {
         this.apiToken = config.get("apiToken").getAsString();
     }
 
-    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
-        MimeMultipartData body = MimeMultipartData.newBuilder()
-                .withCharset(StandardCharsets.UTF_8)
-                .addFile("source", "WorldComment from " + comment.initiatorName + ".jpg",
-                        ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "image/jpg")
-                .addText("title", "WorldComment from " + comment.initiatorName)
-                .addText("description", comment.message)
-                .build();
-        HttpRequest reqUpload = ImageUploader.requestBuilder(URI.create(apiUrl))
-                .header("Content-Type", body.getContentType())
-                .header("X-API-Key", apiToken)
-                .POST(body.getBodyPublisher())
-                .build();
-        return HTTP_CLIENT.sendAsync(reqUpload, HttpResponse.BodyHandlers.ofString())
+    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                MimeMultipartData body = MimeMultipartData.newBuilder()
+                        .withCharset(StandardCharsets.UTF_8)
+                        .addFile("source", "WorldComment from " + comment.initiatorName + ".jpg",
+                                ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "image/jpg")
+                        .addText("title", "WorldComment from " + comment.initiatorName)
+                        .addText("description", comment.message)
+                        .build();
+                return ImageUploader.requestBuilder(URI.create(apiUrl))
+                    .header("Content-Type", body.getContentType())
+                    .header("X-API-Key", apiToken)
+                    .POST(body.getBodyPublisher())
+                    .build();
+            } catch (IOException e) {
+                throw new CompletionException(e);
+            }
+        }, Main.IO_EXECUTOR)
+                .thenCompose(reqUpload -> Main.HTTP_CLIENT.sendAsync(reqUpload, HttpResponse.BodyHandlers.ofString()))
                 .thenApply(response -> {
                     if (response.statusCode() != 200)
                         throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode() + "\n" + response.body()));
