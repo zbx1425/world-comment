@@ -40,6 +40,10 @@ public class RedisMessage {
         return new RedisMessage(Action.UPDATE, entry.toBinaryBuffer());
     }
 
+    public static RedisMessage updateAllFields(CommentEntry entry) {
+        return new RedisMessage(Action.UPDATE_ALL_FIELDS, entry.toBinaryBuffer());
+    }
+
     public void publishAsync(StatefulRedisConnection<String, ByteBuf> connection) {
         ByteBuf buffer = Unpooled.buffer(content.readableBytes() + 16);
         buffer.writeByte(action.ordinal());
@@ -58,6 +62,9 @@ public class RedisMessage {
             case UPDATE:
                 synchronizer.handleUpdate(CommentEntry.fromBinaryBuffer(content));
                 break;
+            case UPDATE_ALL_FIELDS:
+                synchronizer.handleUpdateAllFields(CommentEntry.fromBinaryBuffer(content));
+                break;
         }
     }
 
@@ -66,6 +73,6 @@ public class RedisMessage {
     }
 
     public enum Action {
-        INSERT, UPDATE
+        INSERT, UPDATE, UPDATE_ALL_FIELDS
     }
 }

@@ -15,6 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -24,6 +27,9 @@ public class Main {
 	public static ServerWorldData DATABASE;
 
 	public static ServerConfig SERVER_CONFIG = new ServerConfig();
+
+	public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+	public static final Executor IO_EXECUTOR = Executors.newCachedThreadPool();
 
 	public static final RegistryObject<GroupedItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 

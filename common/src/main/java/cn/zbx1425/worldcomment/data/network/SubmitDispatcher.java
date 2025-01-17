@@ -31,7 +31,9 @@ public class SubmitDispatcher {
     }
 
     private static void addJob(long jobId, SubmitJob job) {
-        pendingJobs.put(jobId, job);
+        synchronized (pendingJobs) {
+            pendingJobs.put(jobId, job);
+        }
         if (job.imageBytes != null) {
                 ImageUploader uploader = job.uploaderToUse.poll();
                 if (uploader == null) throw new IllegalStateException("All uploads failed");

@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class FileSerializer {
@@ -67,22 +68,25 @@ public class FileSerializer {
         }
     }
 
-    public void cover(CommentEntry newEntry, boolean append) throws IOException {
-        try {
-            Files.createDirectory(getLevelPath(newEntry.level));
-        } catch (FileAlreadyExistsException ignored) { }
-
-        Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
-        try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), append)) {
-            newEntry.writeFileStream(oStream);
-        }
-    }
-
     public void update(CommentEntry existingEntry) throws IOException {
         assert existingEntry.fileOffset > 0;
         Path targetFile = getLevelRegionPath(existingEntry.level, existingEntry.region);
         try (RandomAccessFile oStream = new RandomAccessFile(targetFile.toFile(), "rw")) {
             existingEntry.updateInFile(oStream);
+        }
+    }
+
+    public void updateRegion(List<CommentEntry> regionEntries) throws IOException {
+        if (regionEntries.isEmpty()) return;
+        CommentEntry pivot = regionEntries.getFirst();
+        try {
+            Files.createDirectory(getLevelPath(pivot.level));
+        } catch (FileAlreadyExistsException ignored) { }
+        Path targetFile = getLevelRegionPath(pivot.level, pivot.region);
+        try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), false)) {
+            for (CommentEntry entry : regionEntries) {
+                entry.writeFileStream(oStream);
+            }
         }
     }
 }

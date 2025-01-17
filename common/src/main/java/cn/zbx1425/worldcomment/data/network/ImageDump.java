@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -16,6 +17,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -24,9 +27,6 @@ public class ImageDump {
 
     private static long lastRequestNonce = 0;
     private static String lastRequestDirName = "";
-
-    private static final Executor NETWORK_EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     public static void requestDumpComments(String dirName) {
         lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
@@ -45,7 +45,7 @@ public class ImageDump {
             return;
         }
 
-        NETWORK_EXECUTOR.execute(() -> {
+        Main.IO_EXECUTOR.execute(() -> {
             for (int i = 0; i < comments.size(); i++) {
                 int finalI = i;
                 Minecraft.getInstance().execute(() -> {
@@ -62,11 +62,10 @@ public class ImageDump {
                         + (targetUrl.endsWith(".jpg") ? ".jpg" : ".png"));
                 if (!Files.exists(filePath)) {
                     try {
-                        byte[] imageData = HTTP_CLIENT.send(
-                                HttpRequest.newBuilder(URI.create(targetUrl))
+                        byte[] imageData = Main.HTTP_CLIENT.send(
+                                ImageUploader.requestBuilder(URI.create(targetUrl))
+                                        .timeout(Duration.of(10, ChronoUnit.SECONDS))
                                         .GET()
-                                        .header("User-Agent",
-                                                "Mozilla/5.0 WorldComment/" + BuildConfig.MOD_VERSION + " +https://www.zbx1425.cn")
                                         .build(),
                                 HttpResponse.BodyHandlers.ofByteArray()).body();
                         Files.write(filePath, imageData);

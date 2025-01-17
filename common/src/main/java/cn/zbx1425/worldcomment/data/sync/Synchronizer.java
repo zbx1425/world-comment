@@ -14,6 +14,8 @@ public interface Synchronizer extends AutoCloseable {
 
     void notifyUpdate(CommentEntry trustedEntry);
 
+    void notifyUpdateAllFields(CommentEntry trustedEntry);
+
     void notifyInsert(CommentEntry newEntry);
 
     void kvReadAllInto(CommentCache comments) throws IOException;

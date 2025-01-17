@@ -83,6 +83,15 @@ public class CommentEntry {
         this.region = new ChunkPos(location.getX() >> (4 + REGION_SHIFT), location.getZ() >> (4 + REGION_SHIFT));
     }
 
+    public void copyFrom(CommentEntry other) {
+        this.messageType = other.messageType;
+        this.message = other.message;
+        this.image = other.image;
+        this.deleted = other.deleted;
+        this.uplinkSent = other.uplinkSent;
+        this.like = other.like;
+    }
+
     public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
         dst.writeBoolean(deleted);
         dst.writeBoolean(uplinkSent);

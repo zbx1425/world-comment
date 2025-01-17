@@ -75,6 +75,7 @@ public class CommentCache {
         }
     }
 
+    // Update only the patch-able fields
     public CommentEntry update(CommentEntry newEntry) {
         synchronized (this) {
             List<CommentEntry> regionData = regionIndex.getOrDefault(newEntry.level, Long2ObjectMaps.emptyMap())
@@ -87,6 +88,21 @@ public class CommentCache {
                     existingEntry.like = newEntry.like;
                     assert existingEntry.fileOffset > 0;
                     return existingEntry;
+                }
+            }
+            return null;
+        }
+    }
+
+    public List<CommentEntry> updateAllFields(CommentEntry newEntry) {
+        synchronized (this) {
+            List<CommentEntry> regionData = regionIndex.getOrDefault(newEntry.level, Long2ObjectMaps.emptyMap())
+                    .get(newEntry.region.toLong());
+            if (regionData == null) return null;
+            for (CommentEntry existingEntry : regionData) {
+                if (existingEntry.id == newEntry.id) {
+                    existingEntry.copyFrom(newEntry);
+                    return regionData;
                 }
             }
             return null;

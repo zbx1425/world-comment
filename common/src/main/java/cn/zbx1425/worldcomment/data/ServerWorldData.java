@@ -11,6 +11,7 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 public class ServerWorldData {
 
@@ -66,6 +67,7 @@ public class ServerWorldData {
         }
     }
 
+    // Update only the patch-able fields
     public void update(CommentEntry newEntry, boolean fromPeer) throws IOException {
         CommentEntry trustedEntry = comments.update(newEntry);
         if (isHost) {
@@ -78,6 +80,21 @@ public class ServerWorldData {
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             PacketEntryUpdateS2C.send(player, trustedEntry, true);
+        }
+    }
+
+    public void updateAllFields(CommentEntry newEntry, boolean fromPeer) throws IOException {
+        List<CommentEntry> regionEntries = comments.updateAllFields(newEntry);
+        if (isHost) {
+            fileSerializer.updateRegion(regionEntries);
+            uplinkDispatcher.update(newEntry);
+            peerChannel.kvWriteEntry(newEntry);
+        }
+        if (!fromPeer) {
+            peerChannel.notifyUpdateAllFields(newEntry);
+        }
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            PacketEntryUpdateS2C.send(player, newEntry, true);
         }
     }
 }

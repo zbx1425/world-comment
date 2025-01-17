@@ -79,6 +79,15 @@ public class RedisSynchronizer implements Synchronizer {
     }
 
     @Override
+    public void notifyUpdateAllFields(CommentEntry newEntry) {
+        RedisMessage.updateAllFields(newEntry).publishAsync(redisConn);
+    }
+
+    protected void handleUpdateAllFields(CommentEntry peerEntry) throws IOException {
+        serverWorldData.updateAllFields(peerEntry, true);
+    }
+
+    @Override
     public void kvReadAllInto(CommentCache comments) throws IOException {
         Map<String, ByteBuf> data = redisConn.sync().hgetall(HMAP_ALL_KEY);
         for (ByteBuf entry : data.values()) {

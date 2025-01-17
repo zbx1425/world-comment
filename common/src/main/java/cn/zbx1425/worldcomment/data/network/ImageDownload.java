@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
@@ -26,14 +27,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 public class ImageDownload {
-
-    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
-    private static final Executor IO_EXECUTOR = Executors.newCachedThreadPool();
 
     private static final Map<String, ImageState> images = new HashMap<>();
 
@@ -44,7 +43,7 @@ public class ImageDownload {
             images.put(targetUrl, new ImageState());
         }
 
-        IO_EXECUTOR.execute(() -> {
+        Main.IO_EXECUTOR.execute(() -> {
             try {
                 byte[] localImageData = getLocalImageData(image.url);
                 if (localImageData != null) {
@@ -61,23 +60,14 @@ public class ImageDownload {
     }
 
     private static void downloadImage(String url) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(url))
-                .header("User-Agent",
-                        "Mozilla/5.0 WorldComment/" + BuildConfig.MOD_VERSION + " +https://www.zbx1425.cn")
-                .header("X-Minecraft-Username", Minecraft.getInstance().getUser().getName())
-                .header("X-Minecraft-UUID", Minecraft.getInstance().getUser().getProfileId().toString())
+        HttpRequest request = ImageUploader.requestBuilder(URI.create(url))
                 .timeout(Duration.of(10, ChronoUnit.SECONDS))
                 .GET()
                 .build();
-        HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+        Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
                 .thenAccept(response -> {
                     if (response.statusCode() != 200) {
-                        Main.LOGGER.warn("Cannot download image {}: HTTP {}", url, response.statusCode());
-                        synchronized (images) {
-                            if (!images.containsKey(url)) return;
-                            images.get(url).failed = true;
-                        }
-                        return;
+                        throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode()));
                     }
                     byte[] imageData = response.body();
                     applyImageData(url, imageData);

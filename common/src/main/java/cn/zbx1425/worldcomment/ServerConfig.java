@@ -1,13 +1,17 @@
 package cn.zbx1425.worldcomment;
 
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import com.google.common.base.CaseFormat;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerConfig {
 
@@ -45,6 +49,24 @@ public class ServerConfig {
         allowMarkerUsage.writeJson(json);
 
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
+    }
+
+    public List<ImageUploader> parseUploaderList() {
+        List<ImageUploader> uploaderList = new ArrayList<>();
+        try {
+            JsonElement rootElement = JsonParser.parseString(imageUploadConfig.value);
+            if (rootElement.isJsonArray()) {
+                for (JsonElement element : rootElement.getAsJsonArray()) {
+                    uploaderList.add(ImageUploader.getUploader(element.getAsJsonObject()));
+                }
+            } else if (rootElement.isJsonObject()) {
+                uploaderList.add(ImageUploader.getUploader(rootElement.getAsJsonObject()));
+            }
+        } catch (Exception ex) {
+            Main.LOGGER.error("Failed to parse image upload config", ex);
+        }
+        uploaderList.add(ImageUploader.NoopUploader.INSTANCE);
+        return uploaderList;
     }
 
     public static class ConfigItem {

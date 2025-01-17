@@ -24,30 +24,13 @@ public class ClientConfig {
 
     public static ClientConfig fromServerConfig(ServerConfig serverConfig) {
         ClientConfig config = new ClientConfig();
-
-        List<ImageUploader> uploaderList = new ArrayList<>();
-        try {
-            JsonElement rootElement = JsonParser.parseString(serverConfig.imageUploadConfig.value);
-            if (rootElement.isJsonArray()) {
-                for (JsonElement element : rootElement.getAsJsonArray()) {
-                    uploaderList.add(ImageUploader.getUploader(element.getAsJsonObject()));
-                }
-            } else if (rootElement.isJsonObject()) {
-                uploaderList.add(ImageUploader.getUploader(rootElement.getAsJsonObject()));
-            }
-        } catch (Exception ex) {
-            Main.LOGGER.error("Failed to parse image upload config", ex);
-        }
-        uploaderList.add(ImageUploader.NoopUploader.INSTANCE);
-        config.imageUploader = uploaderList;
-
+        config.imageUploader = serverConfig.parseUploaderList();
         config.allowMarkerUsage = switch (serverConfig.allowMarkerUsage.value) {
             case "op" -> 0;
             case "creative" -> 1;
             case "all" -> 2;
             default -> 1;
         };
-
         return config;
     }
 
