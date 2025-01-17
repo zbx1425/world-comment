@@ -15,6 +15,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class ImglocUploader extends ImageUploader {
 
@@ -30,7 +32,7 @@ public class ImglocUploader extends ImageUploader {
         this.apiToken = config.get("apiToken").getAsString();
     }
 
-    public ThumbImage uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
+    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) throws IOException, InterruptedException {
         MimeMultipartData body = MimeMultipartData.newBuilder()
                 .withCharset(StandardCharsets.UTF_8)
                 .addFile("source", "WorldComment from " + comment.initiatorName + ".jpg",
@@ -38,25 +40,25 @@ public class ImglocUploader extends ImageUploader {
                 .addText("title", "WorldComment from " + comment.initiatorName)
                 .addText("description", comment.message)
                 .build();
-        HttpRequest reqUpload = HttpRequest.newBuilder(URI.create(apiUrl))
+        HttpRequest reqUpload = ImageUploader.requestBuilder(URI.create(apiUrl))
                 .header("Content-Type", body.getContentType())
-                .header("User-Agent",
-                        "Mozilla/5.0 WorldComment/" + BuildConfig.MOD_VERSION + " +https://www.zbx1425.cn")
                 .header("X-API-Key", apiToken)
                 .POST(body.getBodyPublisher())
                 .build();
-        HttpResponse<String> respUpload = HTTP_CLIENT.send(reqUpload, HttpResponse.BodyHandlers.ofString());
-        if (respUpload.statusCode() != 200)
-            throw new IOException("Upload HTTP " + respUpload.statusCode() + "\n" + respUpload.body());
-        JsonObject respObj = JsonParser.parseString(respUpload.body()).getAsJsonObject();
-        if (!respObj.has("success")) {
-            throw new IOException("Upload Fail " + respUpload.body());
-        } else {
-            return new ThumbImage(
-                    respObj.get("image").getAsJsonObject().get("url").getAsString(),
-                    respObj.get("image").getAsJsonObject().get("medium").getAsJsonObject().get("url").getAsString()
-            );
-        }
+        return HTTP_CLIENT.sendAsync(reqUpload, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    if (response.statusCode() != 200)
+                        throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode() + "\n" + response.body()));
+                    JsonObject respObj = JsonParser.parseString(response.body()).getAsJsonObject();
+                    if (!respObj.has("success")) {
+                        throw new CompletionException(new IOException("Upload Fail " + response.body()));
+                    } else {
+                        return new ThumbImage(
+                                respObj.get("image").getAsJsonObject().get("url").getAsString(),
+                                respObj.get("image").getAsJsonObject().get("medium").getAsJsonObject().get("url").getAsString()
+                        );
+                    }
+                });
     }
 
     @Override
