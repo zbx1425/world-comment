@@ -1,9 +1,8 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
-import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.ImageConvert;
+import cn.zbx1425.worldcomment.data.network.ImageConvertClient;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonObject;
@@ -11,11 +10,8 @@ import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -39,7 +35,7 @@ public class ImglocUploader extends ImageUploader {
                 MimeMultipartData body = MimeMultipartData.newBuilder()
                         .withCharset(StandardCharsets.UTF_8)
                         .addFile("source", "WorldComment from " + comment.initiatorName + ".jpg",
-                                ImageConvert.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "image/jpg")
+                                ImageConvertClient.toJpegScaled(imageBytes, IMAGE_MAX_WIDTH), "image/jpg")
                         .addText("title", "WorldComment from " + comment.initiatorName)
                         .addText("description", comment.message)
                         .build();

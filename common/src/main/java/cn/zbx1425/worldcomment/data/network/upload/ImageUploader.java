@@ -23,6 +23,9 @@ import java.nio.IntBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -31,18 +34,35 @@ public abstract class ImageUploader {
 
     public abstract CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment);
 
+    public abstract JsonObject serialize();
+
+    public static List<ImageUploader> parseUploaderList(List<JsonObject> configs) {
+        List<ImageUploader> uploaders = new ArrayList<>();
+        if (configs == null || configs.isEmpty()) {
+            // 如果没有配置任何上传器，使用LocalStorageUploader作为默认
+            uploaders.add(LocalStorageUploader.getInstance());
+        } else {
+            // 如果用户配置了上传器，就只使用配置的上传器
+            for (JsonObject config : configs) {
+                uploaders.add(getUploader(config));
+            }
+        }
+        // 无论如何都在最后添加NoopUploader作为fallback
+        uploaders.add(NoopUploader.INSTANCE);
+        return uploaders;
+    }
+
     public static ImageUploader getUploader(JsonObject config) {
         String service = config.has("service") ? config.get("service").getAsString() : "";
-        return switch (service.toLowerCase(Locale.ROOT)) {
+        return switch (service.toLowerCase()) {
             case "" -> NoopUploader.INSTANCE;
+            case "local" -> LocalStorageUploader.deserialize(config);
             case "imgloc" -> new ImglocUploader(config);
             case "smms" -> new SmmsUploader(config);
             case "lsky" -> new LskyUploader(config);
             default -> throw new IllegalStateException("Unknown service: " + service);
         };
     }
-
-    public abstract JsonObject serialize();
 
     public static HttpRequest.Builder requestBuilder(URI uri) {
         return HttpRequest.newBuilder(uri)

@@ -51,22 +51,21 @@ public class ServerConfig {
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }
 
-    public List<ImageUploader> parseUploaderList() {
-        List<ImageUploader> uploaderList = new ArrayList<>();
+    public List<JsonObject> parseUploaderConfig() {
+        List<JsonObject> uploaderConfigs = new ArrayList<>();
         try {
             JsonElement rootElement = JsonParser.parseString(imageUploadConfig.value);
             if (rootElement.isJsonArray()) {
                 for (JsonElement element : rootElement.getAsJsonArray()) {
-                    uploaderList.add(ImageUploader.getUploader(element.getAsJsonObject()));
+                    uploaderConfigs.add(element.getAsJsonObject());
                 }
             } else if (rootElement.isJsonObject()) {
-                uploaderList.add(ImageUploader.getUploader(rootElement.getAsJsonObject()));
+                uploaderConfigs.add(rootElement.getAsJsonObject());
             }
         } catch (Exception ex) {
             Main.LOGGER.error("Failed to parse image upload config", ex);
         }
-        uploaderList.add(ImageUploader.NoopUploader.INSTANCE);
-        return uploaderList;
+        return uploaderConfigs;
     }
 
     public static class ConfigItem {

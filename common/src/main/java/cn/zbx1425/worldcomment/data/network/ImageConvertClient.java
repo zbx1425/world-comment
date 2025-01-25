@@ -14,7 +14,7 @@ import java.nio.IntBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-public class ImageConvert {
+public class ImageConvertClient {
 
     public static byte[] toJpeg(byte[] pngImageBytes) {
         ByteBuffer offHeapPngData = OffHeapAllocator.allocate(pngImageBytes.length);

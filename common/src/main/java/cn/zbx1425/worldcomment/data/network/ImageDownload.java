@@ -1,21 +1,18 @@
 package cn.zbx1425.worldcomment.data.network;
 
-import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.lwjgl.system.MemoryUtil;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
@@ -28,9 +25,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 public class ImageDownload {
 
@@ -48,6 +42,7 @@ public class ImageDownload {
                 byte[] localImageData = getLocalImageData(image.url);
                 if (localImageData != null) {
                     applyImageData(targetUrl, localImageData);
+                    return;
                 }
             } catch (IOException ex) {
                 Main.LOGGER.warn("Cannot read local image {}", image.url, ex);
@@ -60,26 +55,39 @@ public class ImageDownload {
     }
 
     private static void downloadImage(String url) {
-        HttpRequest request = ImageUploader.requestBuilder(URI.create(url))
-                .timeout(Duration.of(10, ChronoUnit.SECONDS))
-                .GET()
-                .build();
-        Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
-                .thenAccept(response -> {
-                    if (response.statusCode() != 200) {
-                        throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode()));
-                    }
-                    byte[] imageData = response.body();
-                    applyImageData(url, imageData);
-                })
-                .exceptionally(ex -> {
-                    Main.LOGGER.warn("Cannot download image {}", url, ex);
-                    synchronized (images) {
-                        if (!images.containsKey(url)) return null;
-                        images.get(url).failed = true;
-                    }
-                    return null;
-                });
+        if (url.startsWith(LocalStorageUploader.URL_PREFIX)) {
+            LocalStorageUploader.downloadImage(url)
+                    .thenAccept(imageData -> applyImageData(url, imageData))
+                    .exceptionally(ex -> {
+                        Main.LOGGER.warn("Cannot download image {}", url, ex);
+                        synchronized (images) {
+                            if (!images.containsKey(url)) return null;
+                            images.get(url).failed = true;
+                        }
+                        return null;
+                    });
+        } else {
+            HttpRequest request = ImageUploader.requestBuilder(URI.create(url))
+                    .timeout(Duration.of(10, ChronoUnit.SECONDS))
+                    .GET()
+                    .build();
+            Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+                    .thenAccept(response -> {
+                        if (response.statusCode() != 200) {
+                            throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode()));
+                        }
+                        byte[] imageData = response.body();
+                        applyImageData(url, imageData);
+                    })
+                    .exceptionally(ex -> {
+                        Main.LOGGER.warn("Cannot download image {}", url, ex);
+                        synchronized (images) {
+                            if (!images.containsKey(url)) return null;
+                            images.get(url).failed = true;
+                        }
+                        return null;
+                    });
+        }
     }
 
     private static byte[] getLocalImageData(String url) throws IOException {
@@ -96,7 +104,7 @@ public class ImageDownload {
         byte[] imageData = pngOrJpgImageData;
         if (url.toLowerCase(Locale.ROOT).endsWith(".jpg")) {
             // Actually maybe directly construct NativeImage from jpg
-            imageData = ImageConvert.toPng(imageData);
+            imageData = ImageConvertClient.toPng(imageData);
         }
         ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
         buffer.put(imageData);
@@ -136,27 +144,26 @@ public class ImageDownload {
     public static void purgeUnused() {
         long currentTime = System.currentTimeMillis();
         synchronized (images) {
-            for (Iterator<Map.Entry<String, ImageState>> it = images.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry<String, ImageState> entry = it.next();
-                if (currentTime - entry.getValue().queryTime > 60000) {
-                    if (entry.getValue().texture != null) entry.getValue().texture.close();
-                    it.remove();
+            Iterator<Map.Entry<String, ImageState>> iterator = images.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, ImageState> entry = iterator.next();
+                if (currentTime - entry.getValue().lastQueryTime > 60000) {
+                    if (entry.getValue().texture != null) {
+                        entry.getValue().texture.close();
+                    }
+                    iterator.remove();
                 }
             }
         }
     }
 
     private static class ImageState {
-        public long queryTime;
         public DynamicTexture texture;
         public boolean failed;
-
-        public ImageState() {
-            queryTime = System.currentTimeMillis();
-        }
+        public long lastQueryTime;
 
         public void onQuery() {
-            queryTime = System.currentTimeMillis();
+            lastQueryTime = System.currentTimeMillis();
         }
     }
 

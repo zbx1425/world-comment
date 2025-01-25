@@ -5,7 +5,6 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
-import cn.zbx1425.worldcomment.data.network.upload.ImageUploadConfig;
 import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -24,10 +23,9 @@ public class SubmitDispatcher {
     private static final Long2ObjectMap<SubmitJob> pendingJobs = new Long2ObjectOpenHashMap<>();
 
     public static long addJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Throwable> callback) {
-        long jobId = ServerWorldData.SNOWFLAKE.nextId();
         SubmitJob job = new SubmitJob(comment, imageBytes, callback, MainClient.CLIENT_CONFIG);
-        addJob(jobId, job);
-        return jobId;
+        addJob(comment.id, job);
+        return comment.id;
     }
 
     private static void addJob(long jobId, SubmitJob job) {
@@ -35,23 +33,23 @@ public class SubmitDispatcher {
             pendingJobs.put(jobId, job);
         }
         if (job.imageBytes != null) {
-                ImageUploader uploader = job.uploaderToUse.poll();
-                if (uploader == null) throw new IllegalStateException("All uploads failed");
-                uploader.uploadImage(job.imageBytes, job.comment)
-                        .thenAccept(thumbImage -> {
-                            job.setImage(thumbImage);
-                            trySendPackage(jobId);
-                        })
-                        .exceptionally(ex -> {
-                            Main.LOGGER.error("Upload Image", ex);
-                            if (job.callback != null) job.callback.accept(job, ex);
-                            if (job.uploaderToUse.isEmpty()) {
-                                removeJob(jobId);
-                            } else {
-                                addJob(jobId, job);
-                            }
-                            return null;
-                        });
+            ImageUploader uploader = job.uploaderToUse.poll();
+            if (uploader == null) throw new IllegalStateException("All uploads failed");
+            uploader.uploadImage(job.imageBytes, job.comment)
+                    .thenAccept(thumbImage -> {
+                        job.setImage(thumbImage);
+                        trySendPackage(jobId);
+                    })
+                    .exceptionally(ex -> {
+                        Main.LOGGER.error("Upload Image", ex);
+                        if (job.callback != null) job.callback.accept(job, ex);
+                        if (job.uploaderToUse.isEmpty()) {
+                            removeJob(jobId);
+                        } else {
+                            addJob(jobId, job);
+                        }
+                        return null;
+                    });
         }
     }
 

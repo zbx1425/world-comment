@@ -2,10 +2,7 @@ package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.interop.BulletChatInterop;
-import cn.zbx1425.worldcomment.network.PacketClientConfigS2C;
-import cn.zbx1425.worldcomment.network.PacketCollectionDataS2C;
-import cn.zbx1425.worldcomment.network.PacketRegionDataS2C;
-import cn.zbx1425.worldcomment.network.PacketEntryUpdateS2C;
+import cn.zbx1425.worldcomment.network.*;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
@@ -27,6 +24,10 @@ public class MainClient {
 				PacketEntryUpdateS2C.IDENTIFIER, PacketEntryUpdateS2C.ClientLogics::handle);
 		ClientPlatform.registerNetworkReceiver(
 				PacketClientConfigS2C.IDENTIFIER, PacketClientConfigS2C.ClientLogics::handle);
+		ClientPlatform.registerNetworkReceiver(
+				PacketImageUploadS2C.IDENTIFIER, PacketImageUploadS2C.ClientLogics::handle);
+		ClientPlatform.registerNetworkReceiver(
+				PacketImageDownloadS2C.IDENTIFIER, PacketImageDownloadS2C.ClientLogics::handle);
 
 		ClientPlatform.registerPlayerJoinEvent(ignored -> {
 			ClientWorldData.INSTANCE.clear();
