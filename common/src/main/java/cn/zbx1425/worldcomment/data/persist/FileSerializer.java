@@ -84,7 +84,7 @@ public class FileSerializer {
     public void updateRegion(List<CommentEntry> regionEntries) throws IOException {
         synchronized (this) {
             if (regionEntries.isEmpty()) return;
-            CommentEntry pivot = regionEntries.getFirst();
+            CommentEntry pivot = regionEntries.get(0);
             try {
                 Files.createDirectory(getLevelPath(pivot.level));
             } catch (FileAlreadyExistsException ignored) {
