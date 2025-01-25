@@ -46,7 +46,7 @@ public class PacketImageUploadC2S {
 
         long timestamp = buffer.readLong();
         String baseFileName = Instant.ofEpochMilli(timestamp).atOffset(ZoneOffset.UTC).format(FILE_DATE_FORMAT)
-                + "-" + String.format("%016X", jobId) + "-" + initiator.getGameProfile().getName();
+                + "-" + String.format("%016x", jobId) + "-" + initiator.getGameProfile().getName();
 
         byte[] imageData = new byte[length];
         buffer.readBytes(imageData);
