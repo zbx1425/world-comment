@@ -30,6 +30,7 @@ public class ClientRayPicking {
         if (currentTime - lastTickTime < 100) return;
         lastTickTime = currentTime;
 
+        MainClient.CLIENT_CONFIG.tick(partialTicks);
         ImageDownload.purgeUnused();
 
         Vec3 pickStart = minecraft.player.getEyePosition(partialTicks);

@@ -26,10 +26,20 @@ public class PacketImageDownloadC2S {
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         String fileName = buffer.readUtf();
+        
         try {
-            Path imagePath = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
+            Path imageDir = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
                     .resolve("world-comment").resolve("image")
-                    .resolve(fileName);
+                    .normalize();
+
+            Path imagePath = imageDir.resolve(fileName).normalize();
+
+            if (!imagePath.startsWith(imageDir)) {
+                Main.LOGGER.warn("Rejected path traversal: {}", fileName);
+                PacketImageDownloadS2C.sendNotFound(initiator, fileName);
+                return;
+            }
+
             if (Files.exists(imagePath)) {
                 byte[] imageData = Files.readAllBytes(imagePath);
                 PacketImageDownloadS2C.send(initiator, fileName, imageData);

@@ -1,18 +1,12 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
-import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import cn.zbx1425.worldcomment.network.PacketImageDownloadC2S;
 import cn.zbx1425.worldcomment.network.PacketImageUploadC2S;
 import com.google.gson.JsonObject;
-import net.minecraft.client.Minecraft;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +16,7 @@ public class LocalStorageUploader extends ImageUploader {
     public static final String URL_PREFIX = "file://worldcomment/";
     private static final Map<Long, CompletableFuture<ThumbImage>> pendingUploads = new HashMap<>();
     private static final Map<String, CompletableFuture<byte[]>> pendingDownloads = new HashMap<>();
-    private static final long TIMEOUT_SECONDS = 10;
+    private static final long TIMEOUT_SECONDS = 30;
 
     private LocalStorageUploader() {}
 

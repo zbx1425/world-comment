@@ -67,7 +67,6 @@ public class ControlTipRenderer implements IGuiCommon {
 
     public static void update() {
         Minecraft minecraft = Minecraft.getInstance();
-        MainClient.CLIENT_CONFIG.tick(minecraft.getTimer());
         for (ControlTip tip : TIPS) tip.visible = false;
         if (minecraft.player == null) {
             return;
