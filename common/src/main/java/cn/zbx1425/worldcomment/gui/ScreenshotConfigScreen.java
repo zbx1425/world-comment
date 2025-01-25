@@ -3,11 +3,11 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     private static final int CONTAINER_PADDING_Y = 5;
     public int containerWidth, containerHeight, containerOffsetX, containerOffsetY;
 
-    private Checkbox cbIncludeHud, cbIncludeComments;
+    private net.minecraft.client.gui.components.Checkbox cbIncludeHud, cbIncludeComments;
     private Button btnOk;
 
     public ScreenshotConfigScreen() {
@@ -39,19 +39,13 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
         cbIncludeHud = Checkbox
                 .builder(Component.translatable("gui.worldcomment.config.screenshot_hud"), minecraft.font)
                 .pos(0, baseY).selected(MainClient.CLIENT_CONFIG.screenshotIncludeGui)
-                .onValueChange((sender, value) -> {
-                    MainClient.CLIENT_CONFIG.screenshotIncludeGui = value;
-                    Screenshot.applyClientConfigForScreenshot();
-                }).build();
+                .build();
         addRenderableWidget(cbIncludeHud);
         baseY += SQ_SIZE;
         cbIncludeComments = Checkbox
                 .builder(Component.translatable("gui.worldcomment.config.screenshot_comments"), minecraft.font)
                 .pos(0, baseY).selected(MainClient.CLIENT_CONFIG.screenshotIncludeComments)
-                .onValueChange((sender, value) -> {
-                    MainClient.CLIENT_CONFIG.screenshotIncludeComments = value;
-                    Screenshot.applyClientConfigForScreenshot();
-                }).build();
+                .build();
         addRenderableWidget(cbIncludeComments);
         baseY += SQ_SIZE;
         baseY += CONTAINER_PADDING_Y;
@@ -76,7 +70,9 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
+                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
+        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
         RenderSystem.enableBlend();
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
@@ -92,6 +88,19 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
                 containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
                 0x66546e7a
         );
+
+        if (MainClient.CLIENT_CONFIG.screenshotIncludeGui != cbIncludeHud.selected()
+                || MainClient.CLIENT_CONFIG.screenshotIncludeComments != cbIncludeComments.selected()) {
+            MainClient.CLIENT_CONFIG.screenshotIncludeGui = cbIncludeHud.selected();
+            MainClient.CLIENT_CONFIG.screenshotIncludeComments = cbIncludeComments.selected();
+            Screenshot.applyClientConfigForScreenshot();
+        }
+    }
+
+    @Override
+    public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
+        super.render(guiParam, mouseX, mouseY, partialTick);
     }
 
     @Override

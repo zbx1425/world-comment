@@ -131,7 +131,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         guiGraphics.drawString(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
                 xOffset + 40, 15, 0xFFFFE6C0, true);
         for (net.minecraft.client.gui.components.Button button : pageButtons) {
-            button.setX(xOffset + 10);
+            button #if MC_VERSION >= "11903" .setX #else .x = #endif (xOffset + 10);
         }
 
         if (subScreen == 3) {
