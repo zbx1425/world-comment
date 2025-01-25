@@ -75,7 +75,7 @@ public class LocalStorageUploader extends ImageUploader {
 
     public static CompletableFuture<byte[]> downloadImage(String url) {
         if (!url.startsWith(URL_PREFIX)) {
-            throw new IllegalArgumentException("Not a worldcomment URL: " + url);
+            throw new IllegalArgumentException("Not a WorldComment URL: " + url);
         }
         String fileName = url.substring(URL_PREFIX.length());
         synchronized (pendingDownloads) {

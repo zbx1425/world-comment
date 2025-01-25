@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.network;
 import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.network.ImageConvertClient;
 import cn.zbx1425.worldcomment.data.network.ImageConvertServer;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
@@ -24,17 +25,23 @@ import java.util.HexFormat;
 public class PacketImageUploadC2S {
 
     public static final ResourceLocation IDENTIFIER = Main.id("image_upload");
-    public static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB limit
+    public static final int MAX_IMAGE_SIZE = 2 * 1024 * 1024 - 1024; // 2MB limit
     private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     public static class ClientLogics {
         public static void send(CommentEntry comment, byte[] imageBytes) {
-            if (imageBytes.length > MAX_IMAGE_SIZE) return;
+            // Convert to JPEG before uploading to avoid hitting vanilla 2MB packet size limit
+            byte[] jpgData = ImageConvertClient.toJpegScaled(imageBytes, ImageUploader.IMAGE_MAX_WIDTH);
+            if (jpgData.length > MAX_IMAGE_SIZE) {
+                Main.LOGGER.warn("Image too large: {}B", jpgData.length);
+                return;
+            }
+
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeLong(comment.id);
-            buffer.writeInt(imageBytes.length);
+            buffer.writeInt(jpgData.length);
             buffer.writeLong(comment.timestamp);
-            buffer.writeBytes(imageBytes);
+            buffer.writeBytes(jpgData);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
     }
@@ -58,10 +65,9 @@ public class PacketImageUploadC2S {
                 Files.createDirectories(serverImagePath);
             }
 
-            byte[] fullData = ImageConvertServer.toJpegScaled(imageData, ImageUploader.IMAGE_MAX_WIDTH);
             String fullFileName = baseFileName + ".jpg";
             Path fullFile = serverImagePath.resolve(fullFileName);
-            Files.write(fullFile, fullData);
+            Files.write(fullFile, imageData);
 
             byte[] thumbData = ImageConvertServer.toJpegScaled(imageData, ImageUploader.THUMBNAIL_MAX_WIDTH);
             String thumbFileName = baseFileName + ".thumb.jpg";
