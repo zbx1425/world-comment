@@ -32,7 +32,7 @@ jobs:
           properties: |
             buildVersion=${{ matrix.minecraft }}
       - name: Capture release artifacts
-        uses: actions/upload-artifact@v4S
+        uses: actions/upload-artifact@v4
         with:
           name: Fabric and Forge Artifacts
           path: build/
