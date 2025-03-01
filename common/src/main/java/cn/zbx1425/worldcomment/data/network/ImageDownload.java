@@ -30,7 +30,8 @@ public class ImageDownload {
 
     private static final Map<String, ImageState> images = new HashMap<>();
 
-    public static AbstractTexture getTexture(ThumbImage image, boolean thumb) {
+    public static ImageState getTexture(ThumbImage image, boolean thumb) {
+        if (image.url.isEmpty()) return ImageState.BLANK;
         String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
         synchronized (images) {
             if (images.containsKey(targetUrl)) return queryTexture(targetUrl);
@@ -111,10 +112,14 @@ public class ImageDownload {
         buffer.rewind();
         Minecraft.getInstance().execute(() -> {
             try {
-                DynamicTexture dynamicTexture = new DynamicTexture(NativeImage.read(buffer));
+                NativeImage pixels = NativeImage.read(buffer);
+                DynamicTexture dynamicTexture = new DynamicTexture(pixels);
                 synchronized (images) {
-                    if (!images.containsKey(url)) return;
-                    images.get(url).texture = dynamicTexture;
+                    ImageState sink = images.get(url);
+                    if (sink == null) return;
+                    sink.texture = dynamicTexture;
+                    sink.width = pixels.getWidth();
+                    sink.height = pixels.getHeight();
                 }
             } catch (Throwable ex) {
                 Main.LOGGER.warn("Cannot store image " + url, ex);
@@ -128,16 +133,11 @@ public class ImageDownload {
         });
     }
 
-    private static AbstractTexture queryTexture(String url) {
+    private static ImageState queryTexture(String url) {
         synchronized (images) {
             ImageState state = images.get(url);
             state.onQuery();
-            if (state.texture != null) return state.texture;
-            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-            if (state.failed) return textureManager.getTexture(
-                    Main.id("textures/gui/placeholder-failed.png"));
-            return textureManager.getTexture(
-                    Main.id("textures/gui/placeholder-loading.png"));
+            return state;
         }
     }
 
@@ -157,14 +157,38 @@ public class ImageDownload {
         }
     }
 
-    private static class ImageState {
+    public static class ImageState {
         public DynamicTexture texture;
+        public int width = 16, height = 9;
         public boolean failed;
+        public boolean blank;
         public long lastQueryTime;
+
+        private ImageState(boolean blank) {
+            this.blank = blank;
+        }
+
+        public ImageState() {
+            this(false);
+        }
 
         public void onQuery() {
             lastQueryTime = System.currentTimeMillis();
         }
+
+        public AbstractTexture getFriendlyTexture(TextureManager textureManager) {
+            if (failed) {
+                return textureManager.getTexture(Main.id("textures/gui/placeholder-failed.png"));
+            } else if (texture != null) {
+                return texture;
+            } else if (blank) {
+                return textureManager.getTexture(Main.id("textures/gui/placeholder-blank.png"));
+            } else {
+                return textureManager.getTexture(Main.id("textures/gui/placeholder-loading.png"));
+            }
+        }
+
+        public static final ImageState BLANK = new ImageState(true);
     }
 
 }

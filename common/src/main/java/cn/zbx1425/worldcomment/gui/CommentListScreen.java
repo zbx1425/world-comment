@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.gui;
 
-import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
@@ -17,7 +16,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 #if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 import java.util.*;
@@ -137,23 +135,24 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         if (subScreen == 3) {
             CommentEntry comment = commentForDetail;
 
-            int picWidth = width - 100 - 20 - 20;
-            int picHeight = picWidth * 9 / 16;
-            int x1 = 100 + 10, x2 = 100 + 10 + picWidth;
-            int y1 = 30 + 10, y2 = 30 + 10 + picHeight;
+            int maxPicWidth = width - 100 - 20 - 20;
+            int maxPicHeight = height - 30 - 20 - 20;
 
             int shadowColor = 0xFF000000;
             int shadowOffset = 3;
+            ImageDownload.ImageState imageToDraw = ImageDownload.getTexture(comment.image, false);
+            int picWidth = Math.min(maxPicWidth, maxPicHeight * imageToDraw.width / imageToDraw.height);
+            int picHeight = picWidth * imageToDraw.height / imageToDraw.width;
+            int x1 = 100 + 10, x2 = 100 + 10 + picWidth;
+            int y1 = 30 + 10, y2 = 30 + 10 + picHeight;
             guiGraphics.fill(
                     (int) (x1 + shadowOffset), (int) (y1 + shadowOffset),
                     (int) (x2 + shadowOffset), (int) (y2 + shadowOffset),
                     shadowColor
             );
-            if (!comment.image.url.isEmpty()) {
-                RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image, false).getId());
-            } else {
-                RenderSystem.setShaderTexture(0, Main.id("textures/gui/placeholder-blank.png"));
-            }
+
+            RenderSystem.setShaderTexture(0, imageToDraw.getFriendlyTexture(minecraft.getTextureManager()).getId());
+
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             Matrix4f matrix4f = guiGraphics.pose().last().pose();
 #if MC_VERSION >= "12100"

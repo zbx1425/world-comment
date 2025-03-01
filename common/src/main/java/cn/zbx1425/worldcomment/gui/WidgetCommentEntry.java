@@ -88,7 +88,8 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         }
 
         if (!comment.image.url.isEmpty() && showImage) {
-            RenderSystem.setShaderTexture(0, ImageDownload.getTexture(comment.image, true).getId());
+            ImageDownload.ImageState imageToDraw = ImageDownload.getTexture(comment.image, true);
+            RenderSystem.setShaderTexture(0, imageToDraw.getFriendlyTexture(Minecraft.getInstance().getTextureManager()).getId());
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             Matrix4f matrix4f = guiGraphics.pose().last().pose();
 #if MC_VERSION >= "12100"
