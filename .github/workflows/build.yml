@@ -8,6 +8,7 @@ on: [ pull_request, push ]
 
 jobs:
   build:
+    name: Build
     strategy:
       matrix:
         minecraft: [ "1.19.2", "1.20.1", "1.20.4", "1.21.1" ]
@@ -31,8 +32,18 @@ jobs:
           arguments: build
           properties: |
             buildVersion=${{ matrix.minecraft }}
-      - name: Capture release artifacts
+      - name: Capture built artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Fabric and Forge Artifacts
+          name: WorldComment-${{ matrix.minecraft }}
           path: build/
+  merge-artifacts:
+    name: Merge Artifacts
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Merge artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: WorldComment-All
+          pattern: WorldComment-*
