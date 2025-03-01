@@ -18,6 +18,9 @@ public class LocalStorageUploader extends ImageUploader {
     private static final Map<String, CompletableFuture<byte[]>> pendingDownloads = new HashMap<>();
     private static final long TIMEOUT_SECONDS = 30;
 
+    public static final int IMAGE_MAX_SIZE = 10 * 1024 * 1024; // 10MB
+    public static final int IMAGE_CHUNK_SIZE = 28 * 1024; // 28KB chunks
+
     private LocalStorageUploader() {}
 
     public static LocalStorageUploader getInstance() {
