@@ -2,11 +2,10 @@ package cn.zbx1425.worldcomment.item;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
-#if MC_VERSION >= "12000"  #endif
+#if MC_VERSION >= "12000" import net.minecraft.core.registries.Registries; #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 #if MC_VERSION >= "12100" import net.minecraft.core.component.DataComponents; #endif
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
