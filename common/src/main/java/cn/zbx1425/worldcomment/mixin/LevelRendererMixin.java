@@ -32,9 +32,6 @@ public class LevelRendererMixin {
 
     @Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=blockentities", ordinal = 0))
     private void afterEntities(PoseStack matrices, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-        ClientWorldData.INSTANCE.tick();
-        ClientRayPicking.tick(partialTick, 20);
-
         if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
             if (!world_comment$lastFrameKeyPlayerListDown) {
                 CommentListScreen.handleKeyTab();

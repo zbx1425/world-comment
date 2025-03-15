@@ -1,7 +1,9 @@
 package cn.zbx1425.worldcomment.fabric;
 
+import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.MainClient;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000"import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
@@ -21,6 +23,7 @@ public class MainFabricClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		MainClient.init();
+
 #if MC_VERSION >= "12100"
 		MainFabric.PACKET_REGISTRY.commitClient();
 #endif
@@ -31,13 +34,6 @@ public class MainFabricClient implements ClientModInitializer {
 
 #if MC_VERSION >= "12100"
 		WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
-			ClientWorldData.INSTANCE.tick();
-#if MC_VERSION >= "12100"
-			ClientRayPicking.tick(context.tickCounter().getGameTimeDeltaTicks(), 20);
-#else
-			ClientRayPicking.tick(context.tickDelta(), 20);
-#endif
-
 			if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
 				if (!world_comment$lastFrameKeyPlayerListDown) {
 					CommentListScreen.handleKeyTab();
@@ -55,5 +51,9 @@ public class MainFabricClient implements ClientModInitializer {
 			matrices.popPose();
 		});
 #endif
+
+		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
+			MainClient.CLIENT_CONFIG.tick(1, 0);
+		});
 	}
 }

@@ -1,6 +1,9 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.google.gson.JsonObject;
@@ -39,10 +42,6 @@ public class ClientConfig {
             default -> 0;
         };
         return config;
-    }
-
-    public void tick(float deltaTicks) {
-        CommentToolItem.updateInvisibilityTimer(deltaTicks);
     }
 
     public ClientConfig() {
@@ -86,5 +85,17 @@ public class ClientConfig {
             case 1 -> false; // TODO
             default -> false;
         };
+    }
+
+    float accumulatedDeltaTicks = 0;
+
+    public void tick(float deltaTicks, float partialTick) {
+        accumulatedDeltaTicks += deltaTicks;
+        if (accumulatedDeltaTicks < 2) return;
+        ImageDownload.purgeUnused();
+        ClientWorldData.INSTANCE.tick();
+        CommentToolItem.updateInvisibilityTimer(accumulatedDeltaTicks);
+        ClientRayPicking.tick(partialTick, 20);
+        accumulatedDeltaTicks = 0;
     }
 }

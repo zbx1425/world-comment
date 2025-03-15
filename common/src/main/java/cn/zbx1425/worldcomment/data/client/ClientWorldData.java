@@ -28,7 +28,6 @@ public class ClientWorldData {
     public static final long REGION_TTL = 300000;
 
     public ResourceLocation level;
-    private long lastTickTime = 0;
 
     public ProximityCommentSet proximityCommentSet = new ProximityCommentSet(16, 150 * 1000);
 
@@ -37,8 +36,6 @@ public class ClientWorldData {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player == null || minecraft.level == null) return;
             long currentTime = System.currentTimeMillis();
-            if (currentTime - lastTickTime < 1000) return;
-            lastTickTime = currentTime;
 
             if (minecraft.level.dimension().location() != this.level) {
                 this.level = minecraft.level.dimension().location();

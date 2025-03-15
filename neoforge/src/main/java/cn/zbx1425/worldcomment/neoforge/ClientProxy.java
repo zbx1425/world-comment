@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.neoforge;
 
+import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
@@ -15,6 +17,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -28,6 +31,7 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.client.event.ClientTickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 #endif
 
@@ -82,9 +86,6 @@ public class ClientProxy {
         @SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                ClientWorldData.INSTANCE.tick();
-                ClientRayPicking.tick(event.getPartialTick().getGameTimeDeltaTicks(), 20);
-
                 if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
                     if (!world_comment$lastFrameKeyPlayerListDown) {
                         CommentListScreen.handleKeyTab();
@@ -101,6 +102,11 @@ public class ClientProxy {
                 CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
                 matrices.popPose();
             }
+        }
+
+        @SubscribeEvent
+        public static void onClientTick(ClientTickEvent.Pre event) {
+            MainClient.CLIENT_CONFIG.tick(1, 0);
         }
     }
 

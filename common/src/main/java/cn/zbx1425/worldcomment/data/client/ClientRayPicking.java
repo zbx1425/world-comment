@@ -19,17 +19,9 @@ public class ClientRayPicking {
     public static List<CommentEntry> pickedComments = new ArrayList<>();
     public static int overlayOffset;
 
-    private static long lastTickTime = 0;
-
     public static void tick(float partialTicks, float hitDistance) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null) return;
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastTickTime < 100) return;
-        lastTickTime = currentTime;
-
-        MainClient.CLIENT_CONFIG.tick(partialTicks);
-        ImageDownload.purgeUnused();
 
         Vec3 pickStart = minecraft.player.getEyePosition(partialTicks);
         Vec3 pickDir = minecraft.player.getViewVector(partialTicks);
