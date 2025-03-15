@@ -3,14 +3,13 @@ package cn.zbx1425.worldcomment.data.client;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
-import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,29 +47,22 @@ public class Screenshot {
             Main.id("shutter"), 16
     );
 
-    public static boolean handleKeyF2() {
+    public static void triggerCommentSend(boolean withPlacingDown) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null) return false;
-
-        ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
-        if (item == null) return false;
-        if (CommentToolItem.getUploadJobId(item) != null) return false;
-
-        if (minecraft.screen == null) {
+        if (minecraft.screen == null || minecraft.screen instanceof ChatScreen) {
             boolean prevHideGui = minecraft.options.hideGui;
             applyClientConfigForScreenshot();
             // This is a workaround for the issue that the screenshot will be taken before CommentWorldRenderer is hidden
             minecraft.tell(() -> RenderSystem.recordRenderCall(() -> minecraft.tell(() -> RenderSystem.recordRenderCall(() -> {
                 grabScreenshot(imageBytes -> minecraft.execute(() -> {
                     minecraft.player.playSound(shutterSoundEvent);
-                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes));
+                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
                 }));
                 minecraft.options.hideGui = prevHideGui;
                 MainClient.CLIENT_CONFIG.commentVisibilityMask = true;
                 isGrabbing = false;
             }))));
         }
-        return true;
     }
 
     public static void applyClientConfigForScreenshot() {

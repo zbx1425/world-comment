@@ -22,8 +22,8 @@
   "gui.worldcomment.message_too_long": "Message is too long.",
   "gui.worldcomment.submit": "Submit!",
 
-  "gui.worldcomment.config.screenshot_hud": "Include HUD in Screenshot",
-  "gui.worldcomment.config.screenshot_comments": "Include other comments in Screenshot",
+  "gui.worldcomment.config.screenshot_hud": "Include HUD",
+  "gui.worldcomment.config.screenshot_comments": "Include other comments",
 
   "gui.worldcomment.control_tip.create": "Make Comment",
   "gui.worldcomment.control_tip.toggle_show": "Show Hidden Comments (%s)",

@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.neoforge;
 
+import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
@@ -8,13 +9,14 @@ import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
-#if MC_VERSION >= "12000" import net.minecraft.client.DeltaTracker;
+#if MC_VERSION >= "12000"
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
-#if MC_VERSION >= "12100"
 import net.minecraft.client.gui.LayeredDraw;
+import net.minecraft.commands.Commands;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -23,17 +25,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
-#else
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.client.settings.IKeyConflictContext;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.client.event.ClientTickEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-#endif
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 public class ClientProxy {
 
@@ -76,6 +68,11 @@ public class ClientProxy {
                 keyMapping.setKeyConflictContext(NoConflictKeyConflictContext.INSTANCE);
                 event.register(keyMapping);
             }
+        }
+
+        @SubscribeEvent
+        public static void onRegisterClientCommand(RegisterCommandsEvent event) {
+            ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
         }
     }
 

@@ -33,15 +33,17 @@ import java.util.List;
 public class CommentToolScreen extends Screen implements IGuiCommon {
 
     private final byte[] imageBytes;
+    private final boolean withPlacingDown;
 
     private static final int SIDEBAR_OFFSET = 100;
 
     private static final int CONTAINER_PADDING_X = 8;
     private static final int CONTAINER_PADDING_Y = 5;
 
-    public CommentToolScreen(byte[] imageBytes) {
+    public CommentToolScreen(byte[] imageBytes, boolean withPlacingDown) {
         super(Component.literal("Comment Tool"));
         this.imageBytes = imageBytes;
+        this.withPlacingDown = withPlacingDown;
         this.screenshotSaved = false;
         ByteBuffer offHeapBuffer = OffHeapAllocator.allocate(imageBytes.length);
         try {
@@ -216,11 +218,15 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                         }
                     }
             ));
-            Minecraft.getInstance().player.displayClientMessage(
-                    Component.translatable("gui.worldcomment.send_pending"), false);
-            ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
-            if (item != null) {
-                CommentToolItem.setUploadJobId(item, jobId);
+            if (!withPlacingDown) {
+                SubmitDispatcher.placeJobAt(jobId, Minecraft.getInstance().player.blockPosition());
+            } else {
+                Minecraft.getInstance().player.displayClientMessage(
+                        Component.translatable("gui.worldcomment.send_pending"), false);
+                ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
+                if (item != null) {
+                    CommentToolItem.setUploadJobId(item, jobId);
+                }
             }
         });
         onClose();

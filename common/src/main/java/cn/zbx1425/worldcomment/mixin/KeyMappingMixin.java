@@ -2,9 +2,11 @@ package cn.zbx1425.worldcomment.mixin;
 
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,7 +20,13 @@ public class KeyMappingMixin {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
         if ((Object)this == options.keyTogglePerspective) {
-            if (CommentListScreen.handleKeyF5()) cir.setReturnValue(false);
+            Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player == null) return;
+
+            if (CommentToolItem.Client.getHoldingCommentTool() != null) {
+                CommentListScreen.triggerOpen();
+                cir.setReturnValue(false);
+            }
         }
     }
 
@@ -27,7 +35,15 @@ public class KeyMappingMixin {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
         if ((Object)this == options.keyScreenshot) {
-            if (Screenshot.handleKeyF2()) cir.setReturnValue(false);
+            Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player == null) return;
+
+            ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
+            if (item != null && CommentToolItem.getUploadJobId(item) == null) {
+                Screenshot.triggerCommentSend(true);
+                cir.setReturnValue(false);
+            }
+
         }
     }
 }

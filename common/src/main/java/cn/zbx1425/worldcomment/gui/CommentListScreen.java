@@ -5,7 +5,6 @@ import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
-import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -387,12 +386,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         commentListOffset = Mth.clamp(commentListOffset, 0, Math.max(commentList.size() - 1, 0));
     }
 
-    public static boolean handleKeyF5() {
+    public static void triggerOpen() {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null) return false;
-
-        if (CommentToolItem.Client.getHoldingCommentTool() == null) return false;
-
         minecraft.execute(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
                 minecraft.screen.onClose();
@@ -400,7 +395,6 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 minecraft.setScreen(new CommentListScreen(null));
             }
         });
-        return true;
     }
 
     public static boolean handleKeyTab() {

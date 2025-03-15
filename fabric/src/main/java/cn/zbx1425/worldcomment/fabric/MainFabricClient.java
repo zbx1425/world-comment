@@ -1,8 +1,11 @@
 package cn.zbx1425.worldcomment.fabric;
 
+import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.MainClient;
-#if MC_VERSION >= "12000"import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+#if MC_VERSION >= "12000" import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
@@ -54,6 +57,10 @@ public class MainFabricClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			MainClient.CLIENT_CONFIG.tick(1, 0);
+		});
+
+		ClientCommandRegistrationCallback.EVENT.register((commandDispatcher, commandBuildContext) -> {
+			ClientCommand.register(commandDispatcher, ClientCommandManager::literal, ClientCommandManager::argument);
 		});
 	}
 }

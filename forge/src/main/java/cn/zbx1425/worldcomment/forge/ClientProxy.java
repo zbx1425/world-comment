@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.forge;
 
 import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,6 +14,7 @@ import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 
 public class ClientProxy {
 
@@ -39,6 +41,11 @@ public class ClientProxy {
                 keyMapping.setKeyConflictContext(NoConflictKeyConflictContext.INSTANCE);
                 event.register(keyMapping);
             }
+        }
+
+        @SubscribeEvent
+        public static void onRegisterClientCommand(RegisterCommandsEvent event) {
+            ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
         }
     }
 
