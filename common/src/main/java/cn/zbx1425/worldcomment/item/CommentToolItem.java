@@ -1,40 +1,40 @@
 package cn.zbx1425.worldcomment.item;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.MainClient;
-import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
-#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.mixin.CreativeModeTabsAccessor; #endif
+#if MC_VERSION >= "12000"  #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 #if MC_VERSION >= "12100" import net.minecraft.core.component.DataComponents; #endif
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 #if MC_VERSION >= "12100" import net.minecraft.world.item.component.CustomData; #endif
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Path;
-
 public class CommentToolItem extends GroupedItem {
+
+    private static boolean visibilityPreference = true;
+    public static float invisibleTimeRemaining = 0f;
 
     public CommentToolItem() {
         super(
-            () -> #if MC_VERSION >= "12000" CreativeModeTabsAccessor.getTOOLS_AND_UTILITIES() #else CreativeModeTab.TAB_MISC #endif,
+            () -> #if MC_VERSION >= "12000"
+                ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.withDefaultNamespace("tools_and_utilities"))
+            #else
+                CreativeModeTab.TAB_MISC
+            #endif,
             properties -> properties.stacksTo(1)
         );
     }
@@ -90,16 +90,16 @@ public class CommentToolItem extends GroupedItem {
                     }
                 }
             } else {
-                if (MainClient.CLIENT_CONFIG.isCommentVisible) {
-                    MainClient.CLIENT_CONFIG.isCommentVisible = false;
-                    if (COMMENT_HIDE_TICKS - (MainClient.CLIENT_CONFIG.commentHideTimer % COMMENT_HIDE_TICKS) < 60) {
-                        MainClient.CLIENT_CONFIG.commentHideTimer =
-                                Math.min(Math.round((MainClient.CLIENT_CONFIG.commentHideTimer + COMMENT_HIDE_TICKS) / COMMENT_HIDE_TICKS), 4) * COMMENT_HIDE_TICKS;
+                if (visibilityPreference) {
+                    visibilityPreference = false;
+                    if (COMMENT_HIDE_TICKS - (invisibleTimeRemaining % COMMENT_HIDE_TICKS) < 60) {
+                        invisibleTimeRemaining =
+                                Math.min(Math.round((invisibleTimeRemaining + COMMENT_HIDE_TICKS) / COMMENT_HIDE_TICKS), 4) * COMMENT_HIDE_TICKS;
                     } else {
-                        MainClient.CLIENT_CONFIG.commentHideTimer = COMMENT_HIDE_TICKS;
+                        invisibleTimeRemaining = COMMENT_HIDE_TICKS;
                     }
                 } else {
-                    MainClient.CLIENT_CONFIG.isCommentVisible = true;
+                    visibilityPreference = true;
                 }
             }
             return false;
@@ -139,5 +139,18 @@ public class CommentToolItem extends GroupedItem {
             item.getOrCreateTag().putLong("uploadJobId", jobId);
         }
 #endif
+    }
+
+    public static void updateInvisibilityTimer(float deltaTicks) {
+        if (invisibleTimeRemaining > 0) {
+            invisibleTimeRemaining -= deltaTicks;
+            if (invisibleTimeRemaining <= 0) {
+                visibilityPreference = true;
+            }
+        }
+    }
+
+    public static boolean getVisibilityPreference() {
+        return visibilityPreference;
     }
 }

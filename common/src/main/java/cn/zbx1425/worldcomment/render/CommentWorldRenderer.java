@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.render;
 
-import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
@@ -14,9 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
@@ -103,7 +100,7 @@ public class CommentWorldRenderer implements IGuiCommon {
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
             for (int i = 0; i < blockData.getValue().size(); i++) {
                 CommentEntry comment = blockData.getValue().get(i);
-                boolean isVisible = (comment.messageType - 1) >= 4 || MainClient.CLIENT_CONFIG.isCommentVisible;
+                boolean isVisible = MainClient.CLIENT_CONFIG.isCommentVisible(Minecraft.getInstance(), comment);
                 if (!isVisible) continue;
                 boolean showIcon = blockData.getValue().size() < 2 ||
                         ((currentTime / 1000) % blockData.getValue().size() == i);

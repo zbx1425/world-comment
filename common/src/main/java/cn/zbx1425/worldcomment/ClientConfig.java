@@ -1,25 +1,28 @@
 package cn.zbx1425.worldcomment;
 
+import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.GameType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClientConfig {
 
-    public boolean isCommentVisible = true;
-
     public boolean screenshotIncludeGui = false;
-    public boolean screenshotIncludeComments = true;
-
-    public float commentHideTimer = 0f;
+    public boolean screenshotIncludeComments = false;
 
     public List<ImageUploader> imageUploader;
 
     public int allowMarkerUsage;
+    public int commentVisibilityCriteria;
+
+    public boolean commentVisibilityMask = true;
 
     public static ClientConfig fromServerConfig(ServerConfig serverConfig) {
         ClientConfig config = new ClientConfig();
@@ -30,16 +33,16 @@ public class ClientConfig {
             case "all" -> 2;
             default -> 1;
         };
+        config.commentVisibilityCriteria = switch (serverConfig.commentVisibilityCriteria.value) {
+            case "tool_toggle" -> 0;
+            case "glass_worn" -> 1;
+            default -> 0;
+        };
         return config;
     }
 
     public void tick(float deltaTicks) {
-        if (commentHideTimer > 0) {
-            commentHideTimer -= deltaTicks;
-            if (commentHideTimer <= 0) {
-                isCommentVisible = true;
-            }
-        }
+        CommentToolItem.updateInvisibilityTimer(deltaTicks);
     }
 
     public ClientConfig() {
@@ -54,6 +57,7 @@ public class ClientConfig {
         }
         imageUploader = ImageUploader.parseUploaderList(uploaderConfigs);
         allowMarkerUsage = packet.readInt();
+        commentVisibilityCriteria = packet.readInt();
     }
 
     public void writePacket(FriendlyByteBuf packet) {
@@ -62,6 +66,25 @@ public class ClientConfig {
             packet.writeUtf(uploader.serialize().toString());
         }
         packet.writeInt(allowMarkerUsage);
+        packet.writeInt(commentVisibilityCriteria);
     }
 
+    public boolean canAccessBuildMarkers(Minecraft minecraft) {
+        return switch (allowMarkerUsage) {
+            case 0 -> minecraft.player.hasPermissions(2);
+            case 1 -> minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
+            case 2 -> true;
+            default -> false;
+        };
+    }
+
+    public boolean isCommentVisible(Minecraft minecraft, CommentEntry comment) {
+        if (!commentVisibilityMask) return false;
+        if ((comment.messageType - 1) >= 4) return true;
+        return switch (commentVisibilityCriteria) {
+            case 0 -> CommentToolItem.getVisibilityPreference();
+            case 1 -> false; // TODO
+            default -> false;
+        };
+    }
 }

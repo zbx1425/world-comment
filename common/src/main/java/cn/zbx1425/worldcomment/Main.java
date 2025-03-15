@@ -4,7 +4,6 @@ import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.GroupedItem;
-import cn.zbx1425.worldcomment.mixin.CreativeModeTabsAccessor;
 import cn.zbx1425.worldcomment.network.*;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;

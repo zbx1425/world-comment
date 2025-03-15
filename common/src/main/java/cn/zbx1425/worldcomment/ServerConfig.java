@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment;
 
-import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import com.google.common.base.CaseFormat;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -24,6 +23,7 @@ public class ServerConfig {
     public ConfigItem imageUploadConfig;
 
     public ConfigItem allowMarkerUsage;
+    public ConfigItem commentVisibilityCriteria;
 
     public void load(Path configPath) throws IOException {
         JsonObject json = Files.exists(configPath)
@@ -35,6 +35,7 @@ public class ServerConfig {
         uplinkAuthKey = new ConfigItem(json, "uplinkAuthKey", "");
         imageUploadConfig = new ConfigItem(json, "imageUploadConfig", "");
         allowMarkerUsage = new ConfigItem(json, "allowMarkerUsage", "creative");
+        commentVisibilityCriteria = new ConfigItem(json, "commentVisibilityCriteria", "tool_toggle");
 
         if (!Files.exists(configPath)) save(configPath);
     }
@@ -47,6 +48,7 @@ public class ServerConfig {
         uplinkAuthKey.writeJson(json);
         imageUploadConfig.writeJson(json);
         allowMarkerUsage.writeJson(json);
+        commentVisibilityCriteria.writeJson(json);
 
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }

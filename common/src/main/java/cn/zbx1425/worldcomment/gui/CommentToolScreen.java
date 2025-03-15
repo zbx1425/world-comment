@@ -86,12 +86,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         radioButtons.clear();
 
         assert minecraft.player != null && minecraft.gameMode != null;
-        boolean canAccessBuildTools = switch (MainClient.CLIENT_CONFIG.allowMarkerUsage) {
-            case 0 -> minecraft.player.hasPermissions(2);
-            case 1 -> minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
-            case 2 -> true;
-            default -> false;
-        };
+        boolean canAccessBuildTools = MainClient.CLIENT_CONFIG.canAccessBuildMarkers(minecraft);
 
         for (int r = 0; r < (canAccessBuildTools ? 2 : 1); r++) {
             addRenderableWidget(new WidgetFlagLabel(

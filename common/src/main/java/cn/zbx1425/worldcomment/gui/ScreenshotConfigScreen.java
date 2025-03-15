@@ -5,7 +5,7 @@ import cn.zbx1425.worldcomment.data.client.Screenshot;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else  #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
 
     private boolean prevHideGui;
-    private boolean prevHideComments;
 
     private static final int CONTAINER_PADDING_X = 8;
     private static final int CONTAINER_PADDING_Y = 5;
@@ -27,7 +26,6 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     public ScreenshotConfigScreen() {
         super(Component.literal("Screenshot Config"));
         prevHideGui = Minecraft.getInstance().options.hideGui;
-        prevHideComments = !MainClient.CLIENT_CONFIG.isCommentVisible;
     }
 
     @Override
@@ -111,7 +109,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     @Override
     public void onClose() {
         minecraft.options.hideGui = prevHideGui;
-        MainClient.CLIENT_CONFIG.isCommentVisible = !prevHideComments;
+        MainClient.CLIENT_CONFIG.commentVisibilityMask = true;
         Screenshot.isGrabbing = false;
         super.onClose();
     }

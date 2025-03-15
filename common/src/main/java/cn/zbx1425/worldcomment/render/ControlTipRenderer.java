@@ -8,8 +8,7 @@ import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
-import net.minecraft.nbt.Tag;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else  #endif
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,8 +28,8 @@ public class ControlTipRenderer implements IGuiCommon {
     public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
             () -> Component.translatable("gui.worldcomment.control_tip.toggle_show",
                     String.format("%02d:%02d",
-                            (int)Math.floor((MainClient.CLIENT_CONFIG.commentHideTimer / 20) / 60),
-                            (int)Math.floor((MainClient.CLIENT_CONFIG.commentHideTimer / 20) % 60)
+                            (int)Math.floor((CommentToolItem.invisibleTimeRemaining / 20) / 60),
+                            (int)Math.floor((CommentToolItem.invisibleTimeRemaining / 20) % 60)
                     )), 0,
             null, true
     );
@@ -78,7 +77,7 @@ public class ControlTipRenderer implements IGuiCommon {
                 TIP_PLACE_COMMENT.visible = true;
             } else {
                 TIP_CREATE.visible = true;
-                if (MainClient.CLIENT_CONFIG.isCommentVisible) {
+                if (CommentToolItem.getVisibilityPreference()) {
                     TIP_TOGGLE_HIDE.visible = true;
                 } else {
                     TIP_TOGGLE_SHOW.visible = true;

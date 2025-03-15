@@ -1,10 +1,8 @@
 package cn.zbx1425.worldcomment.data.client;
 
-import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
-import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.mixin.LevelRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
@@ -51,7 +49,7 @@ public class ClientRayPicking {
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;
                 for (CommentEntry comment : blockData.getValue()) {
-                    boolean isVisible = (comment.messageType - 1) >= 4 || MainClient.CLIENT_CONFIG.isCommentVisible;
+                    boolean isVisible = MainClient.CLIENT_CONFIG.isCommentVisible(minecraft, comment);
                     if (isVisible) {
                         visibleComments.computeIfAbsent(comment.location, ignored -> new ArrayList<>()).add(comment);
                         if (isPicked) {
