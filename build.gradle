@@ -5,7 +5,7 @@ import java.nio.file.Files
 
 plugins {
 	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.6-SNAPSHOT" apply false
+	id "dev.architectury.loom" version "1.9-SNAPSHOT" apply false
 	id "de.undercouch.download" version "4.1.2"
 	id "com.github.johnrengelman.shadow" version "8.1.1"
 	id "io.github.pacifistmc.forgix" version "1.2.9"
@@ -72,6 +72,9 @@ allprojects {
 		maven { url = "https://jitpack.io/" }
 		maven { url = "https://maven.terraformersmc.com/" }
 		maven { url = "https://maven.parchmentmc.org/" }
+		maven { url = 'https://maven.wispforest.io/releases' }
+		maven { url = 'https://maven.su5ed.dev/releases' }
+		maven { url = 'https://maven.fabricmc.net' }
 	}
 
 	tasks.withType(JavaCompile) {

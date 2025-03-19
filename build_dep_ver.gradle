@@ -91,3 +91,10 @@ rootProject.ext.architectury_version = [
         "1.21.1": "13.0.8"
 ][minecraft_version]
 rootProject.ext.architectury_id = minecraft_main_version == 16 ? "me.shedaniel" : "dev.architectury"
+
+if (minecraft_version_int >= 12001) {
+    rootProject.ext.accessories_version = [
+            "1.20.1": "1.0.0-beta.47+1.20.1", "1.20.4": "1.0.0-alpha.25+1.20.4",
+            "1.21.1": "1.1.0-beta.31+1.21.1"
+    ][minecraft_version]
+}
