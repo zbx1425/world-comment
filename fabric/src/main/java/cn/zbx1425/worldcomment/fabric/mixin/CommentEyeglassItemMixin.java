@@ -15,6 +15,10 @@ public class CommentEyeglassItemMixin {
      */
     @Overwrite
     public static Item.Properties injectFabricSettings(Item.Properties properties) {
+#if MC_VERSION >= "12000"
         return properties.equipmentSlot((livingEntity, itemStack) -> EquipmentSlot.HEAD);
+#else
+        return properties;
+#endif
     }
 }
