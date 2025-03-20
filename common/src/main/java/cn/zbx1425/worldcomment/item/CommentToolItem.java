@@ -31,7 +31,7 @@ public class CommentToolItem extends Item implements GroupedItem {
     public CommentToolItem() {
         super(GroupedItem.createProperties(properties ->
                 properties.stacksTo(1)
-        ));
+        , CommentToolItem::getTabImpl));
     }
 
     @Override
@@ -49,6 +49,10 @@ public class CommentToolItem extends Item implements GroupedItem {
 
     @Override
     public #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTab() {
+        return getTabImpl();
+    }
+
+    public static #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTabImpl() {
         #if MC_VERSION >= "12000"
             return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
         #else

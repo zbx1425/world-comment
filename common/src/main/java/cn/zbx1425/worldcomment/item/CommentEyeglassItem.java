@@ -17,14 +17,18 @@ public class CommentEyeglassItem extends ArmorItem implements GroupedItem {
             #if MC_VERSION >= "12000" Type.HELMET #else EquipmentSlot.HEAD #endif,
             GroupedItem.createProperties(properties ->
                 properties.stacksTo(1)
-            )
+            , CommentEyeglassItem::getTabImpl)
         );
     }
 
     @Override
     public #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTab() {
+        return getTabImpl();
+    }
+
+    public static #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTabImpl() {
         #if MC_VERSION >= "12000"
-            return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
+        return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
         #else
             return CreativeModeTab.TAB_MISC;
         #endif
