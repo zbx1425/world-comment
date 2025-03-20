@@ -24,3 +24,6 @@ side = "BOTH"
 
 [[mixins]]
 config = "worldcomment.mixins.json"
+
+[[mixins]]
+config = "worldcomment.neoforge.mixins.json"
