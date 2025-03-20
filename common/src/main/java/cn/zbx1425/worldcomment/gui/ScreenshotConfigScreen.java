@@ -3,9 +3,8 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else  #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
