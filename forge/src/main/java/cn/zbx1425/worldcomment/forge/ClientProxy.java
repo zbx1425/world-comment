@@ -13,6 +13,7 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraft.commands.Commands;
@@ -47,6 +48,11 @@ public class ClientProxy {
         @SubscribeEvent
         public static void onRegisterClientCommand(RegisterCommandsEvent event) {
             ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
+        }
+
+        @SubscribeEvent
+        public static void onClientSetupEvent(FMLClientSetupEvent event) {
+            MainClient.init();
         }
     }
 

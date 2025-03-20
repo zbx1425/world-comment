@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.interop.AccessoriesInterop;
 import cn.zbx1425.worldcomment.interop.BulletChatInterop;
 import cn.zbx1425.worldcomment.network.*;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -32,6 +33,8 @@ public class MainClient {
 		ClientPlatform.registerPlayerJoinEvent(ignored -> {
 			ClientWorldData.INSTANCE.clear();
 		});
+
+		AccessoriesInterop.registerRenderers();
 	}
 
 }

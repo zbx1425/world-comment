@@ -19,6 +19,7 @@ import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -73,6 +74,11 @@ public class ClientProxy {
         @SubscribeEvent
         public static void onRegisterClientCommand(RegisterCommandsEvent event) {
             ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
+        }
+
+        @SubscribeEvent
+        public static void onClientSetupEvent(FMLClientSetupEvent event) {
+            MainClient.init();
         }
     }
 

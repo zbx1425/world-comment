@@ -388,13 +388,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     public static void triggerOpen() {
         Minecraft minecraft = Minecraft.getInstance();
-        minecraft.execute(() -> {
+        RenderSystem.recordRenderCall(() -> minecraft.tell(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
                 minecraft.screen.onClose();
-            } else if (minecraft.screen == null) {
+            } else {
                 minecraft.setScreen(new CommentListScreen(null));
             }
-        });
+        }));
     }
 
     public static boolean handleKeyTab() {

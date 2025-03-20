@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.Main;
 #if MC_VERSION >= 12000
 import io.wispforest.accessories.api.AccessoriesCapability;
 #endif
+import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
@@ -30,13 +31,20 @@ public class AccessoriesInterop {
                 if (cap == null) return false;
                 return !cap.getEquipped(Main.ITEM_COMMENT_EYEGLASS.get()).isEmpty();
             };
-        } catch (Exception ignored) {
-
-        }
+        } catch (Exception ignored) {}
 #endif
     }
 
     public static boolean isWearingEyeglass() {
         return isWearingEyeglass.getAsBoolean();
+    }
+
+    public static void registerRenderers() {
+#if MC_VERSION >= 12000
+        try {
+            Class<?> ignored = Class.forName("io.wispforest.accessories.api.client.AccessoriesRendererRegistry");
+            AccessoriesRendererRegistry.registerNoRenderer(Main.ITEM_COMMENT_EYEGLASS.get());
+        } catch (Exception ignored) {}
+#endif
     }
 }

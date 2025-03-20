@@ -10,7 +10,7 @@
     "head": {
       "rotation": [ 0, 180, 0 ],
       "translation": [ 0, 13, 7 ],
-      "scale":[ 1, 1, 1]
+      "scale": [ 0, 0, 0 ]
     },
     "thirdperson_righthand": {
       "rotation": [ 0, 0, 0 ],
@@ -28,6 +28,6 @@
     }
   },
   "textures": {
-    "layer0": "worldcomment:item/comment_tool"
+    "layer0": "worldcomment:item/comment_eyeglass"
   }
 }

@@ -48,7 +48,6 @@ public class MainForge {
 #else
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 #endif
-			MainClient.init();
 			eventBus.register(ClientProxy.ModEventBusListener.class);
 #if MC_VERSION >= "12100"
 			NeoForge.EVENT_BUS.register(ClientProxy.ForgeEventBusListener.class);

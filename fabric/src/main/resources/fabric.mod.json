@@ -23,7 +23,8 @@
 		]
 	},
 	"mixins": [
-      "worldcomment.mixins.json"
+      "worldcomment.mixins.json",
+	  "worldcomment.fabric.mixins.json"
 	],
 	"depends": {
 		"fabric": "*",
