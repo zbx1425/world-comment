@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.mixin;
 
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
+import cn.zbx1425.worldcomment.interop.AccessoriesInterop;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -42,8 +43,13 @@ public class KeyMappingMixin {
             if (item != null && CommentToolItem.getUploadJobId(item) == null) {
                 Screenshot.triggerCommentSend(true);
                 cir.setReturnValue(false);
+                return;
             }
 
+            if (AccessoriesInterop.isWearingEyeglass()) {
+                Screenshot.triggerCommentSend(false);
+                cir.setReturnValue(false);
+            }
         }
     }
 }

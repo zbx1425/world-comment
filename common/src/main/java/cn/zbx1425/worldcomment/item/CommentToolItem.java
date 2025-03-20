@@ -48,7 +48,7 @@ public class CommentToolItem extends Item implements GroupedItem {
     }
 
     @Override
-    public ResourceKey<CreativeModeTab> getTab() {
+    public #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTab() {
         #if MC_VERSION >= "12000"
             return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
         #else
