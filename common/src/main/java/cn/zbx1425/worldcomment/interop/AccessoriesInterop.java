@@ -1,8 +1,9 @@
 package cn.zbx1425.worldcomment.interop;
 
 import cn.zbx1425.worldcomment.Main;
+#if MC_VERSION >= 12000
 import io.wispforest.accessories.api.AccessoriesCapability;
-import io.wispforest.accessories.api.slot.SlotEntryReference;
+#endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
@@ -18,6 +19,7 @@ public class AccessoriesInterop {
             if (player == null) return false;
             return player.getInventory().armor.get(3).is(Main.ITEM_COMMENT_EYEGLASS.get());
         };
+#if MC_VERSION >= 12000
         try {
             Class<?> ignored = Class.forName("io.wispforest.accessories.api.AccessoriesCapability");
             isWearingEyeglass = () -> {
@@ -31,6 +33,7 @@ public class AccessoriesInterop {
         } catch (Exception ignored) {
 
         }
+#endif
     }
 
     public static boolean isWearingEyeglass() {

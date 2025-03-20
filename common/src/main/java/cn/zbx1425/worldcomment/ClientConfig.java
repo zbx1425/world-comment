@@ -25,6 +25,7 @@ public class ClientConfig {
 
     public int allowMarkerUsage;
     public int commentVisibilityCriteria;
+    public int markerVisibilityCriteria;
 
     public boolean commentVisibilityMask = true;
 
@@ -40,6 +41,15 @@ public class ClientConfig {
         config.commentVisibilityCriteria = switch (serverConfig.commentVisibilityCriteria.value) {
             case "tool_toggle" -> 0;
             case "glass_worn" -> 1;
+            case "always" -> 999;
+            case "never" -> -1;
+            default -> 0;
+        };
+        config.markerVisibilityCriteria = switch (serverConfig.markerVisibilityCriteria.value) {
+            case "tool_toggle" -> 0;
+            case "glass_worn" -> 1;
+            case "always" -> 999;
+            case "never" -> -1;
             default -> 0;
         };
         return config;
@@ -80,10 +90,11 @@ public class ClientConfig {
 
     public boolean isCommentVisible(Minecraft minecraft, CommentEntry comment) {
         if (!commentVisibilityMask) return false;
-        if ((comment.messageType - 1) >= 4) return true;
-        return switch (commentVisibilityCriteria) {
+        int criteriaToUse = ((comment.messageType - 1) >= 4) ? markerVisibilityCriteria : commentVisibilityCriteria;
+        return switch (criteriaToUse) {
             case 0 -> CommentToolItem.getVisibilityPreference();
             case 1 -> AccessoriesInterop.isWearingEyeglass();
+            case 999 -> true;
             default -> false;
         };
     }

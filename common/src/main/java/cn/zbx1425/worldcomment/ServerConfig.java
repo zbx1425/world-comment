@@ -24,6 +24,7 @@ public class ServerConfig {
 
     public ConfigItem allowMarkerUsage;
     public ConfigItem commentVisibilityCriteria;
+    public ConfigItem markerVisibilityCriteria;
 
     public void load(Path configPath) throws IOException {
         JsonObject json = Files.exists(configPath)
@@ -36,6 +37,7 @@ public class ServerConfig {
         imageUploadConfig = new ConfigItem(json, "imageUploadConfig", "");
         allowMarkerUsage = new ConfigItem(json, "allowMarkerUsage", "creative");
         commentVisibilityCriteria = new ConfigItem(json, "commentVisibilityCriteria", "tool_toggle");
+        markerVisibilityCriteria = new ConfigItem(json, "markerVisibilityCriteria", "always");
 
         if (!Files.exists(configPath)) save(configPath);
     }
@@ -49,6 +51,7 @@ public class ServerConfig {
         imageUploadConfig.writeJson(json);
         allowMarkerUsage.writeJson(json);
         commentVisibilityCriteria.writeJson(json);
+        markerVisibilityCriteria.writeJson(json);
 
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }
