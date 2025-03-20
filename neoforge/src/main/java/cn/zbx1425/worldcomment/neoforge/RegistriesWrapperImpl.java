@@ -68,10 +68,10 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
     }
 
     @Override
-    public void registerItem(String id, RegistryObject<GroupedItem> item) {
+    public <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item) {
         ITEMS.register(id, () -> {
-            final GroupedItem itemObject = item.get();
-            registerCreativeModeTab(itemObject.tabSupplier.get(), itemObject);
+            final T itemObject = item.get();
+            registerCreativeModeTab(itemObject.getTab(), itemObject);
             return itemObject;
         });
     }

@@ -47,10 +47,10 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
     @Override
-    public void registerItem(String id, RegistryObject<GroupedItem> item) {
+    public <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item) {
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), item.get());
 #if MC_VERSION >= "12000"
-        ItemGroupEvents.modifyEntriesEvent(item.get().tabSupplier.get()).register(consumer -> consumer.accept(item.get()));
+        ItemGroupEvents.modifyEntriesEvent(item.get().getTab()).register(consumer -> consumer.accept(item.get()));
 #endif
     }
 

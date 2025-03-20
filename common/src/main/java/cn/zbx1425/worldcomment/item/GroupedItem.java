@@ -5,22 +5,16 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-public class GroupedItem extends Item {
+public interface GroupedItem {
 
-    public final Supplier< #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif > tabSupplier;
+    #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTab();
 
-    public GroupedItem(
-            Supplier< #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif > tabSupplier,
-            Function<Properties, Properties> properties) {
-        super(
-#if MC_VERSION >= "12000"
-                properties.apply(new Properties())
-#else
-                properties.apply(new Properties().tab(tabSupplier.get()))
-#endif
-        );
-        this.tabSupplier = tabSupplier;
+    static Item.Properties createProperties(Function<Item.Properties, Item.Properties> properties) {
+        #if MC_VERSION >= "12000"
+            return properties.apply(new Item.Properties());
+        #else
+            return properties.apply(new Item.Properties().tab(tabSupplier.get()));
+        #endif
     }
 }

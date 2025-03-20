@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.interop.AccessoriesInterop;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -82,7 +83,7 @@ public class ClientConfig {
         if ((comment.messageType - 1) >= 4) return true;
         return switch (commentVisibilityCriteria) {
             case 0 -> CommentToolItem.getVisibilityPreference();
-            case 1 -> false; // TODO
+            case 1 -> AccessoriesInterop.isWearingEyeglass();
             default -> false;
         };
     }

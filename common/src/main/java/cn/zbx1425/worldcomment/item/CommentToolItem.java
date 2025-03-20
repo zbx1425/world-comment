@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 #if MC_VERSION >= "12100" import net.minecraft.world.item.component.CustomData; #endif
 import net.minecraft.world.level.Level;
@@ -22,20 +23,15 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 
-public class CommentToolItem extends GroupedItem {
+public class CommentToolItem extends Item implements GroupedItem {
 
     private static boolean visibilityPreference = true;
     public static float invisibleTimeRemaining = 0f;
 
     public CommentToolItem() {
-        super(
-            () -> #if MC_VERSION >= "12000"
-                ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"))
-            #else
-                CreativeModeTab.TAB_MISC
-            #endif,
-            properties -> properties.stacksTo(1)
-        );
+        super(GroupedItem.createProperties(properties ->
+                properties.stacksTo(1)
+        ));
     }
 
     @Override
@@ -49,6 +45,15 @@ public class CommentToolItem extends GroupedItem {
         } else {
             return InteractionResultHolder.fail(item);
         }
+    }
+
+    @Override
+    public ResourceKey<CreativeModeTab> getTab() {
+        #if MC_VERSION >= "12000"
+            return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
+        #else
+            return CreativeModeTab.TAB_MISC;
+        #endif
     }
 
     public static class Client {

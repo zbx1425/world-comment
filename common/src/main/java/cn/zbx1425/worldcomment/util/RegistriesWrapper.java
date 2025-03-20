@@ -16,7 +16,7 @@ public interface RegistriesWrapper {
 
     void registerBlock(String id, RegistryObject<Block> block);
 
-    void registerItem(String id, RegistryObject<GroupedItem> item);
+    <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item);
 
     void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab);
 
