@@ -3,10 +3,10 @@ package cn.zbx1425.worldcomment.fabric;
 import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.MainClient;
-#if MC_VERSION >= "12000" import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
