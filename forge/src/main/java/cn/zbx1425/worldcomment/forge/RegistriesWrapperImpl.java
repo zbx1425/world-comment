@@ -52,9 +52,9 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
     @Override
-    public void registerItem(String id, RegistryObject<GroupedItem> item) {
+    public <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item) {
         ITEMS.register(id, () -> {
-            final GroupedItem itemObject = item.get();
+            final T itemObject = item.get();
             registerCreativeModeTab(itemObject.tabSupplier.get(), itemObject);
             return itemObject;
         });
