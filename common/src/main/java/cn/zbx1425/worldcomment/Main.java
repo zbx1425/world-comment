@@ -32,14 +32,6 @@ public class Main {
 
 	public static final RegistryObject<GroupedItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
 
-	public static ResourceLocation id(String path) {
-#if MC_VERSION >= "12100"
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
-#else
-		return new ResourceLocation(MOD_ID, path);
-#endif
-	}
-
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL);
 
@@ -99,6 +91,22 @@ public class Main {
 		ServerPlatform.registerPlayerJoinEvent(player -> {
 			PacketClientConfigS2C.send(player, SERVER_CONFIG);
 		});
+	}
+
+	public static ResourceLocation id(String path) {
+#if MC_VERSION >= "12100"
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+#else
+		return new ResourceLocation(MOD_ID, path);
+#endif
+	}
+
+	public static ResourceLocation vanillaId(String path) {
+#if MC_VERSION >= "12100"
+		return ResourceLocation.withDefaultNamespace(path);
+#else
+		return new ResourceLocation(path);
+#endif
 	}
 
 }
