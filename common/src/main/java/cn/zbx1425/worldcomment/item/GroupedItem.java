@@ -14,7 +14,7 @@ public interface GroupedItem {
         #if MC_VERSION >= "12000"
             return properties.apply(new Item.Properties());
         #else
-            return properties.apply(new Item.Properties().tab(tabSupplier.get()));
+            return properties.apply(new Item.Properties().tab(getTab()));
         #endif
     }
 }
