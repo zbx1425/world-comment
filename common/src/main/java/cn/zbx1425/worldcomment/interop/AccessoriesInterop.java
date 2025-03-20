@@ -3,8 +3,8 @@ package cn.zbx1425.worldcomment.interop;
 import cn.zbx1425.worldcomment.Main;
 #if MC_VERSION >= 12000
 import io.wispforest.accessories.api.AccessoriesCapability;
-#endif
 import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
+#endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
