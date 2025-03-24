@@ -27,6 +27,8 @@ public class ClientConfig {
     public int commentVisibilityCriteria;
     public int markerVisibilityCriteria;
 
+    public boolean imageGlobalKill = false;
+
     public boolean commentVisibilityMask = true;
 
     public static ClientConfig fromServerConfig(ServerConfig serverConfig) {
@@ -52,6 +54,7 @@ public class ClientConfig {
             case "never" -> -1;
             default -> 0;
         };
+        config.imageGlobalKill = serverConfig.imageGlobalKill.value.equals("true");
         return config;
     }
 

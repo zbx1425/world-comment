@@ -1,13 +1,15 @@
 package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.ServerCommand;
+import net.minecraft.commands.Commands;
 #if MC_VERSION >= "12100"
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 #else
@@ -41,6 +43,7 @@ public class MainForge {
 #endif
 		registries.registerAllDeferred(eventBus);
 		eventBus.register(RegistriesWrapperImpl.RegisterCreativeTabs.class);
+		NeoForge.EVENT_BUS.register(ForgeEventBusListener.class);
 
 #if MC_VERSION >= "12100"
 		eventBus.register(ModEventBusListener.class);
@@ -67,5 +70,13 @@ public class MainForge {
 			MainForge.PACKET_REGISTRY.commit(registrar);
 		}
 #endif
+	}
+
+	public static class ForgeEventBusListener {
+
+		@SubscribeEvent
+		public static void onRegisterCommand(RegisterCommandsEvent event) {
+			ServerCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
+		}
 	}
 }

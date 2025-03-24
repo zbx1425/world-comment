@@ -1,13 +1,15 @@
 package cn.zbx1425.worldcomment.forge;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.ServerCommand;
+import net.minecraft.commands.Commands;
 import dev.architectury.platform.forge.EventBuses;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(Main.MOD_ID)
@@ -25,6 +27,7 @@ public class MainForge {
 
 		registries.registerAllDeferred();
 		eventBus.register(RegistriesWrapperImpl.RegisterCreativeTabs.class);
+		MinecraftForge.EVENT_BUS.register(ForgeEventBusListener.class);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 			MainClient.init();
@@ -33,4 +36,11 @@ public class MainForge {
 		});
 	}
 
+	public static class ForgeEventBusListener {
+
+		@SubscribeEvent
+		public static void onRegisterCommand(RegisterCommandsEvent event) {
+			ServerCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
+		}
+	}
 }

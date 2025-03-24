@@ -72,11 +72,6 @@ public class ClientProxy {
         }
 
         @SubscribeEvent
-        public static void onRegisterClientCommand(RegisterCommandsEvent event) {
-            ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
-        }
-
-        @SubscribeEvent
         public static void onClientSetupEvent(FMLClientSetupEvent event) {
             MainClient.init();
         }
@@ -110,6 +105,11 @@ public class ClientProxy {
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Pre event) {
             MainClient.CLIENT_CONFIG.tick(1, 0);
+        }
+
+        @SubscribeEvent
+        public static void onRegisterClientCommand(RegisterCommandsEvent event) {
+            ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
         }
     }
 

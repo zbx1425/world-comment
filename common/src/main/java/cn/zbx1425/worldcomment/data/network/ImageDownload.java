@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
@@ -31,7 +32,7 @@ public class ImageDownload {
     private static final Map<String, ImageState> images = new HashMap<>();
 
     public static ImageState getTexture(ThumbImage image, boolean thumb) {
-        if (image.url.isEmpty()) return ImageState.BLANK;
+        if (image.url.isEmpty() || MainClient.CLIENT_CONFIG.imageGlobalKill) return ImageState.BLANK;
         String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
         synchronized (images) {
             if (images.containsKey(targetUrl)) return queryTexture(targetUrl);

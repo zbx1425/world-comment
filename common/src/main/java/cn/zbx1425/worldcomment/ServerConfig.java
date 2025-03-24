@@ -26,6 +26,10 @@ public class ServerConfig {
     public ConfigItem commentVisibilityCriteria;
     public ConfigItem markerVisibilityCriteria;
 
+    public ConfigItem imageGlobalKill;
+
+    private Path path;
+
     public void load(Path configPath) throws IOException {
         JsonObject json = Files.exists(configPath)
                 ? JsonParser.parseString(Files.readString(configPath)).getAsJsonObject()
@@ -38,7 +42,9 @@ public class ServerConfig {
         allowMarkerUsage = new ConfigItem(json, "allowMarkerUsage", "creative");
         commentVisibilityCriteria = new ConfigItem(json, "commentVisibilityCriteria", "tool_toggle");
         markerVisibilityCriteria = new ConfigItem(json, "markerVisibilityCriteria", "always");
+        imageGlobalKill = new ConfigItem(json, "imageGlobalKill", "false");
 
+        this.path = configPath;
         if (!Files.exists(configPath)) save(configPath);
     }
 
@@ -52,8 +58,13 @@ public class ServerConfig {
         allowMarkerUsage.writeJson(json);
         commentVisibilityCriteria.writeJson(json);
         markerVisibilityCriteria.writeJson(json);
+        imageGlobalKill.writeJson(json);
 
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
+    }
+
+    public void save() throws IOException {
+        save(this.path);
     }
 
     public List<JsonObject> parseUploaderConfig() {
