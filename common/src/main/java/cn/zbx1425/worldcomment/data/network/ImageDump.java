@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.data.network;
 
-import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
@@ -8,20 +7,15 @@ import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class ImageDump {
 
@@ -58,8 +52,7 @@ public class ImageDump {
                 CommentEntry comment = comments.get(i);
                 String targetUrl = comment.image.url;
                 if (targetUrl.isEmpty()) continue;
-                Path filePath = storeDir.resolve("url-sha1-" + DigestUtils.sha1Hex(targetUrl)
-                        + (targetUrl.endsWith(".jpg") ? ".jpg" : ".png"));
+                Path filePath = storeDir.resolve(ImageDownload.getCacheFileName(targetUrl));
                 if (!Files.exists(filePath)) {
                     try {
                         byte[] imageData = Main.HTTP_CLIENT.send(
@@ -70,7 +63,7 @@ public class ImageDump {
                                 HttpResponse.BodyHandlers.ofByteArray()).body();
                         Files.write(filePath, imageData);
                     } catch (IOException | InterruptedException ex) {
-                        Main.LOGGER.warn("Cannot download image " + targetUrl, ex);
+                        Main.LOGGER.warn("Cannot download image {}", targetUrl, ex);
                     }
                 }
             }
@@ -78,7 +71,7 @@ public class ImageDump {
                 if (Minecraft.getInstance().player != null) {
                     Minecraft.getInstance().player.displayClientMessage(
                             Component.literal("WorldComment: Download finished"),
-                            true);
+                            false);
                 }
             });
         });

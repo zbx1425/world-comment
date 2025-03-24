@@ -6,17 +6,19 @@ import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
+import net.jpountz.xxhash.XXHashFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import org.apache.commons.codec.digest.DigestUtils;
+import java.util.Base64;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -94,8 +96,7 @@ public class ImageDownload {
 
     private static byte[] getLocalImageData(String url) throws IOException {
         Path imageBaseDir = Minecraft.getInstance().gameDirectory.toPath().resolve("worldcomment-images");
-        Path imagePath = imageBaseDir.resolve("url-sha1-" + DigestUtils.sha1Hex(url)
-            + (url.endsWith(".jpg") ? ".jpg" : ".png"));
+        Path imagePath = imageBaseDir.resolve(getCacheFileName(url));
         if (Files.exists(imagePath)) {
             return Files.readAllBytes(imagePath);
         }
@@ -190,6 +191,13 @@ public class ImageDownload {
         }
 
         public static final ImageState BLANK = new ImageState(true);
+    }
+
+    public static String getCacheFileName(String url) {
+        byte[] urlBytes = url.getBytes(StandardCharsets.UTF_8);
+        long hash = XXHashFactory.fastestInstance().hash64().hash(urlBytes, 0, urlBytes.length, 0);
+        String extension = url.toLowerCase().endsWith(".jpg") ? ".jpg" : ".png";
+        return String.format("url-xxh64-%016x%s", hash, extension);
     }
 
 }
