@@ -6,12 +6,11 @@ import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
-import net.jpountz.xxhash.XXHashFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import java.util.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -195,9 +194,9 @@ public class ImageDownload {
 
     public static String getCacheFileName(String url) {
         byte[] urlBytes = url.getBytes(StandardCharsets.UTF_8);
-        long hash = XXHashFactory.fastestInstance().hash64().hash(urlBytes, 0, urlBytes.length, 0);
+        String hash = DigestUtils.sha1Hex(urlBytes);
         String extension = url.toLowerCase().endsWith(".jpg") ? ".jpg" : ".png";
-        return String.format("url-xxh64-%016x%s", hash, extension);
+        return String.format("url-sha1-%s%s", hash, extension);
     }
 
 }

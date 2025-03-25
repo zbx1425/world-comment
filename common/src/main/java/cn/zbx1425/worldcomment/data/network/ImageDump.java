@@ -55,8 +55,10 @@ public class ImageDump {
                 Path filePath = storeDir.resolve(ImageDownload.getCacheFileName(targetUrl));
                 if (!Files.exists(filePath)) {
                     try {
+                        URI url = URI.create(targetUrl);
+                        if (url.getScheme().equals("file")) continue;
                         byte[] imageData = Main.HTTP_CLIENT.send(
-                                ImageUploader.requestBuilder(URI.create(targetUrl))
+                                ImageUploader.requestBuilder(url)
                                         .timeout(Duration.of(10, ChronoUnit.SECONDS))
                                         .GET()
                                         .build(),
