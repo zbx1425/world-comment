@@ -31,7 +31,6 @@ public class MainForge {
 		MinecraftForge.EVENT_BUS.register(ForgeEventBusListener.class);
 
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			MainClient.init();
 			eventBus.register(ClientProxy.ModEventBusListener.class);
 			MinecraftForge.EVENT_BUS.register(ClientProxy.ForgeEventBusListener.class);
 		});
