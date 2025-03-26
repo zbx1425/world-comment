@@ -33,7 +33,7 @@ public class ServerCommand {
                             for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
                                 PacketClientConfigS2C.send(player, Main.SERVER_CONFIG);
                             }
-                            context.getSource().sendSuccess(() -> Component.translatable("gui.worldcomment.image_global_kill_feedback", kill), true);
+                            context.getSource().sendSystemMessage(Component.translatable("gui.worldcomment.image_global_kill_feedback", kill));
                             return 1;
                         })))
         );
