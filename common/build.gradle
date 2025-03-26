@@ -17,6 +17,6 @@ architectury {
 
 loom {
 	mixin {
-		defaultRefmapName = "mixins.worldcomment.refmap.json"
+		defaultRefmapName = "worldcomment.refmap.json"
 	}
 }

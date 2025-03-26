@@ -6,6 +6,9 @@ loom {
 	forge {
 		mixinConfig "worldcomment.mixins.json"
 	}
+	mixin {
+		defaultRefmapName = "worldcomment.forge.refmap.json"
+	}
 }
 
 architectury {

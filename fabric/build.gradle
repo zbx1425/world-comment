@@ -16,7 +16,7 @@ repositories {
 
 loom {
 	mixin {
-		defaultRefmapName = "mixins.worldcomment.refmap.json"
+		defaultRefmapName = "worldcomment.fabric.refmap.json"
 	}
 }
 
