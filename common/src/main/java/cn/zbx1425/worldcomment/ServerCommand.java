@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class ServerCommand {
                                     Function<String, LiteralArgumentBuilder<CommandSourceStack>> literal,
                                     BiFunction<String, ArgumentType<?>, RequiredArgumentBuilder<CommandSourceStack, ?>> argument) {
         dispatcher.register(literal.apply("wcs")
-                .then(literal.apply("imageGlobalKill").then(argument.apply("kill", BoolArgumentType.bool()))
+                .then(literal.apply("imageGlobalKill").then(argument.apply("kill", BoolArgumentType.bool())
                         .executes(context -> {
                             boolean kill = BoolArgumentType.getBool(context, "kill");
                             Main.SERVER_CONFIG.imageGlobalKill.value = kill ? "true" : "false";
@@ -32,8 +33,9 @@ public class ServerCommand {
                             for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
                                 PacketClientConfigS2C.send(player, Main.SERVER_CONFIG);
                             }
+                            context.getSource().sendSuccess(() -> Component.translatable("gui.worldcomment.image_global_kill_feedback", kill), true);
                             return 1;
-                        }))
+                        })))
         );
     }
 }

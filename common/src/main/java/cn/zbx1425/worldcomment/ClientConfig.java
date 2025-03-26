@@ -71,6 +71,7 @@ public class ClientConfig {
         imageUploader = ImageUploader.parseUploaderList(uploaderConfigs);
         allowMarkerUsage = packet.readInt();
         commentVisibilityCriteria = packet.readInt();
+        imageGlobalKill = packet.readBoolean();
     }
 
     public void writePacket(FriendlyByteBuf packet) {
@@ -80,6 +81,7 @@ public class ClientConfig {
         }
         packet.writeInt(allowMarkerUsage);
         packet.writeInt(commentVisibilityCriteria);
+        packet.writeBoolean(imageGlobalKill);
     }
 
     public boolean canAccessBuildMarkers(Minecraft minecraft) {

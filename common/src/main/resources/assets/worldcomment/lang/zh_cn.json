@@ -49,6 +49,7 @@
   "gui.worldcomment.send_finish": "§a您的评论已成功发送。",
   "gui.worldcomment.send_fail": "§c§l处理您的评论时发生了错误: %s\n  §c§l处理您的评论时发生了错误。",
   "gui.worldcomment.send_insufficient_clearance": "§6请选择一处更开阔的地方，因为评论物件有 3 格高。",
+  "gui.worldcomment.image_global_kill_feedback": "图像全局禁用开关已被设定为 %s。",
 
   "key.worldcomment.comment_detail": "查看评论详情"
 }
