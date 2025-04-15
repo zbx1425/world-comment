@@ -30,10 +30,11 @@ public class SmmsUploader extends ImageUploader {
     }
 
     public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
+        String initiatorName = comment.initiatorName.isBlank() ? "anonymous" : comment.initiatorName;
         CompletableFuture<String> fullSizeUrlFuture = uploadImage(imageBytes, IMAGE_MAX_WIDTH,
-                "WorldComment from " + comment.initiatorName + ".jpg");
+                "sender-" + initiatorName + ".jpg");
         CompletableFuture<String> thumbnailFuture = uploadImage(imageBytes, THUMBNAIL_MAX_WIDTH,
-                "WorldComment from " + comment.initiatorName + ".thumb.jpg");
+                "sender-" + initiatorName + ".thumb.jpg");
         return CompletableFuture.allOf(fullSizeUrlFuture, thumbnailFuture).thenApply(ignored ->
                 new ThumbImage(fullSizeUrlFuture.join(), thumbnailFuture.join()));
     }
