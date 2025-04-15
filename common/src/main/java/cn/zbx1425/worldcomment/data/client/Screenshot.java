@@ -55,8 +55,10 @@ public class Screenshot {
             // This is a workaround for the issue that the screenshot will be taken before CommentWorldRenderer is hidden
             minecraft.tell(() -> RenderSystem.recordRenderCall(() -> minecraft.tell(() -> RenderSystem.recordRenderCall(() -> {
                 grabScreenshot(imageBytes -> minecraft.execute(() -> {
-                    minecraft.player.playSound(shutterSoundEvent);
-                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
+                    if (minecraft.player != null && minecraft.player.onGround()) {
+                        minecraft.player.playSound(shutterSoundEvent);
+                        Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
+                    }
                 }));
                 minecraft.options.hideGui = prevHideGui;
                 MainClient.CLIENT_CONFIG.commentVisibilityMask = true;
