@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.data.network;
 
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -46,7 +48,7 @@ public class ImageConvertServer {
 
         JPEGImageWriteParam writeParam = new JPEGImageWriteParam(Locale.getDefault());
         writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        writeParam.setCompressionQuality(0.90f);
+        writeParam.setCompressionQuality(ImageUploader.THUMBNAIL_QUALITY / 100f);
         writeParam.setOptimizeHuffmanTables(true);
         
         try (MemoryCacheImageOutputStream output = new MemoryCacheImageOutputStream(outputStream)) {

@@ -92,4 +92,5 @@ public abstract class ImageUploader {
 
     public static int IMAGE_MAX_WIDTH = 1920;
     public static int THUMBNAIL_MAX_WIDTH = 256;
+    public static int THUMBNAIL_QUALITY = 85;
 }

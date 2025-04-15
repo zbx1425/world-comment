@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.data.network;
 
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import org.lwjgl.stb.STBIWriteCallback;
 import org.lwjgl.stb.STBImage;
@@ -30,7 +31,7 @@ public class ImageConvertClient {
             }
             try {
                 try (ByteArrayWriteCallback writeCallback = new ByteArrayWriteCallback(pngImageBytes.length)) {
-                    if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, width.get(0), height.get(0), 4, pixels, 90) == 0) {
+                    if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, width.get(0), height.get(0), 4, pixels, ImageUploader.THUMBNAIL_QUALITY) == 0) {
                         throw new IllegalStateException("Failed to write JPEG image: " + STBImage.stbi_failure_reason());
                     }
                     return writeCallback.array();
@@ -92,7 +93,7 @@ public class ImageConvertClient {
                         throw new IllegalStateException("Failed to resize image: " + STBImage.stbi_failure_reason());
                     }
                     try (ByteArrayWriteCallback writeCallback = new ByteArrayWriteCallback(pngImageBytes.length)) {
-                        if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, newWidth, newHeight, 4, scaledPixels, 90) == 0) {
+                        if (STBImageWrite.stbi_write_jpg_to_func(writeCallback, 0, newWidth, newHeight, 4, scaledPixels, ImageUploader.THUMBNAIL_QUALITY) == 0) {
                             throw new IllegalStateException("Failed to write JPEG image: " + STBImage.stbi_failure_reason());
                         }
                         return writeCallback.array();

@@ -21,12 +21,14 @@ public class LskyUploader extends ImageUploader {
     private final String apiToken;
     private final Integer strategyId;
     private final Integer albumId;
+    private final String cdnImageTransform;
 
     public LskyUploader(JsonObject config) {
         this.apiUrl = config.get("apiUrl").getAsString();
         this.apiToken = config.get("apiToken").getAsString();
         this.strategyId = config.has("strategyId") ? config.get("strategyId").getAsInt() : null;
         this.albumId = config.has("albumId") ? config.get("albumId").getAsInt() : null;
+        this.cdnImageTransform = config.has("cdnImageTransform") ? config.get("cdnImageTransform").getAsString() : null;
     }
 
     public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
@@ -55,7 +57,22 @@ public class LskyUploader extends ImageUploader {
                     }
                     JsonObject linkObj = JsonParser.parseString(response.body()).getAsJsonObject()
                             .get("data").getAsJsonObject().get("links").getAsJsonObject();
-                    return new ThumbImage(linkObj.get("url").getAsString(), linkObj.get("thumbnail_url").getAsString());
+                    String originalUrl = linkObj.get("url").getAsString();
+                    String thumbUrl;
+                    
+                    if (cdnImageTransform != null) {
+                        URI uri = URI.create(originalUrl);
+                        String path = uri.getPath();
+                        thumbUrl = originalUrl.replace(path, cdnImageTransform
+                                .replace("{thumbWidth}", Integer.toString(ImageUploader.THUMBNAIL_MAX_WIDTH))
+                                .replace("{quality100}", Integer.toString(ImageUploader.THUMBNAIL_QUALITY))
+                                .replace("{quality1}", String.format("%.2f", ImageUploader.THUMBNAIL_QUALITY / 100f))
+                                .replace("{path}", path.substring(1)));
+                    } else {
+                        thumbUrl = linkObj.get("thumbnail_url").getAsString();
+                    }
+                    
+                    return new ThumbImage(originalUrl, thumbUrl);
                 });
     }
 
@@ -66,6 +83,7 @@ public class LskyUploader extends ImageUploader {
         json.addProperty("apiToken", apiToken);
         if (strategyId != null) json.addProperty("strategyId", strategyId);
         if (albumId != null) json.addProperty("albumId", albumId);
+        if (cdnImageTransform != null) json.addProperty("cdnImageTransform", cdnImageTransform);
         return json;
     }
 }
