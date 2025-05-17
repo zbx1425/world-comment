@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class CommentEyeglassItem extends Item implements GroupedItem, Equipable {
+public class CommentEyeglassItem extends Item implements GroupedItem #if MC_VERSION >= "11904", Equipable #endif {
 
     public CommentEyeglassItem() {
         super(
@@ -43,8 +43,10 @@ public class CommentEyeglassItem extends Item implements GroupedItem, Equipable 
         return swapWithEquipmentSlot(this, level, player, usedHand);
     }
 
+#if MC_VERSION >= "11904"
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
     }
+#endif
 }
