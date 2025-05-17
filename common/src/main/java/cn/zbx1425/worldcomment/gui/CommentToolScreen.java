@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 
@@ -196,32 +197,33 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     private void sendReport() {
         if (selectedCommentType == 0) return;
         Minecraft.getInstance().execute(() -> {
+            Player player = Minecraft.getInstance().player;
             CommentEntry comment = new CommentEntry(
-                    Minecraft.getInstance().player, checkBoxAnonymous.selected(),
+                    player, checkBoxAnonymous.selected(),
                     selectedCommentType, textBoxMessage.getValue()
             );
             long jobId = SubmitDispatcher.addJob(
                     comment, checkBoxNoImage.selected() ? null : imageBytes,
                     (job, ex) -> Minecraft.getInstance().execute(() -> {
                         if (job == null) {
-                            Minecraft.getInstance().player.displayClientMessage(
+                            player.displayClientMessage(
                                     Component.translatable("gui.worldcomment.send_finish"), false);
                         } else {
                             if (ex != null) {
-                                Minecraft.getInstance().player.displayClientMessage(
+                                player.displayClientMessage(
                                         Component.translatable("gui.worldcomment.send_fail",
                                                 ex.getClass().getName() + ": " + ex.getMessage()), false);
                             } else {
-                                Minecraft.getInstance().player.displayClientMessage(
+                                player.displayClientMessage(
                                         Component.translatable("gui.worldcomment.send_upload_incomplete"), false);
                             }
                         }
                     }
             ));
             if (!withPlacingDown) {
-                SubmitDispatcher.placeJobAt(jobId, Minecraft.getInstance().player.blockPosition());
+                SubmitDispatcher.placeJobAt(jobId, player.blockPosition().atY((int) Math.round(player.position().y - 1.0 / 16)));
             } else {
-                Minecraft.getInstance().player.displayClientMessage(
+                player.displayClientMessage(
                         Component.translatable("gui.worldcomment.send_pending"), false);
                 ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
                 if (item != null) {
