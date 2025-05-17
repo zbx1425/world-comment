@@ -5,8 +5,8 @@ import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
-#if MC_VERSION >= "12000" import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+import net.minecraft.client.Minecraft;
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.phys.Vec3;
@@ -57,29 +57,6 @@ public class ClientProxy {
     }
 
     public static class ForgeEventBusListener {
-
-        private static boolean world_comment$lastFrameKeyPlayerListDown = false;
-
-        @SubscribeEvent
-        public static void onRenderLevelStage(RenderLevelStageEvent event) {
-            if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-                if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
-                    if (!world_comment$lastFrameKeyPlayerListDown) {
-                        CommentListScreen.handleKeyTab();
-                    }
-                    world_comment$lastFrameKeyPlayerListDown = true;
-                } else {
-                    world_comment$lastFrameKeyPlayerListDown = false;
-                }
-
-                PoseStack matrices = event.getPoseStack();
-                matrices.pushPose();
-                Vec3 cameraPos = event.getCamera().getPosition();
-                matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
-                CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
-                matrices.popPose();
-            }
-        }
 
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {

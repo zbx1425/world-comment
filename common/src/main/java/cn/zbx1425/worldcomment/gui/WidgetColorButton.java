@@ -71,5 +71,10 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
         int var6 = this.x + this.getWidth() - var3;
         renderScrollingString(var1, var2, this.getMessage(), var5, this.y, var6, this.y + this.getHeight(), var4);
     }
+
+    @Override
+    public Component getMessage() {
+        return Component.empty();
+    }
 #endif
 }
