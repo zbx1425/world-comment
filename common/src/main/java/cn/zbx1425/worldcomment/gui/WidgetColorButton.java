@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION >= "12002" import net.minecraft.client.gui.components.WidgetSprites; #endif
 import net.minecraft.client.gui.components.Button;
+#if MC_VERSION >= "12106" import net.minecraft.client.renderer.RenderPipelines; #endif
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -43,8 +44,10 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
             guiGraphics.setColor(1.0f, 1.0f, 1.0f, this.alpha);
         }
         guiGraphics.enableBlend();
-#if MC_VERSION >= "12002"
-        guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+#if MC_VERSION >= "12106"
+        guiGraphics.getGuiParam().blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+#elif MC_VERSION >= "12002"
+        guiGraphics.getGuiParam().blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
 #else
         guiGraphics.blitNineSliced(WIDGETS_LOCATION, this #if MC_VERSION >= "11903" .getX() #else .x #endif, this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
 #endif

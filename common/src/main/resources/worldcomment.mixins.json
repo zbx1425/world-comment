@@ -9,7 +9,8 @@
     "InventoryMixin",
     "KeyMappingMixin",
     "LevelRendererAccessor",
-    "LevelRendererMixin"
+    "LevelRendererMixin",
+    "NativeImageAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

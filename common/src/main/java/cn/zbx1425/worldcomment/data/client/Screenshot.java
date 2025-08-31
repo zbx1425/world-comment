@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.client;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
+import cn.zbx1425.worldcomment.mixin.NativeImageAccessor;
 import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -11,15 +12,34 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.sounds.SoundEvent;
+import org.lwjgl.stb.STBImage;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.util.function.Consumer;
 
 public class Screenshot {
 
     public static boolean isGrabbing = false;
 
+#if MC_VERSION >= "12106"
+    public static void grabScreenshot(Consumer<byte[]> callback) {
+        RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
+        net.minecraft.client.Screenshot.takeScreenshot(frameBuf, nativeImage -> {
+            try (nativeImage) {
+                ByteArrayOutputStream byteArraySink = new ByteArrayOutputStream();
+                if (!((NativeImageAccessor)(Object)nativeImage).invokeWriteToChannel(Channels.newChannel(byteArraySink))) {
+                    throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());
+                }
+                callback.accept(byteArraySink.toByteArray());
+            } catch (IOException ex) {
+                Main.LOGGER.error("Failed to save screenshot", ex);
+            }
+        });
+    }
+#else
     public static void grabScreenshot(Consumer<byte[]> callback) {
         RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
         NativeImage fullSizeImage = new NativeImage(frameBuf.width, frameBuf.height, false);
@@ -32,6 +52,7 @@ public class Screenshot {
             Main.LOGGER.error("Failed to save screenshot", ex);
         }
     }
+#endif
 
     public static File getAvailableFile() {
         File screenShotDirectory = new File(Minecraft.getInstance().gameDirectory,"screenshots");

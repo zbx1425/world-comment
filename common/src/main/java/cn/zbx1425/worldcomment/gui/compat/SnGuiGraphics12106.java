@@ -51,8 +51,8 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
     }
 
     @Override
-    public void blit(ResourceLocation var1, int var10, int var14, int i, int i1, int var12, int var16) {
-        sink.blit(RenderPipelines.GUI_TEXTURED, var1, var10, var14, i, i1, var12, var16);
+    public void blit(ResourceLocation atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
+        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, 0, (float)uOffset, vOffset, uWidth, vHeight, 256, 256);
     }
 
     @Override
@@ -102,12 +102,12 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void renderTooltip(Font font, MutableComponent translatable, int mouseX, int mouseY) {
-        sink.renderTooltip(font, translatable, mouseX, mouseY);
+        sink.setTooltipForNextFrame(font, translatable, mouseX, mouseY);
     }
 
     @Override
     public void renderTooltip(Font font, List<Component> append, Optional<TooltipComponent> empty, int mouseX, int mouseY) {
-        sink.renderTooltip(font, append, empty, mouseX, mouseY);
+        sink.setTooltipForNextFrame(font, append, empty, mouseX, mouseY);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void enableBlend() {
-        
+
     }
 
     @Override

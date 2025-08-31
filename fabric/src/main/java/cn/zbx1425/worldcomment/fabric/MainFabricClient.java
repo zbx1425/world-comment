@@ -3,7 +3,8 @@ package cn.zbx1425.worldcomment.fabric;
 import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.MainClient;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -31,8 +32,8 @@ public class MainFabricClient implements ClientModInitializer {
 		MainFabric.PACKET_REGISTRY.commitClient();
 #endif
 
-		HudRenderCallback.EVENT.register((guiGraphics, delta) -> {
-			OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphics.withPose(guiGraphics) #endif);
+		HudRenderCallback.EVENT.register((guiParam, delta) -> {
+			OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam));
 		});
 
 #if MC_VERSION >= "12100"

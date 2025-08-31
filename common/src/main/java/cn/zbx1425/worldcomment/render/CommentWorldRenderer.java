@@ -96,7 +96,7 @@ public class CommentWorldRenderer implements IGuiCommon {
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
         long currentTime = System.currentTimeMillis();
-        VertexConsumer vertices = buffers.getBuffer(RenderType.entityTranslucentCull(ATLAS_LOCATION));
+        VertexConsumer vertices = buffers.getBuffer(RenderType.entityTranslucent(ATLAS_LOCATION));
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
             for (int i = 0; i < blockData.getValue().size(); i++) {
                 CommentEntry comment = blockData.getValue().get(i);

@@ -129,13 +129,20 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                 0xFF00BCD4, Component.translatable("gui.worldcomment.message")
         ));
         baseY += SQ_SIZE / 2;
-        textBoxMessage = new MultiLineEditBox(
-                Minecraft.getInstance().font,
-                SIDEBAR_OFFSET, baseY, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4,
-                // On 1.19.2 this doesn't rescale with the poseStack
-                #if MC_VERSION >= "12000" Component.translatable("gui.worldcomment.message.placeholder") #else Component.literal("") #endif,
-                Component.literal("")
-        );
+        textBoxMessage =
+                MultiLineEditBox.builder()
+                        .setX(SIDEBAR_OFFSET)
+                        .setY(baseY)
+                        .setPlaceholder(Component.translatable("gui.worldcomment.message.placeholder"))
+                        .build(Minecraft.getInstance().font, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4, Component.literal(""));
+
+//        new MultiLineEditBox(
+//                Minecraft.getInstance().font,
+//                SIDEBAR_OFFSET, baseY, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4,
+//                // On 1.19.2 this doesn't rescale with the poseStack
+//                #if MC_VERSION >= "12000" Component.translatable("gui.worldcomment.message.placeholder") #else Component.literal("") #endif,
+//                Component.literal("")
+//        );
         textBoxMessage.setValue("");
         textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
         addRenderableWidget(textBoxMessage);
