@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
@@ -64,14 +65,13 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     @Override
 #if MC_VERSION >= "12000"
     protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
-        final GuiGraphics guiGraphics = guiParam;
 #else
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
-        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
 #endif
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
 
-        graphicsBlit9(
-                guiGraphics, getX(), getY(), getWidth(), getHeight(),
+        guiGraphics.blitNineSlicedFast(
+                ATLAS_LOCATION, getX(), getY(), getWidth(), getHeight(),
                 0, 0, 128, 48, 256, 256,
                 24, 4, 4, 28
         );
@@ -89,30 +89,9 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
         if (!comment.image.url.isEmpty() && showImage) {
             ImageDownload.ImageState imageToDraw = ImageDownload.getTexture(comment.image, true);
-            RenderSystem.setShaderTexture(0, imageToDraw.getFriendlyTexture(Minecraft.getInstance().getTextureManager()).getId());
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            Matrix4f matrix4f = guiGraphics.pose().last().pose();
-#if MC_VERSION >= "12100"
-            BufferBuilder bufferBuilder = Tesselator.getInstance()
-                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             int x1 = getX() + width - 4 - picWidth, x2 = getX() + width - 4;
             int y1 = getY() + 20, y2 = getY() + 20 + picHeight;
-            bufferBuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 0);
-            bufferBuilder.addVertex(matrix4f, x1, y2, 0).setUv(0, 1);
-            bufferBuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 1);
-            bufferBuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 0);
-            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-#else
-            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            int x1 = getX() + width - 4 - picWidth, x2 = getX() + width - 4;
-            int y1 = getY() + 20, y2 = getY() + 20 + picHeight;
-            bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
-            bufferBuilder.vertex(matrix4f, x1, y2, 0).uv(0, 1).endVertex();
-            bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
-            bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
-            BufferUploader.drawWithShader(bufferBuilder.end());
-#endif
+            guiGraphics.blit(imageToDraw.getFriendlyTexture(Minecraft.getInstance().getTextureManager()), x1, y1, x2, y2);
         }
 
         Component nameComponent = comment.initiatorName.isEmpty() ? Component.translatable("gui.worldcomment.anonymous")
@@ -130,9 +109,10 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
                     getX() + getWidth() - 6 - font.width(timeStr), getY() + 8, 0xFFBBBBBB, true);
         }
 
-        RenderSystem.enableBlend();
+        guiGraphics.enableBlend();
         guiGraphics.blit(ATLAS_LOCATION, getX() + 6, getY() + 2, 18, 18,
                 ((comment.messageType - 1) % 4) * 64, (int)((comment.messageType - 1) / 4) * 64 + 128, 64, 64, 256, 256);
+        guiGraphics.disableBlend();
 
         if (mouseX > getX() + 4 && mouseX < getX() + getWidth() && mouseY > getY() && mouseY < getY() + 24) {
             guiGraphics.renderTooltip(font, List.of(

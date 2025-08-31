@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -50,7 +51,12 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         try {
             offHeapBuffer.put(imageBytes);
             offHeapBuffer.rewind();
+#if MC_VERSION >= "12106"
+            this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(
+                    () -> Screenshot.getAvailableFile().toPath().toString(), NativeImage.read(offHeapBuffer)));
+#else
             this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(offHeapBuffer)));
+#endif
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -236,23 +242,23 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
 
     @Override
     public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
-        guiGraphics.pose().pushPose();
+        guiGraphics.pushPose();
         boolean animationDone = setupAnimationTransform(guiGraphics);
-        guiGraphics.pose().translate(0, 0, 1);
+        guiGraphics.translate(0, 0, 1);
         super.render(guiParam, mouseX, mouseY, partialTick);
-        guiGraphics.pose().popPose();
+        guiGraphics.popPose();
     }
 
     @Override
     public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
-        guiGraphics.pose().pushPose();
+        guiGraphics.pushPose();
         setupAnimationTransform(guiGraphics);
-        RenderSystem.enableBlend();
+        guiGraphics.enableBlend();
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY - CONTAINER_PADDING_Y,
@@ -267,13 +273,14 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                 containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
                 0x66546e7a
         );
-        guiGraphics.pose().popPose();
+        guiGraphics.disableBlend();
+        guiGraphics.popPose();
     }
 
     private long timestampOpenGui = 0L;
 
     /** @return true if animation is done */
-    private boolean setupAnimationTransform(GuiGraphics guiGraphics) {
+    private boolean setupAnimationTransform(ISnGuiGraphics guiGraphics) {
         long timestampNow = System.currentTimeMillis();
         if (timestampOpenGui == 0) timestampOpenGui = timestampNow;
 
@@ -300,9 +307,9 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
 
         float scaleX = (x2 - x1) / widgetImage.getWidth();
         float scaleY = (y2 - y1) / widgetImage.getHeight();
-        guiGraphics.pose().translate(x1, y1, 0);
-        guiGraphics.pose().scale(scaleX, scaleY, 1);
-        guiGraphics.pose().translate(-containerOffsetX, -(containerOffsetY + CONTAINER_PADDING_Y), 0);
+        guiGraphics.translate(x1, y1, 0);
+        guiGraphics.scale(scaleX, scaleY);
+        guiGraphics.translate(-containerOffsetX, -(containerOffsetY + CONTAINER_PADDING_Y), 0);
         return false;
     }
 

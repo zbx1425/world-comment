@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.client;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
+import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -53,7 +54,7 @@ public class Screenshot {
             boolean prevHideGui = minecraft.options.hideGui;
             applyClientConfigForScreenshot();
             // This is a workaround for the issue that the screenshot will be taken before CommentWorldRenderer is hidden
-            minecraft.tell(() -> RenderSystem.recordRenderCall(() -> minecraft.tell(() -> RenderSystem.recordRenderCall(() -> {
+            FrameTask.enqueue(() -> {
                 grabScreenshot(imageBytes -> minecraft.execute(() -> {
                     boolean onGround = #if MC_VERSION >= "12000" minecraft.player.onGround() #else minecraft.player.isOnGround() #endif;
                     boolean canSend = withPlacingDown || onGround;
@@ -65,7 +66,7 @@ public class Screenshot {
                 minecraft.options.hideGui = prevHideGui;
                 MainClient.CLIENT_CONFIG.commentVisibilityMask = true;
                 isGrabbing = false;
-            }))));
+            }, 2);
         }
     }
 

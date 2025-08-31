@@ -33,7 +33,7 @@ dependencies {
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-	if (rootProject.minecraft_version_int >= 12001) {
+	if (rootProject.minecraft_version_int >= 12001 && rootProject.accessories_version != "") {
 		modImplementation "io.wispforest:accessories-neoforge:${rootProject.accessories_version}"
 		forgeRuntimeLibrary "blue.endless:jankson:1.2.2"
 		forgeRuntimeLibrary "io.wispforest:endec:0.1.9"

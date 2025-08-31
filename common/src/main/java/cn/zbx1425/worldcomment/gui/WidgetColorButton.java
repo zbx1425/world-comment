@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
@@ -29,12 +30,11 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
     @Override
 #if MC_VERSION >= "12000"
     protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
-        final GuiGraphics guiGraphics = guiParam;
 #else
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
-        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
         super.render(guiParam, mouseX, mouseY, partialTick);
 #endif
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         Minecraft minecraft = Minecraft.getInstance();
         if (this.active) {
             guiGraphics.setColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,
@@ -42,16 +42,16 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
         } else {
             guiGraphics.setColor(1.0f, 1.0f, 1.0f, this.alpha);
         }
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
+        guiGraphics.enableBlend();
 #if MC_VERSION >= "12002"
         guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
 #else
         guiGraphics.blitNineSliced(WIDGETS_LOCATION, this #if MC_VERSION >= "11903" .getX() #else .x #endif, this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
 #endif
+        guiGraphics.disableBlend();
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0f) << 24);
+        this.renderString(guiGraphics.getGuiParam(), minecraft.font, i | Mth.ceil(this.alpha * 255.0f) << 24);
     }
 
     private int getTextureY() {

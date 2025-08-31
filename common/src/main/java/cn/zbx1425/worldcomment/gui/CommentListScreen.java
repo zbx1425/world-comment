@@ -5,8 +5,10 @@ import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
+import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
@@ -113,12 +115,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     @Override
     public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+
         Minecraft minecraft = Minecraft.getInstance();
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
         #if MC_VERSION >= "12100" super.render(guiParam, mouseX, mouseY, partialTick); #endif
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 1);
+        guiGraphics.pushPose();
+        guiGraphics.translate(0, 0, 1);
 
         int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
         int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;
@@ -149,28 +152,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     (int) (x2 + shadowOffset), (int) (y2 + shadowOffset),
                     shadowColor
             );
-
-            RenderSystem.setShaderTexture(0, imageToDraw.getFriendlyTexture(minecraft.getTextureManager()).getId());
-
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            Matrix4f matrix4f = guiGraphics.pose().last().pose();
-#if MC_VERSION >= "12100"
-            BufferBuilder bufferBuilder = Tesselator.getInstance()
-                    .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 0);
-            bufferBuilder.addVertex(matrix4f, x1, y2, 0).setUv(0, 1);
-            bufferBuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 1);
-            bufferBuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 0);
-            BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-#else
-            BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-            bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
-            bufferBuilder.vertex(matrix4f, x1, y2, 0).uv(0, 1).endVertex();
-            bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
-            bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
-            BufferUploader.drawWithShader(bufferBuilder.end());
-#endif
+            guiGraphics.blit(imageToDraw.getFriendlyTexture(minecraft.getTextureManager()), x1, y1, x2, y2);
 
             WidgetCommentEntry widget = getWidget(comment);
             widget.showImage = false;
@@ -196,7 +178,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 }
             }
         } else {
-            graphicsBlit9(guiGraphics, xOffset + 100, 30, bookWidth - 120, height - 50,
+            guiGraphics.blitNineSlicedFast(ATLAS_LOCATION, xOffset + 100, 30, bookWidth - 120, height - 50,
                     176, 40, 20, 20, 256, 256,
                     4, 4, 4, 4
             );
@@ -251,7 +233,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             }
         }
 
-        guiGraphics.pose().popPose();
+        guiGraphics.popPose();
         #if MC_VERSION < "12100" super.render(guiParam, mouseX, mouseY, partialTick); #endif
     }
 
@@ -319,7 +301,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     @Override
     public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
 
         int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
@@ -327,12 +309,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         int xOffset = (width - bookWidth) / 2;
         int xOffsetR = width - xOffset;
 
-        graphicsBlit9(guiGraphics, xOffset + 30, 10, bookWidth - 40, height - 20,
+        guiGraphics.blitNineSlicedFast(ATLAS_LOCATION, xOffset + 30, 10, bookWidth - 40, height - 20,
                 196, 40, 20, 20, 256, 256,
                 4, 4, 4, 4
         );
-        RenderSystem.enableBlend();
+        guiGraphics.enableBlend();
         guiGraphics.fill(xOffset + 30, 10, xOffset + 60, height - 10, 0x66d32f2f);
+        guiGraphics.disableBlend();
     }
 
     private double accumulatedScroll = 0;
@@ -388,13 +371,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     public static void triggerOpen() {
         Minecraft minecraft = Minecraft.getInstance();
-        RenderSystem.recordRenderCall(() -> minecraft.tell(() -> {
+        FrameTask.enqueue(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
                 minecraft.screen.onClose();
             } else {
                 minecraft.setScreen(new CommentListScreen(null));
             }
-        }));
+        }, 1);
     }
 
     public static boolean handleKeyTab() {

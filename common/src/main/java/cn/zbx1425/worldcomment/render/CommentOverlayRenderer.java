@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.WidgetCommentEntry;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 
@@ -28,23 +29,23 @@ public class CommentOverlayRenderer {
         }
     }
 
-    public static void render(GuiGraphics guiGraphics) {
+    public static void render(ISnGuiGraphics guiGraphics) {
         if (cachedWidth != guiGraphics.guiWidth() || !ClientRayPicking.pickedComments.equals(cachedComments)) {
             calculateLayout(guiGraphics.guiWidth());
             cachedWidth = guiGraphics.guiWidth();
         }
         if (cachedComments.size() > 0) {
-            guiGraphics.pose().pushPose();
+            guiGraphics.pushPose();
             int baseYOffset = guiGraphics.guiHeight() / 2
                     - (cachedWidgets.get(ClientRayPicking.overlayOffset) #if MC_VERSION >= "11903" .getY() #else .y #endif + WidgetCommentEntry.TOP_SINK);
-            guiGraphics.pose().translate(0, baseYOffset, 0);
+            guiGraphics.translate(0, baseYOffset, 0);
             for (WidgetCommentEntry widget : cachedWidgets) {
                 if (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset + widget.getHeight() > 0
                         && widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset < guiGraphics.guiHeight()) {
-                    widget.render(#if MC_VERSION >= "12000" guiGraphics #else guiGraphics.pose() #endif, 0, 0, 0);
+                    widget.render(guiGraphics.getGuiParam(), 0, 0, 0);
                 }
             }
-            guiGraphics.pose().popPose();
+            guiGraphics.popPose();
             if (cachedComments.size() > 1) {
                 String pageStr = String.format("↕ %d / %d", ClientRayPicking.overlayOffset + 1, cachedComments.size());
                 guiGraphics.drawString(Minecraft.getInstance().font, pageStr,

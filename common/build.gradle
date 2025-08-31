@@ -2,7 +2,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 	modApi "${rootProject.architectury_id}:architectury:${rootProject.architectury_version}"
 
-	if (rootProject.minecraft_version_int >= 12001) {
+	if (rootProject.minecraft_version_int >= 12001 && rootProject.accessories_version != "") {
 		modImplementation "io.wispforest:accessories-common:${rootProject.accessories_version}"
 	}
 }

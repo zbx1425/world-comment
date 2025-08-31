@@ -1,11 +1,12 @@
 package cn.zbx1425.worldcomment.interop;
 
 import cn.zbx1425.worldcomment.Main;
-#if MC_VERSION >= 12000
+#if MC_VERSION >= 12000 && MC_VERSION < 12108
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
 #endif
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.function.BooleanSupplier;
@@ -18,9 +19,13 @@ public class AccessoriesInterop {
         isWearingEyeglass = () -> {
             Player player = Minecraft.getInstance().player;
             if (player == null) return false;
+#if MC_VERSION >= 12108
+            return player.getItemBySlot(EquipmentSlot.HEAD).is(Main.ITEM_COMMENT_EYEGLASS.get());
+#else
             return player.getInventory().armor.get(3).is(Main.ITEM_COMMENT_EYEGLASS.get());
+#endif
         };
-#if MC_VERSION >= 12000
+#if MC_VERSION >= 12000 && MC_VERSION < 12108
         try {
             Class<?> ignored = Class.forName("io.wispforest.accessories.api.AccessoriesCapability");
             isWearingEyeglass = () -> {
@@ -40,7 +45,7 @@ public class AccessoriesInterop {
     }
 
     public static void registerRenderers() {
-#if MC_VERSION >= 12000
+#if MC_VERSION >= 12000 && MC_VERSION < 12108
         try {
             Class<?> ignored = Class.forName("io.wispforest.accessories.api.client.AccessoriesRendererRegistry");
             AccessoriesRendererRegistry.registerNoRenderer(Main.ITEM_COMMENT_EYEGLASS.get());

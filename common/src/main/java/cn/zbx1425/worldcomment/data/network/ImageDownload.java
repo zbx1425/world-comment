@@ -114,7 +114,11 @@ public class ImageDownload {
         Minecraft.getInstance().execute(() -> {
             try {
                 NativeImage pixels = NativeImage.read(buffer);
+#if MC_VERSION >= "12006"
+                DynamicTexture dynamicTexture = new DynamicTexture(() -> url, pixels);
+#else
                 DynamicTexture dynamicTexture = new DynamicTexture(pixels);
+#endif
                 synchronized (images) {
                     ImageState sink = images.get(url);
                     if (sink == null) return;

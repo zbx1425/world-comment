@@ -12,7 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+#if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
+#if MC_VERSION >= "12108" import net.minecraft.world.InteractionResult; #endif
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -35,15 +36,15 @@ public class CommentToolItem extends Item implements GroupedItem {
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+    public @NotNull #if MC_VERSION < "12108" InteractionResultHolder<ItemStack> #else InteractionResult #endif use(Level level, Player player, InteractionHand usedHand) {
         ItemStack item = player.getItemInHand(usedHand);
-        if (!level.isClientSide) return InteractionResultHolder.pass(item);
-        if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return InteractionResultHolder.fail(item);
+        if (!level.isClientSide) return #if MC_VERSION < "12108" InteractionResultHolder.pass(item) #else InteractionResult.PASS #endif;
+        if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
 
         if (Client.placeUploadJob(level, player, item)) {
-            return InteractionResultHolder.success(item);
+            return #if MC_VERSION < "12108" InteractionResultHolder.success(item) #else InteractionResult.SUCCESS #endif;
         } else {
-            return InteractionResultHolder.fail(item);
+            return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
         }
     }
 
@@ -118,7 +119,7 @@ public class CommentToolItem extends Item implements GroupedItem {
 #if MC_VERSION >= "12100"
         CustomData customData = item.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
         if (customData.contains("uploadJobId")) {
-            return customData.copyTag().getLong("uploadJobId");
+            return customData.copyTag().getLong("uploadJobId") #if MC_VERSION >= "12108" .orElse(null) #endif;
         } else {
             return null;
         }

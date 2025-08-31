@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
@@ -32,14 +33,13 @@ public class CommentTypeButton extends Button implements IGuiCommon {
     @Override
 #if MC_VERSION >= "12000"
     protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
-        final GuiGraphics guiGraphics = guiParam;
 #else
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
-        final GuiGraphics guiGraphics = GuiGraphics.withPose(guiParam);
         super.render(guiParam, mouseX, mouseY, partialTick);
 #endif
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         Minecraft minecraft = Minecraft.getInstance();
-        RenderSystem.enableBlend();
+        guiGraphics.enableBlend();
         guiGraphics.setColor(((topColor >> 16) & 0xFF) / 255f, ((topColor >> 8) & 0xFF) / 255f,
                 (topColor & 0xFF) / 255f, 1);
         guiGraphics.blit(ATLAS_LOCATION, getX(), getY(), getWidth(), 12,
@@ -53,7 +53,8 @@ public class CommentTypeButton extends Button implements IGuiCommon {
         }
         guiGraphics.blit(ATLAS_LOCATION, getX() + 8 - 1, getY() + 14 - 1, 24, 24,
                 ((commentType - 1) % 4) * 64, (int)((commentType - 1) / 4) * 64 + 128, 64, 64, 256, 256);
-        renderScrollingString(guiGraphics, minecraft.font, getMessage(),
+        guiGraphics.disableBlend();
+        guiGraphics.renderScrollingString(minecraft.font, getMessage(),
                 getX(), getY(), getX() + getWidth(), getY() + 12, active ? 0xFFFFFFFF : 0xFFA0A0A0);
     }
 

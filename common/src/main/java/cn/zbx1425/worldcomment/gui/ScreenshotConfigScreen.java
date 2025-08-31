@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
@@ -69,8 +70,8 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     @Override
     public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        GuiGraphics guiGraphics = #if MC_VERSION >= "12000" guiParam #else GuiGraphics.withPose(guiParam) #endif ;
-        RenderSystem.enableBlend();
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        guiGraphics.enableBlend();
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,
                 containerOffsetY - CONTAINER_PADDING_Y,
@@ -85,6 +86,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
                 containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
                 0x66546e7a
         );
+        guiGraphics.disableBlend();
 
         if (MainClient.CLIENT_CONFIG.screenshotIncludeGui != cbIncludeHud.selected()
                 || MainClient.CLIENT_CONFIG.screenshotIncludeComments != cbIncludeComments.selected()) {

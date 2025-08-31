@@ -4,7 +4,7 @@ import cn.zbx1425.worldcomment.Main;
 #if MC_VERSION >= "12000" import net.minecraft.core.registries.Registries; #endif
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+#if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
@@ -13,12 +13,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class CommentEyeglassItem extends Item implements GroupedItem #if MC_VERSION >= "11904", Equipable #endif {
+public class CommentEyeglassItem extends Item implements GroupedItem #if MC_VERSION >= "11904" && MC_VERSION < "12108", Equipable #endif {
 
     public CommentEyeglassItem() {
         super(
             GroupedItem.createProperties(properties -> injectFabricSettings(
-                    properties.stacksTo(1)),
+                    properties
+                            .stacksTo(1)
+                    #if MC_VERSION >= "12108" .equippable(EquipmentSlot.HEAD) #endif
+                    ),
                     CommentEyeglassItem::getTabImpl)
         );
     }
@@ -40,6 +43,7 @@ public class CommentEyeglassItem extends Item implements GroupedItem #if MC_VERS
         #endif
     }
 
+#if MC_VERSION < "12108"
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand usedHand) {
 #if MC_VERSION >= "11904"
@@ -60,8 +64,9 @@ public class CommentEyeglassItem extends Item implements GroupedItem #if MC_VERS
         }
 #endif
     }
+#endif
 
-#if MC_VERSION >= "11904"
+#if MC_VERSION >= "11904" && MC_VERSION < "12108"
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
