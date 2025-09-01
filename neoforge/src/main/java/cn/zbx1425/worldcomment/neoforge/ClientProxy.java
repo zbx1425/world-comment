@@ -7,6 +7,7 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 #if MC_VERSION >= "12000"
@@ -15,7 +16,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.LayeredDraw;
+#if MC_VERSION < "12002" import net.minecraft.client.gui.LayeredDraw; #endif
+#if MC_VERSION >= "12002" import net.neoforged.neoforge.client.gui.GuiLayer; #endif
 import net.minecraft.commands.Commands;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,6 +27,7 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+#if MC_VERSION >= "12102" import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent; #endif
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
@@ -37,13 +40,13 @@ public class ClientProxy {
             event.registerAbove(VanillaGuiLayers.SCOREBOARD_SIDEBAR, Main.id("picked_comments"), PICKED_COMMENTS_OVERLAY);
         }
 
-        private static final LayeredDraw.Layer PICKED_COMMENTS_OVERLAY = new PickedCommentsOverlay();
+        private static final #if MC_VERSION >= "12002" GuiLayer #else LayeredDraw.Layer #endif PICKED_COMMENTS_OVERLAY = new PickedCommentsOverlay();
 
-        private static class PickedCommentsOverlay implements LayeredDraw.Layer {
+        private static class PickedCommentsOverlay implements #if MC_VERSION >= "12002" GuiLayer #else LayeredDraw.Layer #endif {
 
             @Override
-            public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
-                OverlayLayer.render(guiGraphics);
+            public void render(GuiGraphics guiParam, DeltaTracker deltaTracker) {
+                OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam));
             }
         }
 #else
@@ -81,9 +84,14 @@ public class ClientProxy {
 
         private static boolean world_comment$lastFrameKeyPlayerListDown = false;
 
+#if MC_VERSION >= "12102"
+        @SubscribeEvent
+        public static void onRenderLevelStage(RenderLevelStageEvent.AfterEntities event) { {
+#else
         @SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+#endif
                 if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
                     if (!world_comment$lastFrameKeyPlayerListDown) {
                         CommentListScreen.handleKeyTab();
@@ -111,6 +119,13 @@ public class ClientProxy {
         public static void onRegisterClientCommand(RegisterCommandsEvent event) {
             ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
         }
+
+#if MC_VERSION >= "12102"
+        @SubscribeEvent
+        private static void onRegisterClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
+            MainForge.PACKET_REGISTRY.commitClient(event);
+        }
+#endif
     }
 
     private static class NoConflictKeyConflictContext implements IKeyConflictContext {

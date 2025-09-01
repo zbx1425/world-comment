@@ -67,7 +67,7 @@ public class MainForge {
 		@SubscribeEvent
 		public static void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
 			PayloadRegistrar registrar = event.registrar("1");
-			MainForge.PACKET_REGISTRY.commit(registrar);
+			MainForge.PACKET_REGISTRY.commitCommon(registrar);
 		}
 #endif
 	}

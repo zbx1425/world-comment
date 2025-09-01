@@ -24,6 +24,7 @@ import java.util.Optional;
 public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     private GuiGraphics sink;
+    private int currentColor = -1;
 
     private static SnGuiGraphics12106 INSTANCE = null;
 
@@ -47,12 +48,12 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void blit(ResourceLocation atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
-        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, padLeft, padTop, uOffset, vOffset, padLeft1, padTop1, texWidth, texHeight);
+        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, uOffset, vOffset, padLeft, padTop, padLeft1, padTop1, texWidth, texHeight, currentColor);
     }
 
     @Override
     public void blit(ResourceLocation atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
-        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, 0, (float)uOffset, vOffset, uWidth, vHeight, 256, 256);
+        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, (float)uOffset, vOffset, uWidth, vHeight, 256, 256);
     }
 
     @Override
@@ -91,8 +92,8 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
     }
 
     @Override
-    public void setColor(float v, float v1, float v2, float v3) {
-
+    public void setColor(float r, float g, float b, float a) {
+        currentColor = (int)(r * 255) << 16 | (int)(g * 255) << 8 | (int)(b * 255) | (int)(a * 255) << 24;
     }
 
     @Override
