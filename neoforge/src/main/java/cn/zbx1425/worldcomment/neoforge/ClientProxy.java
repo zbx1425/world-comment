@@ -78,6 +78,13 @@ public class ClientProxy {
         public static void onClientSetupEvent(FMLClientSetupEvent event) {
             MainClient.init();
         }
+
+#if MC_VERSION >= "12102"
+        @SubscribeEvent
+        private static void onRegisterClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
+            MainForge.PACKET_REGISTRY.commitClient(event);
+        }
+#endif
     }
 
     public static class ForgeEventBusListener {
@@ -120,12 +127,6 @@ public class ClientProxy {
             ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
         }
 
-#if MC_VERSION >= "12102"
-        @SubscribeEvent
-        private static void onRegisterClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
-            MainForge.PACKET_REGISTRY.commitClient(event);
-        }
-#endif
     }
 
     private static class NoConflictKeyConflictContext implements IKeyConflictContext {

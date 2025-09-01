@@ -1,14 +1,8 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
 import cn.zbx1425.worldcomment.mixin.GuiGraphicsAccessor;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
@@ -16,10 +10,11 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Optional;
+
+#if MC_VERSION >= "12106"
 
 public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
@@ -157,3 +152,5 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     }
 }
+
+#endif
