@@ -22,7 +22,7 @@ public class CommentEyeglassItem extends Item implements GroupedItem #if MC_VERS
                             .stacksTo(1)
                     #if MC_VERSION >= "12108" .equippable(EquipmentSlot.HEAD) #endif
                     ),
-                    CommentEyeglassItem::getTabImpl)
+                    Main.id("comment_eyeglass"), CommentEyeglassItem::getTabImpl)
         );
     }
 

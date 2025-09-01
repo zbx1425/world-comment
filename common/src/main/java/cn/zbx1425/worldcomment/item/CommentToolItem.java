@@ -32,7 +32,7 @@ public class CommentToolItem extends Item implements GroupedItem {
     public CommentToolItem() {
         super(GroupedItem.createProperties(properties ->
                 properties.stacksTo(1)
-        , CommentToolItem::getTabImpl));
+        , Main.id("comment_tool"), CommentToolItem::getTabImpl));
     }
 
     @Override
