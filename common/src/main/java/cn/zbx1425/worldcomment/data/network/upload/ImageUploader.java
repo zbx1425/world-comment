@@ -4,31 +4,14 @@ import cn.zbx1425.worldcomment.BuildConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ThumbImage;
-import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.stb.STBIWriteCallback;
-import org.lwjgl.stb.STBImage;
-import org.lwjgl.stb.STBImageResize;
-import org.lwjgl.stb.STBImageWrite;
-import org.lwjgl.system.MemoryStack;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public abstract class ImageUploader {
 
@@ -60,6 +43,7 @@ public abstract class ImageUploader {
             case "imgloc" -> new ImglocUploader(config);
             case "smms" -> new SmmsUploader(config);
             case "lsky" -> new LskyUploader(config);
+            case "s3presigned" -> new S3PreSignedUploader(config);
             default -> throw new IllegalStateException("Unknown service: " + service);
         };
     }
