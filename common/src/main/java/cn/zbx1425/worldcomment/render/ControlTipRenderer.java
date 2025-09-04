@@ -25,15 +25,7 @@ public class ControlTipRenderer implements IGuiCommon {
             Component.translatable("gui.worldcomment.control_tip.place_comment"), TipLogo.RIGHT_MOUSE_BUTTON,
             null, true, true
     );
-    public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
-            () -> Component.translatable("gui.worldcomment.control_tip.toggle_show",
-                    ClientRayPicking.nearbyCommentsCount), TipLogo.SN_LOGO,
-            null, false
-    );
-    public static final ControlTip TIP_TOGGLE_HIDE = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.toggle_hide"), TipLogo.RIGHT_MOUSE_BUTTON,
-            null, false
-    );
+
     public static final ControlTip TIP_VIEW_MANAGE = new ControlTip(
             Component.translatable("gui.worldcomment.control_tip.view_manage"), TipLogo.KEYBOARD,
             Minecraft.getInstance().options.keyTogglePerspective, false
@@ -48,7 +40,7 @@ public class ControlTipRenderer implements IGuiCommon {
     );
 
     public static final List<ControlTip> TIPS =
-            List.of(TIP_PLACE_COMMENT, TIP_TOGGLE_SHOW, TIP_TOGGLE_HIDE, TIP_CREATE,
+            List.of(TIP_PLACE_COMMENT, TIP_CREATE,
                     TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL);
 
     public static void render(ISnGuiGraphics guiGraphics) {
@@ -154,8 +146,7 @@ public class ControlTipRenderer implements IGuiCommon {
     public enum TipLogo {
         RIGHT_MOUSE_BUTTON(176, 0, 20),
         SCROLL_WHEEL(196, 0, 20),
-        KEYBOARD(216, 0, 20),
-        SN_LOGO(176, 96, 32);
+        KEYBOARD(216, 0, 20);
 
         public final int u;
         public final int v;

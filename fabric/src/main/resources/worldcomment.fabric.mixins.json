@@ -4,7 +4,6 @@
   "package": "cn.zbx1425.worldcomment.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "CommentEyeglassItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

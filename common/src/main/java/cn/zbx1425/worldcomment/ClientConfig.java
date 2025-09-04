@@ -5,8 +5,6 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
-import cn.zbx1425.worldcomment.interop.AccessoriesInterop;
-import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
@@ -17,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientConfig {
+
+    public boolean screenshotKeyTakeOver = true;
 
     public boolean screenshotIncludeGui = false;
     public boolean screenshotIncludeComments = false;
@@ -42,15 +42,13 @@ public class ClientConfig {
             default -> 1;
         };
         config.commentVisibilityCriteria = switch (serverConfig.commentVisibilityCriteria.value) {
-            case "tool_toggle" -> 0;
-            case "glass_worn" -> 1;
+            case "preference" -> 0;
             case "always" -> 999;
             case "never" -> -1;
             default -> 0;
         };
         config.markerVisibilityCriteria = switch (serverConfig.markerVisibilityCriteria.value) {
-            case "tool_toggle" -> 0;
-            case "glass_worn" -> 1;
+            case "preference" -> 0;
             case "always" -> 999;
             case "never" -> -1;
             default -> 0;
@@ -98,8 +96,6 @@ public class ClientConfig {
         if (!commentVisibilityMask) return false;
         int criteriaToUse = ((comment.messageType - 1) >= 4) ? markerVisibilityCriteria : commentVisibilityCriteria;
         return switch (criteriaToUse) {
-//            case 0 -> CommentToolItem.getVisibilityPreference();
-//            case 1 -> AccessoriesInterop.isWearingEyeglass();
             case 999 -> true;
             case -1 -> false;
             default -> commentVisibilityPreference;
@@ -113,7 +109,6 @@ public class ClientConfig {
         if (accumulatedDeltaTicks < 2) return;
         ImageDownload.purgeUnused();
         ClientWorldData.INSTANCE.tick();
-        CommentToolItem.updateInvisibilityTimer(accumulatedDeltaTicks);
         ClientRayPicking.tick(partialTick, 20);
         accumulatedDeltaTicks = 0;
     }

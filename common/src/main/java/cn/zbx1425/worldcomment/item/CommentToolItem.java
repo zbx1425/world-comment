@@ -26,9 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class CommentToolItem extends Item implements GroupedItem {
 
-    private static boolean visibilityPreference = true;
-    public static float invisibleTimeRemaining = 0f;
-
     public CommentToolItem() {
         super(GroupedItem.createProperties(properties ->
                 properties.stacksTo(1)
@@ -98,18 +95,6 @@ public class CommentToolItem extends Item implements GroupedItem {
                                 Component.translatable("gui.worldcomment.send_insufficient_clearance"), false);
                     }
                 }
-            } else {
-                if (visibilityPreference) {
-                    visibilityPreference = false;
-                    if (COMMENT_HIDE_TICKS - (invisibleTimeRemaining % COMMENT_HIDE_TICKS) < 60) {
-                        invisibleTimeRemaining =
-                                Math.min(Math.round((invisibleTimeRemaining + COMMENT_HIDE_TICKS) / COMMENT_HIDE_TICKS), 4) * COMMENT_HIDE_TICKS;
-                    } else {
-                        invisibleTimeRemaining = COMMENT_HIDE_TICKS;
-                    }
-                } else {
-                    visibilityPreference = true;
-                }
             }
             return false;
         }
@@ -148,18 +133,5 @@ public class CommentToolItem extends Item implements GroupedItem {
             item.getOrCreateTag().putLong("uploadJobId", jobId);
         }
 #endif
-    }
-
-    public static void updateInvisibilityTimer(float deltaTicks) {
-        if (invisibleTimeRemaining > 0) {
-            invisibleTimeRemaining -= deltaTicks;
-            if (invisibleTimeRemaining <= 0) {
-                visibilityPreference = true;
-            }
-        }
-    }
-
-    public static boolean getVisibilityPreference() {
-        return visibilityPreference;
     }
 }

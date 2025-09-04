@@ -2,7 +2,6 @@ package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
-import cn.zbx1425.worldcomment.item.CommentEyeglassItem;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.network.*;
@@ -32,11 +31,9 @@ public class Main {
 	public static final Executor IO_EXECUTOR = Executors.newCachedThreadPool();
 
 	public static final RegistryObject<CommentToolItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
-	public static final RegistryObject<CommentEyeglassItem> ITEM_COMMENT_EYEGLASS = new RegistryObject<>(CommentEyeglassItem::new);
 
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL);
-		registries.registerItem("comment_eyeglass", ITEM_COMMENT_EYEGLASS);
 
 		ServerPlatform.registerPacket(PacketClientConfigS2C.IDENTIFIER);
 		ServerPlatform.registerPacket(PacketCollectionDataS2C.IDENTIFIER);
