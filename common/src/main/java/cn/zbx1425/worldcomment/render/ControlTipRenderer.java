@@ -68,7 +68,6 @@ public class ControlTipRenderer implements IGuiCommon {
             return;
         }
         if (Screenshot.isGrabbing) return;
-        TIP_TOGGLE_SHOW.visible = !MainClient.CLIENT_CONFIG.commentVisibilityPreference;
         ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
         if (item != null) {
             if (CommentToolItem.getUploadJobId(item) != null) {

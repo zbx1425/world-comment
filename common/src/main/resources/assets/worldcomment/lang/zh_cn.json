@@ -26,6 +26,14 @@
   "gui.worldcomment.config.screenshot_hud": "截图中包括叠加层 (HUD)",
   "gui.worldcomment.config.screenshot_comments": "截图中包括其他评论",
 
+  "gui.worldcomment.toggler.status": "随笔评论目前 %s",
+  "gui.worldcomment.toggler.toggle": "§7点击切换",
+  "gui.worldcomment.toggler.enabled": "§a显示",
+  "gui.worldcomment.toggler.disabled": "§c隐藏",
+  "gui.worldcomment.toggler.create": "按 %s 发送评论",
+  "gui.worldcomment.toggler.nearby": "附近有 %s 条评论",
+  "gui.worldcomment.toggler.manage": "使用 §9/wc list§r 管理评论",
+
   "gui.worldcomment.control_tip.create": "发表评论",
   "gui.worldcomment.control_tip.toggle_show": "x%d",
   "gui.worldcomment.control_tip.toggle_hide": "隐藏评论",

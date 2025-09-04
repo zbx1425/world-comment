@@ -45,7 +45,8 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
         }
         guiGraphics.enableBlend();
 #if MC_VERSION >= "12106"
-        guiGraphics.getGuiParam().blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+        guiGraphics.getGuiParam().blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight(),
+                this.active ? color : -1);
 #elif MC_VERSION >= "12002"
         guiGraphics.getGuiParam().blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
 #else

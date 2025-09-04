@@ -26,6 +26,14 @@
   "gui.worldcomment.config.screenshot_hud": "Include HUD",
   "gui.worldcomment.config.screenshot_comments": "Include other comments",
 
+  "gui.worldcomment.toggler.status": "World Comments are %s",
+  "gui.worldcomment.toggler.toggle": "§7Click to toggle",
+  "gui.worldcomment.toggler.enabled": "§aVISIBLE",
+  "gui.worldcomment.toggler.disabled": "§cHIDDEN",
+  "gui.worldcomment.toggler.create": "Press %s to send a comment",
+  "gui.worldcomment.toggler.nearby": "%d comment(s) nearby",
+  "gui.worldcomment.toggler.manage": "Use §9/wc list§r to manage comments",
+
   "gui.worldcomment.control_tip.create": "Make Comment",
   "gui.worldcomment.control_tip.toggle_show": "x%d",
   "gui.worldcomment.control_tip.toggle_hide": "Hide Comments",
