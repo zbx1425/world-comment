@@ -23,45 +23,37 @@ public class S3PreSignedUploader extends ImageUploader {
     private final String apiUrl;
     private final String apiAuthKey;
     private final String cdnImageTransform;
-    private final boolean localThumbGeneration;
 
     public S3PreSignedUploader(JsonObject config) {
         this.apiUrl = config.get("apiUrl").getAsString();
         this.apiAuthKey = config.get("apiAuthKey").getAsString();
         this.cdnImageTransform = config.has("cdnImageTransform") ? config.get("cdnImageTransform").getAsString() : null;
-        this.localThumbGeneration = config.has("localThumbGeneration") && config.get("localThumbGeneration").getAsBoolean();
     }
 
     @Override
     public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
-        return getPreSignedUrlPair(comment)
-                .thenCompose(preSignedUrls -> {
-                    if (localThumbGeneration) {
-                        CompletableFuture<Void> fullSizeUpload = uploadToS3(preSignedUrls.url, imageBytes, IMAGE_MAX_WIDTH);
-                        CompletableFuture<Void> thumbUpload = uploadToS3(preSignedUrls.thumbUrl, imageBytes, THUMBNAIL_MAX_WIDTH);
+        return requestPreSign(comment)
+                .thenCompose(preSign -> {
+                    if (cdnImageTransform == null) {
+                        CompletableFuture<Void> fullSizeUpload = uploadToS3(preSign.upload.url, imageBytes, IMAGE_MAX_WIDTH);
+                        CompletableFuture<Void> thumbUpload = uploadToS3(preSign.upload.thumbUrl, imageBytes, THUMBNAIL_MAX_WIDTH);
                         return CompletableFuture.allOf(fullSizeUpload, thumbUpload)
-                                .thenApply(v -> new ThumbImage(stripQuery(preSignedUrls.url), stripQuery(preSignedUrls.thumbUrl)));
+                                .thenApply(v -> new ThumbImage(preSign.access.url, preSign.access.thumbUrl));
                     } else {
-                        return uploadToS3(preSignedUrls.url, imageBytes, IMAGE_MAX_WIDTH)
+                        return uploadToS3(preSign.upload.url, imageBytes, IMAGE_MAX_WIDTH)
                                 .thenApply(v -> {
-                                    String publicUrl = stripQuery(preSignedUrls.url);
-                                    String thumbUrl;
-                                    if (cdnImageTransform != null) {
-                                        thumbUrl = transformUrl(publicUrl);
-                                    } else {
-                                        thumbUrl = stripQuery(preSignedUrls.thumbUrl);
-                                    }
+                                    String publicUrl = preSign.access.url;
+                                    String thumbUrl= transformUrl(publicUrl);
                                     return new ThumbImage(publicUrl, thumbUrl);
                                 });
                     }
                 });
     }
 
-    private CompletableFuture<ThumbImage> getPreSignedUrlPair(CommentEntry comment) {
+    private CompletableFuture<PreSignResponse> requestPreSign(CommentEntry comment) {
         return CompletableFuture.supplyAsync(() -> {
             JsonObject objectToSend = comment.toJson().deepCopy();
             objectToSend.remove("message");
-            objectToSend.remove("image");
             objectToSend.addProperty("requestTimestamp", Instant.now().getEpochSecond());
             byte[] postDataBytes = objectToSend.toString().getBytes(StandardCharsets.UTF_8);
 
@@ -80,11 +72,11 @@ public class S3PreSignedUploader extends ImageUploader {
                 .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
-                        throw new CompletionException(new IOException("Failed to get presigned URL: "
+                        throw new CompletionException(new IOException("Failed to pre-sign: "
                                 + response.statusCode() + "\n" + response.body()));
                     }
                     JsonObject respObj = JsonParser.parseString(response.body()).getAsJsonObject();
-                    return new ThumbImage(respObj);
+                    return new PreSignResponse(respObj);
                 });
     }
 
@@ -106,12 +98,6 @@ public class S3PreSignedUploader extends ImageUploader {
                         throw new CompletionException(new IOException("S3 upload failed: " + response.statusCode()));
                     }
                 });
-    }
-
-    private String stripQuery(String url) {
-        if (url == null) return null;
-        int queryIndex = url.indexOf('?');
-        return (queryIndex == -1) ? url : url.substring(0, queryIndex);
     }
 
     private String transformUrl(String originalUrl) {
@@ -136,7 +122,12 @@ public class S3PreSignedUploader extends ImageUploader {
         json.addProperty("apiUrl", apiUrl);
         json.addProperty("apiAuthKey", apiAuthKey);
         if (cdnImageTransform != null) json.addProperty("cdnImageTransform", cdnImageTransform);
-        if (localThumbGeneration) json.addProperty("localThumbGeneration", true);
         return json;
+    }
+
+    private record PreSignResponse(ThumbImage upload, ThumbImage access) {
+        public PreSignResponse(JsonObject response) {
+            this(new ThumbImage(response.get("upload").getAsJsonObject()), new ThumbImage(response.get("access").getAsJsonObject()));
+        }
     }
 }

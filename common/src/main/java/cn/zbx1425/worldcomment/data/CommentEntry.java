@@ -132,16 +132,20 @@ public class CommentEntry {
         json.addProperty("id", id);
         json.addProperty("timestamp", timestamp);
         json.addProperty("level", level.toString());
-        JsonArray blockPosArr = new JsonArray();
-        blockPosArr.add(location.getX());
-        blockPosArr.add(location.getY());
-        blockPosArr.add(location.getZ());
-        json.add("location", blockPosArr);
+        if (location != null) {
+            JsonArray blockPosArr = new JsonArray();
+            blockPosArr.add(location.getX());
+            blockPosArr.add(location.getY());
+            blockPosArr.add(location.getZ());
+            json.add("location", blockPosArr);
+        }
         json.addProperty("initiator", initiator.toString());
         json.addProperty("initiatorName", initiatorName);
         json.addProperty("messageType", messageType);
         json.addProperty("message", message);
-        json.add("image", image.toJson());
+        if (image != null) {
+            json.add("image", image.toJson());
+        }
         json.addProperty("deleted", deleted);
         json.addProperty("like", like);
         return json;
