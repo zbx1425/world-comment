@@ -23,6 +23,8 @@
   "gui.worldcomment.message_too_long": "留言内容太长",
   "gui.worldcomment.submit": "提交!",
 
+  "gui.worldcomment.send.guide_just_screenshot": "如果只想保存截图，请按蓝色按钮然后关闭此界面。",
+
   "gui.worldcomment.config.screenshot_hud": "截图中包括叠加层 (HUD)",
   "gui.worldcomment.config.screenshot_comments": "截图中包括其他评论",
 

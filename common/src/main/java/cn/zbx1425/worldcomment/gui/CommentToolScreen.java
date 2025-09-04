@@ -147,6 +147,12 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
         addRenderableWidget(textBoxMessage);
         baseY += textBoxMessage.getHeight();
+
+        baseY += 8;
+        addRenderableWidget(new WidgetLabel(0, baseY, SIDEBAR_OFFSET + CommentTypeButton.BTN_WIDTH * 5, font.lineHeight,
+                Component.translatable("gui.worldcomment.send.guide_just_screenshot").withStyle(ChatFormatting.GRAY)));
+        baseY += font.lineHeight;
+
         baseY += CONTAINER_PADDING_Y;
 
         btnSendFeedback = new WidgetColorButton(
