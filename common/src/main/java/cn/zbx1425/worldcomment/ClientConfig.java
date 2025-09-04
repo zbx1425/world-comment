@@ -94,6 +94,11 @@ public class ClientConfig {
 
     public boolean isCommentVisible(Minecraft minecraft, CommentEntry comment) {
         if (!commentVisibilityMask) return false;
+        if (comment.initiator.equals(minecraft.player.getGameProfile().getId())
+            && (System.currentTimeMillis() - comment.timestamp) < 30000) {
+            // Show a newly placed comment to its owner for 30 seconds.
+            return true;
+        }
         int criteriaToUse = ((comment.messageType - 1) >= 4) ? markerVisibilityCriteria : commentVisibilityCriteria;
         return switch (criteriaToUse) {
             case 999 -> true;

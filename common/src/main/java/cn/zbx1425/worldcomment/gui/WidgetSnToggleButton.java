@@ -53,7 +53,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
             ), Optional.empty(), mouseX, mouseY);
         }
 
-        Component countComponent = Component.literal(String.format("x%d", ClientRayPicking.nearbyCommentsCount));
+        Component countComponent = Component.literal(String.format("%dx", ClientRayPicking.nearbyCommentsCount));
         int countWidth = Minecraft.getInstance().font.width(countComponent);
         int yOffset = (BTN_SIZE - Minecraft.getInstance().font.lineHeight) / 2;
         guiGraphics.drawString(Minecraft.getInstance().font, countComponent,
