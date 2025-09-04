@@ -9,7 +9,6 @@ import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,35 +18,32 @@ import java.util.function.Supplier;
 public class ControlTipRenderer implements IGuiCommon {
 
     public static final ControlTip TIP_CREATE = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.create"), 2,
+            Component.translatable("gui.worldcomment.control_tip.create"), TipLogo.KEYBOARD,
             Minecraft.getInstance().options.keyScreenshot, false, true
     );
     public static final ControlTip TIP_PLACE_COMMENT = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.place_comment"), 0,
+            Component.translatable("gui.worldcomment.control_tip.place_comment"), TipLogo.RIGHT_MOUSE_BUTTON,
             null, true, true
     );
     public static final ControlTip TIP_TOGGLE_SHOW = new ControlTip(
             () -> Component.translatable("gui.worldcomment.control_tip.toggle_show",
-                    String.format("%02d:%02d",
-                            (int)Math.floor((CommentToolItem.invisibleTimeRemaining / 20) / 60),
-                            (int)Math.floor((CommentToolItem.invisibleTimeRemaining / 20) % 60)
-                    )), 0,
-            null, true
+                    ClientRayPicking.nearbyCommentsCount), TipLogo.SN_LOGO,
+            null, false
     );
     public static final ControlTip TIP_TOGGLE_HIDE = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.toggle_hide"), 0,
+            Component.translatable("gui.worldcomment.control_tip.toggle_hide"), TipLogo.RIGHT_MOUSE_BUTTON,
             null, false
     );
     public static final ControlTip TIP_VIEW_MANAGE = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.view_manage"), 2,
+            Component.translatable("gui.worldcomment.control_tip.view_manage"), TipLogo.KEYBOARD,
             Minecraft.getInstance().options.keyTogglePerspective, false
     );
     public static final ControlTip TIP_DETAIL = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.detail"), 2,
+            Component.translatable("gui.worldcomment.control_tip.detail"), TipLogo.KEYBOARD,
             Minecraft.getInstance().options.keyPlayerList, false
     );
     public static final ControlTip TIP_SCROLL = new ControlTip(
-            Component.translatable("gui.worldcomment.control_tip.scroll"), 1,
+            Component.translatable("gui.worldcomment.control_tip.scroll"), TipLogo.SCROLL_WHEEL,
             null, false
     );
 
@@ -72,17 +68,13 @@ public class ControlTipRenderer implements IGuiCommon {
             return;
         }
         if (Screenshot.isGrabbing) return;
+        TIP_TOGGLE_SHOW.visible = !MainClient.CLIENT_CONFIG.commentVisibilityPreference;
         ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
         if (item != null) {
             if (CommentToolItem.getUploadJobId(item) != null) {
                 TIP_PLACE_COMMENT.visible = true;
             } else {
                 TIP_CREATE.visible = true;
-                if (CommentToolItem.getVisibilityPreference()) {
-                    TIP_TOGGLE_HIDE.visible = true;
-                } else {
-                    TIP_TOGGLE_SHOW.visible = true;
-                }
             }
             TIP_VIEW_MANAGE.visible = true;
         }
@@ -96,7 +88,7 @@ public class ControlTipRenderer implements IGuiCommon {
 
     public static class ControlTip {
 
-        public final int imgIndex;
+        public final TipLogo logo;
         public final KeyMapping key;
         public final boolean critical;
         public final boolean atCursor;
@@ -104,25 +96,25 @@ public class ControlTipRenderer implements IGuiCommon {
 
         public boolean visible = false;
 
-        public ControlTip(Component text, int imgIndex, KeyMapping key, boolean critical) {
+        public ControlTip(Component text, TipLogo logo, KeyMapping key, boolean critical) {
             this.text = () -> text;
-            this.imgIndex = imgIndex;
+            this.logo = logo;
             this.key = key;
             this.critical = critical;
             this.atCursor = false;
         }
 
-        public ControlTip(Component text, int imgIndex, KeyMapping key, boolean critical, boolean atCursor) {
+        public ControlTip(Component text, TipLogo logo, KeyMapping key, boolean critical, boolean atCursor) {
             this.text = () -> text;
-            this.imgIndex = imgIndex;
+            this.logo = logo;
             this.key = key;
             this.critical = critical;
             this.atCursor = atCursor;
         }
 
-        public ControlTip(Supplier<Component> text, int imgIndex, KeyMapping key, boolean critical) {
+        public ControlTip(Supplier<Component> text, TipLogo logo, KeyMapping key, boolean critical) {
             this.text = text;
-            this.imgIndex = imgIndex;
+            this.logo = logo;
             this.key = key;
             this.critical = critical;
             this.atCursor = false;
@@ -143,7 +135,7 @@ public class ControlTipRenderer implements IGuiCommon {
                 }
             }
             guiGraphics.blit(ATLAS_LOCATION, x, y, 20, 20,
-                    176 + imgIndex * 20, 0, 20, 20, 256, 256);
+                    logo.u, logo.v, logo.size, logo.size, 256, 256);
             if (key != null) {
                 Component keyMessage = key.getTranslatedKeyMessage();
                 int keyMessageWidth = font.width(keyMessage);
@@ -157,6 +149,23 @@ public class ControlTipRenderer implements IGuiCommon {
                 }
             }
             guiGraphics.drawString(font, text.get(), x + 20 + 4, y + 10 - 4, 0xFFFFFFFF, true);
+        }
+    }
+
+    public enum TipLogo {
+        RIGHT_MOUSE_BUTTON(176, 0, 20),
+        SCROLL_WHEEL(196, 0, 20),
+        KEYBOARD(216, 0, 20),
+        SN_LOGO(176, 96, 32);
+
+        public final int u;
+        public final int v;
+        public final int size;
+
+        TipLogo(int u, int v, int size) {
+            this.u = u;
+            this.v = v;
+            this.size = size;
         }
     }
 }

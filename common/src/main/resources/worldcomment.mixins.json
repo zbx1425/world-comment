@@ -10,7 +10,8 @@
     "KeyMappingMixin",
     "LevelRendererAccessor",
     "LevelRendererMixin",
-    "NativeImageAccessor"
+    "NativeImageAccessor",
+    "PauseScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

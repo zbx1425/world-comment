@@ -20,6 +20,7 @@ public class ClientConfig {
 
     public boolean screenshotIncludeGui = false;
     public boolean screenshotIncludeComments = false;
+    public boolean commentVisibilityPreference = true;
 
     public List<ImageUploader> imageUploader;
 
@@ -97,10 +98,11 @@ public class ClientConfig {
         if (!commentVisibilityMask) return false;
         int criteriaToUse = ((comment.messageType - 1) >= 4) ? markerVisibilityCriteria : commentVisibilityCriteria;
         return switch (criteriaToUse) {
-            case 0 -> CommentToolItem.getVisibilityPreference();
-            case 1 -> AccessoriesInterop.isWearingEyeglass();
+//            case 0 -> CommentToolItem.getVisibilityPreference();
+//            case 1 -> AccessoriesInterop.isWearingEyeglass();
             case 999 -> true;
-            default -> false;
+            case -1 -> false;
+            default -> commentVisibilityPreference;
         };
     }
 

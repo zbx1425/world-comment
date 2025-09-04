@@ -2,7 +2,6 @@ package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.mixin.LevelRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
@@ -17,6 +16,7 @@ import java.util.*;
 public class ClientRayPicking {
 
     public static Map<BlockPos, List<CommentEntry>> visibleComments = new Object2ObjectArrayMap<>();
+    public static int nearbyCommentsCount = 0;
     public static List<CommentEntry> pickedComments = new ArrayList<>();
     public static int overlayOffset;
 
@@ -31,10 +31,12 @@ public class ClientRayPicking {
         double vanillaDistSqr = hitResult.getType() == HitResult.Type.MISS
                 ? 65472 : hitResult.getLocation().distanceToSqr(pickStart);
 
+        int nearbyCommentsCount = 0;
         visibleComments.clear();
         pickedComments.clear();
         for (Map<BlockPos, List<CommentEntry>> region : ClientWorldData.INSTANCE.regions.values()) {
             for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
+                nearbyCommentsCount += blockData.getValue().size();
                 BlockPos bp = blockData.getKey();
                 AABB blockHitArea = new AABB(bp.getX(), bp.getY(), bp.getZ(),
                         bp.getX() + 1, bp.getY() + 3, bp.getZ() + 1);
@@ -54,5 +56,6 @@ public class ClientRayPicking {
             }
         }
         overlayOffset = Math.min(overlayOffset, Math.max(pickedComments.size() - 1, 0));
+        ClientRayPicking.nearbyCommentsCount = nearbyCommentsCount;
     }
 }
