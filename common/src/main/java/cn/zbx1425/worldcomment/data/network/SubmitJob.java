@@ -28,7 +28,7 @@ public class SubmitJob {
             imageReady = true;
         }
         this.callback = callback;
-        this.uploaderToUse = new LinkedList<>(config.imageUploader);
+        this.uploaderToUse = new LinkedList<>(config.imageUploaders);
     }
 
     public void setImage(ThumbImage image) {

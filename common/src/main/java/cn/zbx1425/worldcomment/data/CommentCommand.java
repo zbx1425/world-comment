@@ -44,7 +44,7 @@ public class CommentCommand {
                     case "domainisnot" -> predicateIsPositive = false;
                     default -> { return; }
                 };
-                ImageUploader uploader = ImageUploader.parseUploaderList(Main.SERVER_CONFIG.parseUploaderConfig()).get(0);
+                ImageUploader uploader = Main.SERVER_CONFIG.imageUploaders.value.getFirst();
                 for (CommentEntry commentEntry : worldData.comments.timeIndex.values()) {
                     if (commentEntry.image.url.isEmpty()) continue;
                     URI imageUrl;

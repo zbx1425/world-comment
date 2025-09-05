@@ -19,6 +19,10 @@ public abstract class ImageUploader {
 
     public abstract JsonObject serialize();
 
+    public JsonObject serializeForClient() {
+        return serialize();
+    }
+
     public static List<ImageUploader> parseUploaderList(List<JsonObject> configs) {
         List<ImageUploader> uploaders = new ArrayList<>();
         if (configs == null || configs.isEmpty()) {
@@ -70,7 +74,9 @@ public abstract class ImageUploader {
 
         @Override
         public JsonObject serialize() {
-            return new JsonObject();
+            JsonObject obj = new JsonObject();
+            obj.addProperty("service", "");
+            return obj;
         }
     }
 

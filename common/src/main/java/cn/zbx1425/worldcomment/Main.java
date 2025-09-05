@@ -70,7 +70,7 @@ public class Main {
 #endif
 						.resolve("config").resolve("world-comment.json"));
 
-				DATABASE = new ServerWorldData(server, SERVER_CONFIG.syncRole.value.equalsIgnoreCase("host"));
+				DATABASE = new ServerWorldData(server, SERVER_CONFIG.syncRole.value == ServerConfig.SyncRole.HOST);
 				if (!SERVER_CONFIG.redisUrl.value.isEmpty()) {
 					DATABASE.peerChannel = new RedisSynchronizer(SERVER_CONFIG.redisUrl.value, DATABASE);
 				}

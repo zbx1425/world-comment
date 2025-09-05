@@ -22,11 +22,11 @@ public class ClientConfig {
     public boolean screenshotIncludeComments = false;
     public boolean commentVisibilityPreference = true;
 
-    public List<ImageUploader> imageUploader;
+    public List<ImageUploader> imageUploaders;
 
-    public int allowMarkerUsage;
-    public int commentVisibilityCriteria;
-    public int markerVisibilityCriteria;
+    public ServerConfig.MarkerUsage allowMarkerUsage;
+    public ServerConfig.Visibility commentVisibilityCriteria;
+    public ServerConfig.Visibility markerVisibilityCriteria;
 
     public boolean imageGlobalKill = false;
 
@@ -34,26 +34,11 @@ public class ClientConfig {
 
     public static ClientConfig fromServerConfig(ServerConfig serverConfig) {
         ClientConfig config = new ClientConfig();
-        config.imageUploader = ImageUploader.parseUploaderList(serverConfig.parseUploaderConfig());
-        config.allowMarkerUsage = switch (serverConfig.allowMarkerUsage.value) {
-            case "op" -> 0;
-            case "creative" -> 1;
-            case "all" -> 2;
-            default -> 1;
-        };
-        config.commentVisibilityCriteria = switch (serverConfig.commentVisibilityCriteria.value) {
-            case "preference" -> 0;
-            case "always" -> 999;
-            case "never" -> -1;
-            default -> 0;
-        };
-        config.markerVisibilityCriteria = switch (serverConfig.markerVisibilityCriteria.value) {
-            case "preference" -> 0;
-            case "always" -> 999;
-            case "never" -> -1;
-            default -> 0;
-        };
-        config.imageGlobalKill = serverConfig.imageGlobalKill.value.equals("true");
+        config.imageUploaders = serverConfig.imageUploaders.value;
+        config.allowMarkerUsage = serverConfig.allowMarkerUsage.value;
+        config.commentVisibilityCriteria = serverConfig.commentVisibilityCriteria.value;
+        config.markerVisibilityCriteria = serverConfig.markerVisibilityCriteria.value;
+        config.imageGlobalKill = serverConfig.imageGlobalKill.value;
         return config;
     }
 
@@ -67,27 +52,29 @@ public class ClientConfig {
         for (int i = 0; i < uploaderCount; i++) {
             uploaderConfigs.add(JsonParser.parseString(packet.readUtf()).getAsJsonObject());
         }
-        imageUploader = ImageUploader.parseUploaderList(uploaderConfigs);
-        allowMarkerUsage = packet.readInt();
-        commentVisibilityCriteria = packet.readInt();
+        imageUploaders = ImageUploader.parseUploaderList(uploaderConfigs);
+        allowMarkerUsage = packet.readEnum(ServerConfig.MarkerUsage.class);
+        commentVisibilityCriteria = packet.readEnum(ServerConfig.Visibility.class);
+        markerVisibilityCriteria = packet.readEnum(ServerConfig.Visibility.class);
         imageGlobalKill = packet.readBoolean();
     }
 
     public void writePacket(FriendlyByteBuf packet) {
-        packet.writeInt(imageUploader.size());
-        for (ImageUploader uploader : imageUploader) {
-            packet.writeUtf(uploader.serialize().toString());
+        packet.writeInt(imageUploaders.size());
+        for (ImageUploader uploader : imageUploaders) {
+            packet.writeUtf(uploader.serializeForClient().toString());
         }
-        packet.writeInt(allowMarkerUsage);
-        packet.writeInt(commentVisibilityCriteria);
+        packet.writeEnum(allowMarkerUsage);
+        packet.writeEnum(commentVisibilityCriteria);
+        packet.writeEnum(markerVisibilityCriteria);
         packet.writeBoolean(imageGlobalKill);
     }
 
     public boolean canAccessBuildMarkers(Minecraft minecraft) {
         return switch (allowMarkerUsage) {
-            case 0 -> minecraft.player.hasPermissions(2);
-            case 1 -> minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
-            case 2 -> true;
+            case OP -> minecraft.player.hasPermissions(2);
+            case CREATIVE -> minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
+            case ALL -> true;
             default -> false;
         };
     }
@@ -99,10 +86,10 @@ public class ClientConfig {
             // Show a newly placed comment to its owner for 30 seconds.
             return true;
         }
-        int criteriaToUse = ((comment.messageType - 1) >= 4) ? markerVisibilityCriteria : commentVisibilityCriteria;
+        ServerConfig.Visibility criteriaToUse = ((comment.messageType - 1) >= 4) ? markerVisibilityCriteria : commentVisibilityCriteria;
         return switch (criteriaToUse) {
-            case 999 -> true;
-            case -1 -> false;
+            case ALWAYS -> true;
+            case NEVER -> false;
             default -> commentVisibilityPreference;
         };
     }
