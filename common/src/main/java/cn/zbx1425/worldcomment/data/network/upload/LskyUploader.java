@@ -24,13 +24,14 @@ public class LskyUploader extends ImageUploader {
     private final String cdnImageTransform;
     private final Boolean localThumbGeneration;
 
-    public LskyUploader(JsonObject config) {
-        this.apiUrl = config.get("apiUrl").getAsString();
-        this.apiToken = config.get("apiToken").getAsString();
-        this.strategyId = config.has("strategyId") ? config.get("strategyId").getAsInt() : null;
-        this.albumId = config.has("albumId") ? config.get("albumId").getAsInt() : null;
-        this.cdnImageTransform = config.has("cdnImageTransform") ? config.get("cdnImageTransform").getAsString() : null;
-        this.localThumbGeneration = config.has("localThumbGeneration") ? config.get("localThumbGeneration").getAsBoolean() : null;
+    public LskyUploader(JsonObject serializedOrConfig) {
+        super("lsky", serializedOrConfig);
+        this.apiUrl = serializedOrConfig.get("apiUrl").getAsString();
+        this.apiToken = serializedOrConfig.get("apiToken").getAsString();
+        this.strategyId = serializedOrConfig.has("strategyId") ? serializedOrConfig.get("strategyId").getAsInt() : null;
+        this.albumId = serializedOrConfig.has("albumId") ? serializedOrConfig.get("albumId").getAsInt() : null;
+        this.cdnImageTransform = serializedOrConfig.has("cdnImageTransform") ? serializedOrConfig.get("cdnImageTransform").getAsString() : null;
+        this.localThumbGeneration = serializedOrConfig.has("localThumbGeneration") ? serializedOrConfig.get("localThumbGeneration").getAsBoolean() : null;
     }
 
     public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
@@ -96,9 +97,9 @@ public class LskyUploader extends ImageUploader {
                 });
     }
 
-    public JsonObject serialize() {
-        JsonObject json = new JsonObject();
-        json.addProperty("service", "lsky");
+    @Override
+    public JsonObject serializeForClient() {
+        JsonObject json = super.serializeForClient();
         json.addProperty("apiUrl", apiUrl);
         json.addProperty("apiToken", apiToken);
         if (strategyId != null) json.addProperty("strategyId", strategyId);

@@ -21,7 +21,9 @@ public class LocalStorageUploader extends ImageUploader {
     public static final int IMAGE_MAX_SIZE = 10 * 1024 * 1024; // 10MB
     public static final int IMAGE_CHUNK_SIZE = 28 * 1024; // 28KB chunks
 
-    private LocalStorageUploader() {}
+    private LocalStorageUploader() {
+        super("local", null);
+    }
 
     public static LocalStorageUploader getInstance() {
         return INSTANCE;
@@ -115,16 +117,5 @@ public class LocalStorageUploader extends ImageUploader {
         if (future != null) {
             future.completeExceptionally(ex);
         }
-    }
-
-    @Override
-    public JsonObject serialize() {
-        JsonObject obj = new JsonObject();
-        obj.addProperty("service", "local");
-        return obj;
-    }
-
-    public static LocalStorageUploader deserialize(JsonObject config) {
-        return getInstance();
     }
 } 

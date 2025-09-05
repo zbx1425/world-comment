@@ -24,10 +24,11 @@ public class S3PreSignedUploader extends ImageUploader {
     private final String apiAuthKey;
     private final String cdnImageTransform;
 
-    public S3PreSignedUploader(JsonObject config) {
-        this.apiUrl = config.get("apiUrl").getAsString();
-        this.apiAuthKey = config.get("apiAuthKey").getAsString();
-        this.cdnImageTransform = config.has("cdnImageTransform") ? config.get("cdnImageTransform").getAsString() : null;
+    public S3PreSignedUploader(JsonObject serializedOrConfig) {
+        super("s3PreSigned", serializedOrConfig);
+        this.apiUrl = serializedOrConfig.get("apiUrl").getAsString();
+        this.apiAuthKey = serializedOrConfig.get("apiAuthKey").getAsString();
+        this.cdnImageTransform = serializedOrConfig.has("cdnImageTransform") ? serializedOrConfig.get("cdnImageTransform").getAsString() : null;
     }
 
     @Override
@@ -116,9 +117,8 @@ public class S3PreSignedUploader extends ImageUploader {
     }
 
     @Override
-    public JsonObject serialize() {
-        JsonObject json = new JsonObject();
-        json.addProperty("service", "s3PreSigned");
+    public JsonObject serializeForClient() {
+        JsonObject json = super.serializeForClient();
         json.addProperty("apiUrl", apiUrl);
         json.addProperty("apiAuthKey", apiAuthKey);
         if (cdnImageTransform != null) json.addProperty("cdnImageTransform", cdnImageTransform);

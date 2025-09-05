@@ -20,13 +20,14 @@ public class SmmsUploader extends ImageUploader {
     private final String apiUrl;
     private final String apiToken;
 
-    public SmmsUploader(JsonObject config) {
-        if (config.has("apiUrl")) {
-            this.apiUrl = config.get("apiUrl").getAsString();
+    public SmmsUploader(JsonObject serializedOrConfig) {
+        super("smms", serializedOrConfig);
+        if (serializedOrConfig.has("apiUrl")) {
+            this.apiUrl = serializedOrConfig.get("apiUrl").getAsString();
         } else {
             this.apiUrl = "https://smms.app/api/v2/upload";
         }
-        this.apiToken = config.get("apiToken").getAsString();
+        this.apiToken = serializedOrConfig.get("apiToken").getAsString();
     }
 
     public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
@@ -73,9 +74,9 @@ public class SmmsUploader extends ImageUploader {
                 });
     }
 
-    public JsonObject serialize() {
-        JsonObject obj = new JsonObject();
-        obj.addProperty("service", "smms");
+    @Override
+    public JsonObject serializeForClient() {
+        JsonObject obj = super.serializeForClient();
         obj.addProperty("apiUrl", apiUrl);
         obj.addProperty("apiToken", apiToken);
         return obj;

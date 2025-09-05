@@ -20,13 +20,14 @@ public class ImglocUploader extends ImageUploader {
     private final String apiUrl;
     private final String apiToken;
 
-    public ImglocUploader(JsonObject config) {
-        if (config.has("apiUrl")) {
-            this.apiUrl = config.get("apiUrl").getAsString();
+    public ImglocUploader(JsonObject serializedOrConfig) {
+        super("imgloc", serializedOrConfig);
+        if (serializedOrConfig.has("apiUrl")) {
+            this.apiUrl = serializedOrConfig.get("apiUrl").getAsString();
         } else {
             this.apiUrl = "https://imgloc.com/api/1/upload";
         }
-        this.apiToken = config.get("apiToken").getAsString();
+        this.apiToken = serializedOrConfig.get("apiToken").getAsString();
     }
 
     public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
@@ -65,9 +66,8 @@ public class ImglocUploader extends ImageUploader {
     }
 
     @Override
-    public JsonObject serialize() {
-        JsonObject obj = new JsonObject();
-        obj.addProperty("service", "imgloc");
+    public JsonObject serializeForClient() {
+        JsonObject obj = super.serializeForClient();
         obj.addProperty("apiUrl", apiUrl);
         obj.addProperty("apiToken", apiToken);
         return obj;
