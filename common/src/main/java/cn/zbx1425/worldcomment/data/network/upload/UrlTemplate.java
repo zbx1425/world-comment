@@ -6,6 +6,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -30,13 +31,13 @@ public class UrlTemplate {
                 }
             }
 
-            switch (key) {
+            switch (key.toLowerCase(Locale.ROOT)) {
                 case "initiator":
                     return comment.initiator.toString();
-                case "initiatorName":
+                case "initiatorname":
                     String sanitized = comment.initiatorName.replaceAll("[^a-zA-Z0-9_\\-]", "_");
                     return sanitized.isEmpty() ? "anonymous" : sanitized;
-                case "thumbWidth":
+                case "thumbwidth":
                     return Integer.toString(ImageUploader.THUMBNAIL_MAX_WIDTH);
                 case "quality100":
                     return Integer.toString(ImageUploader.THUMBNAIL_QUALITY);

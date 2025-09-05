@@ -149,7 +149,7 @@ public class S3PreSignedUploader extends ImageUploader {
         String baseUrl;
         if (endpoint != null && !endpoint.isEmpty()) {
             URI endpointUri = new URI(endpoint);
-            host = endpointUri.getHost();
+            host = bucketName + "." + endpointUri.getHost();
             baseUrl = endpointUri.getScheme() + "://" + host;
         } else {
             host = bucketName + ".s3." + region + ".amazonaws.com";
@@ -263,10 +263,10 @@ public class S3PreSignedUploader extends ImageUploader {
                 throw new CompletionException(e);
             }
         }, Main.IO_EXECUTOR)
-                .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.discarding()))
+                .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
                 .thenAccept(response -> {
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                        throw new CompletionException(new IOException("S3 upload failed: " + response.statusCode()));
+                        throw new CompletionException(new IOException("S3 upload failed: " + response.statusCode() + " " + response.body()));
                     }
                 });
     }

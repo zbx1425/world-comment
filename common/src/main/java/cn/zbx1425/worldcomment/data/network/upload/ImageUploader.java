@@ -33,7 +33,7 @@ public abstract class ImageUploader {
     public JsonObject serializeForClient() {
         JsonObject obj = new JsonObject();
         obj.addProperty("service", serviceName);
-        obj.addProperty("instanceId", instanceId.toString());
+        obj.addProperty("uploaderId", instanceId.toString());
         return obj;
     }
 
