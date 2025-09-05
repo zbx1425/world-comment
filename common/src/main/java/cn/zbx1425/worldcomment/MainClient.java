@@ -28,6 +28,9 @@ public class MainClient {
 				PacketImageUploadS2C.IDENTIFIER, PacketImageUploadS2C.ClientLogics::handle);
 		ClientPlatform.registerNetworkReceiver(
 				PacketImageDownloadS2C.IDENTIFIER, PacketImageDownloadS2C.ClientLogics::handle);
+		ClientPlatform.registerNetworkReceiver(
+				PacketPreSignResponseS2C.IDENTIFIER, PacketPreSignResponseS2C.ClientLogics::handle
+		);
 
 		ClientPlatform.registerPlayerJoinEvent(ignored -> {
 			ClientWorldData.INSTANCE.clear();

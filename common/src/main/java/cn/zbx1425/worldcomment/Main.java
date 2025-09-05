@@ -47,6 +47,8 @@ public class Main {
 		ServerPlatform.registerPacket(PacketImageUploadS2C.IDENTIFIER);
 		ServerPlatform.registerPacket(PacketImageDownloadC2S.IDENTIFIER);
 		ServerPlatform.registerPacket(PacketImageDownloadS2C.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketPreSignRequestC2S.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketPreSignResponseS2C.IDENTIFIER);
 
 		ServerPlatform.registerNetworkReceiver(
 				PacketRegionRequestC2S.IDENTIFIER, PacketRegionRequestC2S::handle);
@@ -60,6 +62,8 @@ public class Main {
 				PacketImageUploadC2S.IDENTIFIER, PacketImageUploadC2S::handle);
 		ServerPlatform.registerNetworkReceiver(
 				PacketImageDownloadC2S.IDENTIFIER, PacketImageDownloadC2S::handle);
+		ServerPlatform.registerNetworkReceiver(
+				PacketPreSignRequestC2S.IDENTIFIER, PacketPreSignRequestC2S::handle);
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {

@@ -34,10 +34,6 @@ dependencies {
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
-
-//	if (rootProject.minecraft_version_int >= 12001 && rootProject.accessories_version != "") {
-//		modImplementation "io.wispforest:accessories-fabric:${rootProject.accessories_version}"
-//	}
 }
 
 processResources {
