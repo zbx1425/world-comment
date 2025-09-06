@@ -27,6 +27,11 @@ public class ClientPlatform {
     }
 
     @ExpectPlatform
+    public static void registerPlayerLeaveEvent(Runnable runnable) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static void registerTickEvent(Consumer<Minecraft> consumer) {
         throw new AssertionError();
     }

@@ -32,7 +32,7 @@ public class ServerCommand {
                                 Main.LOGGER.warn("Failed to save config", ex);
                             }
                             for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
-                                PacketClientConfigS2C.send(player, Main.SERVER_CONFIG);
+                                PacketClientConfigS2C.send(player, Main.DATABASE.metadata, Main.SERVER_CONFIG);
                             }
                             context.getSource().sendSystemMessage(Component.translatable("gui.worldcomment.image_global_kill_feedback", kill));
                             return 1;

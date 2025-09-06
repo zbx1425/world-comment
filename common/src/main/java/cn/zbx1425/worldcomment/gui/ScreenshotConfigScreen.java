@@ -36,13 +36,13 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
         int baseY = CONTAINER_PADDING_Y;
         cbIncludeHud = Checkbox
                 .builder(Component.translatable("gui.worldcomment.config.screenshot_hud"), minecraft.font)
-                .pos(0, baseY).selected(MainClient.CLIENT_CONFIG.screenshotIncludeGui)
+                .pos(0, baseY).selected(MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeGui)
                 .build();
         addRenderableWidget(cbIncludeHud);
         baseY += SQ_SIZE;
         cbIncludeComments = Checkbox
                 .builder(Component.translatable("gui.worldcomment.config.screenshot_comments"), minecraft.font)
-                .pos(0, baseY).selected(MainClient.CLIENT_CONFIG.screenshotIncludeComments)
+                .pos(0, baseY).selected(MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeComments)
                 .build();
         addRenderableWidget(cbIncludeComments);
         baseY += SQ_SIZE;
@@ -88,10 +88,10 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
         );
         guiGraphics.disableBlend();
 
-        if (MainClient.CLIENT_CONFIG.screenshotIncludeGui != cbIncludeHud.selected()
-                || MainClient.CLIENT_CONFIG.screenshotIncludeComments != cbIncludeComments.selected()) {
-            MainClient.CLIENT_CONFIG.screenshotIncludeGui = cbIncludeHud.selected();
-            MainClient.CLIENT_CONFIG.screenshotIncludeComments = cbIncludeComments.selected();
+        if (MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeGui != cbIncludeHud.selected()
+                || MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeComments != cbIncludeComments.selected()) {
+            MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeGui = cbIncludeHud.selected();
+            MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeComments = cbIncludeComments.selected();
             Screenshot.applyClientConfigForScreenshot();
         }
     }
@@ -110,7 +110,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     @Override
     public void onClose() {
         minecraft.options.hideGui = prevHideGui;
-        MainClient.CLIENT_CONFIG.commentVisibilityMask = true;
+        MainClient.CLIENT_CONFIG.transientPreference.commentVisibilityMask = true;
         Screenshot.isGrabbing = false;
         super.onClose();
     }

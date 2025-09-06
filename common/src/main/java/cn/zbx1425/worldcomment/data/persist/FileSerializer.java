@@ -2,6 +2,9 @@ package cn.zbx1425.worldcomment.data.persist;
 
 import cn.zbx1425.worldcomment.data.CommentCache;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.ServerWorldMeta;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
@@ -22,7 +25,7 @@ public class FileSerializer {
         this.basePath = basePath;
     }
 
-    public void loadInto(CommentCache commentCache) throws IOException {
+    public ServerWorldMeta loadInto(CommentCache commentCache) throws IOException {
         commentCache.clear();
         try {
             Files.createDirectories(basePath.resolve("region"));
@@ -44,6 +47,15 @@ public class FileSerializer {
                     }
                 }
             }
+        }
+
+        if (Files.exists(basePath.resolve("metadata.json"))) {
+            String metaContent = Files.readString(basePath.resolve("metadata.json"));
+            return new ServerWorldMeta(JsonParser.parseString(metaContent).getAsJsonObject());
+        } else {
+            ServerWorldMeta meta = new ServerWorldMeta();
+            Files.writeString(basePath.resolve("metadata.json"), meta.serialize().toString());
+            return meta;
         }
     }
 

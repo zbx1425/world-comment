@@ -30,6 +30,10 @@ public class ClientPlatformImpl {
         ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(consumer::accept);
     }
 
+    public static void registerPlayerLeaveEvent(Runnable runnable) {
+        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> runnable.run());
+    }
+
     public static void registerTickEvent(Consumer<Minecraft> consumer) {
         ClientTickEvent.CLIENT_PRE.register(consumer::accept);
     }

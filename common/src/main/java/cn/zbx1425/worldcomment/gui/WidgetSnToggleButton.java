@@ -31,7 +31,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         guiGraphics.blit(ATLAS_LOCATION, getX(), getY(),
                 BTN_SIZE, BTN_SIZE,
-                160 + (MainClient.CLIENT_CONFIG.commentVisibilityPreference ? 0 : 32), 96,
+                160 + (MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference ? 0 : 32), 96,
                 32, 32, 256, 256);
         if (mouseX > getX() && mouseX < getX() + BTN_SIZE &&
                 mouseY > getY() && mouseY < getY() + BTN_SIZE) {
@@ -41,7 +41,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
                     32, 32, 256, 256);
             guiGraphics.renderTooltip(Minecraft.getInstance().font, List.of(
                     Component.translatable("gui.worldcomment.toggler.status",
-                            MainClient.CLIENT_CONFIG.commentVisibilityPreference ?
+                            MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference ?
                                     Component.translatable("gui.worldcomment.toggler.enabled") :
                                     Component.translatable("gui.worldcomment.toggler.disabled")),
                     Component.translatable("gui.worldcomment.toggler.toggle"),
@@ -63,7 +63,8 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
 
     @Override
     public void onClick(double mouseX, double mouseY) {
-        MainClient.CLIENT_CONFIG.commentVisibilityPreference = !MainClient.CLIENT_CONFIG.commentVisibilityPreference;
+        MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference = !MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference;
+        MainClient.CLIENT_CONFIG.perServerPreference.isDirty = true;
     }
 
     @Override

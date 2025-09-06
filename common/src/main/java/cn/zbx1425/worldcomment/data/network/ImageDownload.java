@@ -33,7 +33,7 @@ public class ImageDownload {
     private static final Map<String, ImageState> images = new HashMap<>();
 
     public static ImageState getTexture(ThumbImage image, boolean thumb) {
-        if (image.url.isEmpty() || MainClient.CLIENT_CONFIG.imageGlobalKill) return ImageState.BLANK;
+        if (image.url.isEmpty() || MainClient.CLIENT_CONFIG.serverIssuedConfig.imageGlobalKill) return ImageState.BLANK;
         String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
         synchronized (images) {
             if (images.containsKey(targetUrl)) return queryTexture(targetUrl);

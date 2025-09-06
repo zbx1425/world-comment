@@ -93,7 +93,7 @@ public class Main {
 		});
 
 		ServerPlatform.registerPlayerJoinEvent(player -> {
-			PacketClientConfigS2C.send(player, SERVER_CONFIG);
+			PacketClientConfigS2C.send(player, Main.DATABASE.metadata, SERVER_CONFIG);
 		});
 	}
 

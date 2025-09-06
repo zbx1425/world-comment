@@ -12,6 +12,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 public class ServerWorldData {
 
@@ -21,6 +22,7 @@ public class ServerWorldData {
     public final Path basePath;
 
     public boolean isHost;
+    public ServerWorldMeta metadata;
 
     public final CommentCache comments = new CommentCache();
 
@@ -39,10 +41,10 @@ public class ServerWorldData {
 
     public void load() throws IOException {
         if (isHost) {
-            fileSerializer.loadInto(comments);
-            peerChannel.kvWriteAll(comments.timeIndex);
+            metadata = fileSerializer.loadInto(comments);
+            peerChannel.kvWriteAll(comments.timeIndex, metadata);
         } else {
-            peerChannel.kvReadAllInto(comments);
+            metadata = peerChannel.kvReadAllInto(comments);
         }
     }
 

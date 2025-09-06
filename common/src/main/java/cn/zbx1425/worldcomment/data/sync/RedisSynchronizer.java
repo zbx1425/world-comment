@@ -4,6 +4,9 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentCache;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.ServerWorldMeta;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
@@ -17,6 +20,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +30,7 @@ public class RedisSynchronizer implements Synchronizer {
     private final StatefulRedisConnection<String, ByteBuf> redisConn;
 
     public static final String HMAP_ALL_KEY = "WORLD_COMMENT_DATA_ALL";
+    public static final String META_KEY = "WORLD_COMMENT_METADATA";
 
     private final ServerWorldData serverWorldData;
 
@@ -39,7 +44,7 @@ public class RedisSynchronizer implements Synchronizer {
     }
 
     @Override
-    public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> all) {
+    public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> all, ServerWorldMeta metadata) {
         RedisAsyncCommands<String, ByteBuf> commands = redisConn.async();
         commands.multi();
         commands.del(HMAP_ALL_KEY);
@@ -48,6 +53,7 @@ public class RedisSynchronizer implements Synchronizer {
             data.put(Long.toHexString(entry.id), entry.toBinaryBuffer());
         }
         commands.hset(HMAP_ALL_KEY, data);
+        commands.set(META_KEY, Unpooled.wrappedBuffer(metadata.serialize().toString().getBytes(StandardCharsets.UTF_8)));
         commands.exec();
     }
 
@@ -88,11 +94,15 @@ public class RedisSynchronizer implements Synchronizer {
     }
 
     @Override
-    public void kvReadAllInto(CommentCache comments) throws IOException {
+    public ServerWorldMeta kvReadAllInto(CommentCache comments) throws IOException {
         Map<String, ByteBuf> data = redisConn.sync().hgetall(HMAP_ALL_KEY);
         for (ByteBuf entry : data.values()) {
             comments.insert(CommentEntry.fromBinaryBuffer(entry));
         }
+
+        JsonObject serializedMetadata = JsonParser.parseString(
+                redisConn.sync().get(META_KEY).toString(StandardCharsets.UTF_8)).getAsJsonObject();
+        return new ServerWorldMeta(serializedMetadata);
     }
 
     @Override

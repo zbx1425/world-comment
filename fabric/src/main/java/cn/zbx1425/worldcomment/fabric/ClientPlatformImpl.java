@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.fabric;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,12 @@ public class ClientPlatformImpl {
             if (entity == Minecraft.getInstance().player) {
                 consumer.accept((LocalPlayer) entity);
             }
+        });
+    }
+
+    public static void registerPlayerLeaveEvent(Runnable runnable) {
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+           runnable.run();
         });
     }
 

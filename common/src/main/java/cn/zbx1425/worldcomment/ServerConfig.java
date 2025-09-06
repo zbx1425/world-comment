@@ -95,6 +95,8 @@ public class ServerConfig {
     public ConfigItem<Visibility> commentVisibilityCriteria;
     public ConfigItem<Visibility> markerVisibilityCriteria;
     public ConfigItem<Boolean> imageGlobalKill;
+    public ConfigItem<Boolean> screenshotKeyTriggersComment;
+    public ConfigItem<Boolean> defaultCommentVisibilityPreference;
 
     private Path path;
 
@@ -132,6 +134,8 @@ public class ServerConfig {
         commentVisibilityCriteria = new ConfigItem<>(json, "commentVisibilityCriteria", Visibility.PREFERENCE, str -> parseEnum(str, Visibility.class));
         markerVisibilityCriteria = new ConfigItem<>(json, "markerVisibilityCriteria", Visibility.ALWAYS, str -> parseEnum(str, Visibility.class));
         imageGlobalKill = new ConfigItem<>(json, "imageGlobalKill", false, Boolean::parseBoolean);
+        screenshotKeyTriggersComment = new ConfigItem<>(json, "screenshotKeyTriggersComment", true, Boolean::parseBoolean);
+        defaultCommentVisibilityPreference = new ConfigItem<>(json, "defaultCommentVisibilityPreference", true, Boolean::parseBoolean);
 
         if (!Files.exists(configPath)) save(configPath);
     }
@@ -147,6 +151,8 @@ public class ServerConfig {
         commentVisibilityCriteria.writeJson(json);
         markerVisibilityCriteria.writeJson(json);
         imageGlobalKill.writeJson(json);
+        screenshotKeyTriggersComment.writeJson(json);
+        defaultCommentVisibilityPreference.writeJson(json);
         Files.writeString(configPath, new GsonBuilder().setPrettyPrinting().create().toJson(json));
     }
 

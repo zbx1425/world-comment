@@ -85,7 +85,7 @@ public class Screenshot {
                     }
                 }));
                 minecraft.options.hideGui = prevHideGui;
-                MainClient.CLIENT_CONFIG.commentVisibilityMask = true;
+                MainClient.CLIENT_CONFIG.transientPreference.commentVisibilityMask = true;
                 isGrabbing = false;
             }, 2);
         }
@@ -93,7 +93,7 @@ public class Screenshot {
 
     public static void applyClientConfigForScreenshot() {
         isGrabbing = true;
-        Minecraft.getInstance().options.hideGui = !MainClient.CLIENT_CONFIG.screenshotIncludeGui;
-        MainClient.CLIENT_CONFIG.commentVisibilityMask = MainClient.CLIENT_CONFIG.screenshotIncludeComments;
+        Minecraft.getInstance().options.hideGui = !MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeGui;
+        MainClient.CLIENT_CONFIG.transientPreference.commentVisibilityMask = MainClient.CLIENT_CONFIG.transientPreference.screenshotIncludeComments;
     }
 }

@@ -48,7 +48,7 @@ public class KeyMappingMixin {
                 return;
             }
 
-            if (MainClient.CLIENT_CONFIG.screenshotKeyTakeOver) {
+            if (MainClient.CLIENT_CONFIG.serverIssuedConfig.screenshotKeyTriggersComment) {
                 Screenshot.triggerCommentSend(false);
                 cir.setReturnValue(false);
             }

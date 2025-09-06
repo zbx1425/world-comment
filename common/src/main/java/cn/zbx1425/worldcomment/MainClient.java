@@ -35,6 +35,9 @@ public class MainClient {
 		ClientPlatform.registerPlayerJoinEvent(ignored -> {
 			ClientWorldData.INSTANCE.clear();
 		});
+		ClientPlatform.registerPlayerLeaveEvent(() -> {
+			CLIENT_CONFIG.save();
+		});
 	}
 
 }
