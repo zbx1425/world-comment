@@ -50,6 +50,10 @@ tasks.register('setupFiles') {
 	}
 }
 
+tasks.register('setupLibrary') {
+	// Nothing to do right now
+}
+
 allprojects {
 	apply plugin: "architectury-plugin"
 
