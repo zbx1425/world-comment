@@ -1,12 +1,14 @@
 package cn.zbx1425.worldcomment.neoforge;
 
-import dev.architectury.event.events.client.ClientPlayerEvent;
-import dev.architectury.event.events.client.ClientTickEvent;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,16 +30,47 @@ public class ClientPlatformImpl {
 #endif
     }
 
+    public static List<Consumer<LocalPlayer>> PLAYER_JOIN_EVENT = new ObjectArrayList<>();
     public static void registerPlayerJoinEvent(Consumer<LocalPlayer> consumer) {
-        ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(consumer::accept);
+        PLAYER_JOIN_EVENT.add(consumer);
     }
 
+    public static List<Runnable> PLAYER_QUIT_EVENT = new ObjectArrayList<>();
     public static void registerPlayerLeaveEvent(Runnable runnable) {
-        ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> runnable.run());
+        PLAYER_QUIT_EVENT.add(runnable);
     }
 
+    public static List<Consumer<Minecraft>> TICK_EVENT = new ObjectArrayList<>();
     public static void registerTickEvent(Consumer<Minecraft> consumer) {
-        ClientTickEvent.CLIENT_PRE.register(consumer::accept);
+        TICK_EVENT.add(consumer);
+    }
+
+    public static class ClientEventBusListener {
+
+
+        @SubscribeEvent
+        public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+            if (!event.getEntity().level().isClientSide()) return;
+            for (Consumer<LocalPlayer> consumer : PLAYER_JOIN_EVENT) {
+                consumer.accept((LocalPlayer) event.getEntity());
+            }
+        }
+
+        @SubscribeEvent
+        public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+            if (!event.getEntity().level().isClientSide()) return;
+            for (Consumer<LocalPlayer> consumer : PLAYER_JOIN_EVENT) {
+                consumer.accept((LocalPlayer) event.getEntity());
+            }
+        }
+
+        @SubscribeEvent
+        public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+            if (event.getEntity().level().isClientSide()) return;
+            for (Runnable consumer : PLAYER_QUIT_EVENT) {
+                consumer.run();
+            }
+        }
     }
 
     public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {

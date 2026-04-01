@@ -43,7 +43,7 @@ public class CompatPacketRegistry {
 #if MC_VERSION >= "12102"
             registrar.playBidirectional(packet.TYPE, packet.STREAM_CODEC,
                     (arg, iPayloadContext) -> handlerC2S.handlePacket(
-                            iPayloadContext.player().getServer(), (ServerPlayer)iPayloadContext.player(), arg.buffer)
+                       iPayloadContext.player().level().getServer(), (ServerPlayer)iPayloadContext.player(), arg.buffer)
             );
 #else
             registrar.playBidirectional(packet.TYPE, packet.STREAM_CODEC, new DirectionalPayloadHandler<>(

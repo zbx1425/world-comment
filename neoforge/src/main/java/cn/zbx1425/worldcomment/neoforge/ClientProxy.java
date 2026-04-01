@@ -93,7 +93,7 @@ public class ClientProxy {
 
 #if MC_VERSION >= "12102"
         @SubscribeEvent
-        public static void onRenderLevelStage(RenderLevelStageEvent.AfterEntities event) { {
+        public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentFeatures event) { {
 #else
         @SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
@@ -110,7 +110,7 @@ public class ClientProxy {
 
                 PoseStack matrices = event.getPoseStack();
                 matrices.pushPose();
-                Vec3 cameraPos = event.getCamera().getPosition();
+                Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().position();
                 matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
                 CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
                 matrices.popPose();

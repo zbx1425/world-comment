@@ -47,13 +47,14 @@ public class MainForge {
 
 #if MC_VERSION >= "12100"
 		eventBus.register(ModEventBusListener.class);
-		if (FMLEnvironment.dist.isClient()) {
+		if (FMLEnvironment.getDist().isClient()) {
 #else
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 #endif
 			eventBus.register(ClientProxy.ModEventBusListener.class);
 #if MC_VERSION >= "12100"
 			NeoForge.EVENT_BUS.register(ClientProxy.ForgeEventBusListener.class);
+			NeoForge.EVENT_BUS.register(ClientPlatformImpl.ClientEventBusListener.class);
 		}
 #else
 			MinecraftForge.EVENT_BUS.register(ClientProxy.ForgeEventBusListener.class);
