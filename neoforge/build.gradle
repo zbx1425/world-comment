@@ -21,11 +21,17 @@ configurations {
 
 dependencies {
 	neoForge "net.neoforged:neoforge:${rootProject.forge_version}"
-	modApi "${rootProject.architectury_id}:architectury-neoforge:${rootProject.architectury_version}"
+	if (rootProject.architectury_version != "") {
+		modApi "${rootProject.architectury_id}:architectury-neoforge:${rootProject.architectury_version}"
+	}
 
 	forgeRuntimeLibrary 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 
-	common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	if (rootProject.minecraft_version_int < 260000) {
+		common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	} else {
+		common(project(path: ":common")) { transitive false }
+	}
 	shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 }
 
@@ -59,10 +65,12 @@ shadowJar {
 	relocate "org.reactivestreams", "vendor.cn.zbx1425.worldcomment.org.reactivestreams"
 }
 
-remapJar {
-	input.set shadowJar.archiveFile
-	dependsOn shadowJar
-	archiveClassifier = null
+if (rootProject.minecraft_version_int < 260000) {
+	remapJar {
+		input.set shadowJar.archiveFile
+		dependsOn shadowJar
+		archiveClassifier = null
+	}
 }
 
 components.java {

@@ -4,8 +4,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.nio.file.Files
 
 plugins {
-	id "architectury-plugin" version "3.4-SNAPSHOT"
-	id "dev.architectury.loom" version "1.10-SNAPSHOT" apply false
+	id "architectury-plugin" version "3.5-SNAPSHOT"
+	id "dev.architectury.loom-no-remap" version "1.14-SNAPSHOT" apply false
 	id "de.undercouch.download" version "4.1.2"
 	id "com.github.johnrengelman.shadow" version "8.1.1"
 	id "io.github.pacifistmc.forgix" version "1.2.9"
@@ -19,11 +19,7 @@ architectury {
 }
 
 subprojects {
-	apply plugin: "dev.architectury.loom"
-
-	loom {
-		silentMojangMappingsLicense()
-	}
+	apply plugin: "dev.architectury.loom-no-remap"
 
 	configurations {
 		shadowCommon
@@ -32,10 +28,6 @@ subprojects {
 	dependencies {
 		annotationProcessor 'systems.manifold:manifold-preprocessor:+'
 		minecraft "com.mojang:minecraft:${minecraft_version}"
-		mappings parchment_version == "" ? loom.officialMojangMappings() : loom.layered() {
-			officialMojangMappings()
-			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
-		}
 
 		implementation 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 		shadowCommon 'io.lettuce:lettuce-core:6.2.3.RELEASE'
@@ -48,11 +40,7 @@ subprojects {
 	}
 }
 
-task setupLibrary() {
-	/* TODO... */
-}
-
-task setupFiles() {
+tasks.register('setupFiles') {
 	copy {
 		outputs.upToDateWhen { false }
 		from "common/src/main/BuildConfigTemplate.java"
@@ -91,8 +79,10 @@ allprojects {
 			options.release.set(16)
 		} else if (minecraft_main_version < 21) {
 			options.release.set(17)
-		} else {
+		} else if (minecraft_main_version < 26) {
 			options.release.set(21)
+		} else {
+			options.release.set(26)
 		}
 
         options.compilerArgs += ['-Xplugin:Manifold', '-AMC_VERSION=' + minecraft_version_int]
@@ -108,22 +98,6 @@ allprojects {
 
 	build.finalizedBy(mergeJars)
 	assemble.finalizedBy(mergeJars)
-}
-
-static def getModrinthVersion(loader, minecraftVersion, projectId) {
-	def versionsArray = new JsonSlurper().parse(("https://api.modrinth.com/v2/project/" + projectId + "/version").toURL())
-	for (def versionElement : versionsArray) {
-		if (versionElement["loaders"].contains(loader) && versionElement["game_versions"].contains(minecraftVersion)) {
-			return versionElement["version_number"]
-		}
-	}
-	return ""
-}
-
-static def getParchmentVersion(minecraftVersion) {
-	def url = "https://ldtteam.jfrog.io/artifactory/parchmentmc-internal/org/parchmentmc/data/parchment-" + minecraftVersion + "/maven-metadata.xml"
-	def data = new XmlParser().parse(url)
-	return data.versioning.latest.text()
 }
 
 forgix {
@@ -147,33 +121,4 @@ forgix {
 		projectName = "fabric"
 		jarLocation = "build/libs/fabric" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
 	}
-}
-
-import org.gradle.api.internal.file.copy.CopyAction;
-import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
-
-class DummyArchiveTask extends AbstractArchiveTask {
-
-	protected CopyAction createCopyAction() {
-		return new DummyCopyAction();
-	}
-
-	class DummyCopyAction implements CopyAction {
-
-		@Override
-		WorkResult execute(CopyActionProcessingStream stream) {
-			return WorkResults.didWork(true);
-		}
-	}
-}
-
-task dummyForgixOutput(type: DummyArchiveTask) {
-	// Forgix's mergeJars task doesn't extend AbstractArchiveTask.
-	// This is to make github.com/teaconmc/longjing happy.
-	dependsOn(mergeJars)
-	mustRunAfter mergeJars
-	destinationDirectory = file("build/")
-	archiveBaseName = "WorldComment"
-	archiveVersion = rootProject.mod_version + "+" + minecraft_version
-	archiveExtension = "jar"
 }

@@ -26,21 +26,18 @@ configurations {
 
 dependencies {
 	forge "net.minecraftforge:forge:${rootProject.forge_version}"
-	modApi "${rootProject.architectury_id}:architectury-forge:${rootProject.architectury_version}"
+	if (rootProject.architectury_version != "") {
+		modApi "${rootProject.architectury_id}:architectury-forge:${rootProject.architectury_version}"
+	}
 
 	forgeRuntimeLibrary 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 
-	common(project(path: ":common", configuration: "namedElements")) { transitive false }
-	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
-
-	if (rootProject.minecraft_version_int >= 12001 && rootProject.accessories_version != "") {
-		modImplementation "io.wispforest:accessories-neoforge:${rootProject.accessories_version}"
-		forgeRuntimeLibrary "blue.endless:jankson:1.2.2"
-		forgeRuntimeLibrary "io.wispforest:endec:0.1.9"
-		forgeRuntimeLibrary "io.wispforest.endec:gson:0.1.5"
-		forgeRuntimeLibrary "io.wispforest.endec:jankson:0.1.6"
-		forgeRuntimeLibrary "io.wispforest.endec:netty:0.1.4"
+	if (rootProject.minecraft_version_int < 260000) {
+		common(project(path: ":common", configuration: "namedElements")) { transitive false }
+	} else {
+		common(project(path: ":common")) { transitive false }
 	}
+	shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 }
 
 processResources {
