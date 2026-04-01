@@ -82,7 +82,7 @@ allprojects {
 		} else if (minecraft_main_version < 26) {
 			options.release.set(21)
 		} else {
-			options.release.set(26)
+			options.release.set(25)
 		}
 
         options.compilerArgs += ['-Xplugin:Manifold', '-AMC_VERSION=' + minecraft_version_int]
