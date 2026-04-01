@@ -135,7 +135,7 @@ public class ServerConfig {
         markerVisibilityCriteria = new ConfigItem<>(json, "markerVisibilityCriteria", Visibility.ALWAYS, str -> parseEnum(str, Visibility.class));
         imageGlobalKill = new ConfigItem<>(json, "imageGlobalKill", false, Boolean::parseBoolean);
         screenshotKeyTriggersComment = new ConfigItem<>(json, "screenshotKeyTriggersComment", true, Boolean::parseBoolean);
-        defaultCommentVisibilityPreference = new ConfigItem<>(json, "defaultCommentVisibilityPreference", true, Boolean::parseBoolean);
+        defaultCommentVisibilityPreference = new ConfigItem<>(json, "defaultCommentVisibilityPreference", false, Boolean::parseBoolean);
 
         if (!Files.exists(configPath)) save(configPath);
     }
