@@ -1,27 +1,27 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 
 import java.util.NoSuchElementException;
 
 public interface ISnGuiGraphicsDrawUtil {
 
-    default void blitNineSliced(ResourceLocation var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
+    default void blitNineSliced(Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
         this.blitNineSliced(var1, var2, var3, var4, var5, var6, var6, var6, var6, var7, var8, var9, var10);
     }
 
-    default void blitNineSliced(ResourceLocation var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11) {
+    default void blitNineSliced(Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11) {
         this.blitNineSliced(var1, var2, var3, var4, var5, var6, var7, var6, var7, var8, var9, var10, var11);
     }
 
     default void blitNineSliced(
-            ResourceLocation var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11, int var12, int var13
+            Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11, int var12, int var13
     ) {
         ISnGuiGraphics guiGraphics = (ISnGuiGraphics) this;
         var6 = Math.min(var6, var4 / 2);
@@ -53,7 +53,7 @@ public interface ISnGuiGraphicsDrawUtil {
         }
     }
 
-    default void blitRepeating(ResourceLocation var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9) {
+    default void blitRepeating(Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9) {
         int var10 = var2;
 
         int var12;
@@ -72,7 +72,7 @@ public interface ISnGuiGraphicsDrawUtil {
     }
 
 
-    default void blitNineSlicedFast(ResourceLocation atlasLocation, int x, int y, int width, int height,
+    default void blitNineSlicedFast(Identifier atlasLocation, int x, int y, int width, int height,
                                int uOffset, int vOffset, int uWidth, int vHeight, int texWidth, int texHeight,
                                int padTop, int padRight, int padBottom, int padLeft) {
         ISnGuiGraphics guiGraphics = (ISnGuiGraphics) this;

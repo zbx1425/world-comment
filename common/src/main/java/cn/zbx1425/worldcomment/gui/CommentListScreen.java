@@ -12,11 +12,13 @@ import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Mth;
 #if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 import java.util.*;
@@ -106,7 +108,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     commentListOffset = 0;
                     lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
                     PacketCollectionRequestC2S.ClientLogics.sendPlayer(
-                            minecraft.player.getGameProfile().getId(), lastRequestNonce);
+                            minecraft.player.getGameProfile().id(), lastRequestNonce);
                 }
             }
         }
@@ -114,12 +116,12 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
 
         Minecraft minecraft = Minecraft.getInstance();
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
-        #if MC_VERSION >= "12100" super.render(guiParam, mouseX, mouseY, partialTick); #endif
+        #if MC_VERSION >= "12100" super.extractRenderState(guiParam, mouseX, mouseY, partialTick); #endif
         guiGraphics.pushPose();
         guiGraphics.translate(0, 0, 1);
 
@@ -160,10 +162,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), 0, imgAreaWidth / 2);
             widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), height - 20 - widget.getHeight(),
                     imgAreaWidth / 2);
-            widget.render(guiParam, mouseX, mouseY, partialTick);
+            widget.extractRenderState(guiParam, mouseX, mouseY, partialTick);
 
-            boolean canDelete = minecraft.player.hasPermissions(3)
-                    || minecraft.player.getGameProfile().getId().equals(comment.initiator);
+            boolean canDelete = minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)
+                    || minecraft.player.getGameProfile().id().equals(comment.initiator);
             if (canDelete) {
                 int deleteBtnX = 100 + 18, deleteBtnY = height - 20 - 22;
                 guiGraphics.blit(ATLAS_LOCATION, deleteBtnX, deleteBtnY, 20, 20,
@@ -189,7 +191,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 WidgetCommentEntry widget = getWidget(comment);
                 widget.showImage = true;
                 widget.setBounds(xOffset + 106, yOffset, bookWidth - 102 - 22 - 8 - 4 - 16);
-                widget.render(guiParam, mouseX, mouseY, partialTick);
+                widget.extractRenderState(guiParam, mouseX, mouseY, partialTick);
 
                 guiGraphics.blit(ATLAS_LOCATION, xOffsetR - 22 - 4 - 16, yOffset + 4, 16, 16,
                         196, 60, 20, 20, 256, 256);
@@ -199,8 +201,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                             236, 60, 20, 20, 256, 256);
                     }
 
-                boolean canDelete = minecraft.player.hasPermissions(3)
-                        || minecraft.player.getGameProfile().getId().equals(comment.initiator);
+                boolean canDelete = minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)
+                        || minecraft.player.getGameProfile().id().equals(comment.initiator);
                 if (canDelete) {
                     yOffset += 16;
                     guiGraphics.blit(ATLAS_LOCATION, xOffsetR - 22 - 4 - 16, yOffset + 4, 16, 16,
@@ -238,7 +240,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
         int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;
         int xOffset = (width - bookWidth) / 2;
@@ -246,8 +252,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
         if (subScreen == 3) {
             CommentEntry comment = commentForDetail;
-            boolean canDelete = minecraft.player.hasPermissions(3)
-                    || minecraft.player.getGameProfile().getId().equals(comment.initiator);
+            boolean canDelete = minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)
+                    || minecraft.player.getGameProfile().id().equals(comment.initiator);
             if (canDelete) {
                 int deleteBtnX = 100 + 18, deleteBtnY = height - 20 - 22;
                 if (mouseX > deleteBtnX && mouseX < deleteBtnX + 20
@@ -295,14 +301,14 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 if (yOffset > height - 22) break;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
+    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
-        super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
+        super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
 
         int commentEntryWidth = Math.min(width - 100 - 20 - 10, 250);
         int bookWidth = subScreen == 3 ? width : commentEntryWidth + 100 + 20 + 10;

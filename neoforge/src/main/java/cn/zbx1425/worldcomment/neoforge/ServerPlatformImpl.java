@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.ServerPlatform;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -14,13 +14,13 @@ public class ServerPlatformImpl {
         return false;
     }
 
-    public static void registerPacket(ResourceLocation resourceLocation) {
+    public static void registerPacket(Identifier resourceLocation) {
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.registerPacket(resourceLocation);
 #endif
     }
 
-    public static void registerNetworkReceiver(ResourceLocation resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
+    public static void registerNetworkReceiver(Identifier resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.registerNetworkReceiverC2S(resourceLocation, packetCallback);
 #else
@@ -54,7 +54,7 @@ public class ServerPlatformImpl {
         RegistryUtilities.registerTickEvent(consumer);
     }
 
-    public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
+    public static void sendPacketToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf packet) {
         packet.readerIndex(0);
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.sendS2C(player, id, packet);

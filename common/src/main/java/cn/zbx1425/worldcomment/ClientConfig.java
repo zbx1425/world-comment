@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.level.GameType;
 
 import java.nio.file.Files;
@@ -168,7 +169,7 @@ public class ClientConfig {
 
     public boolean canAccessBuildMarkers(Minecraft minecraft) {
         return switch (serverIssuedConfig.allowMarkerUsage) {
-            case OP -> minecraft.player.hasPermissions(2);
+            case OP -> minecraft.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
             case CREATIVE -> minecraft.gameMode.getPlayerMode() == GameType.CREATIVE;
             case ALL -> true;
             default -> false;
@@ -177,7 +178,7 @@ public class ClientConfig {
 
     public boolean isCommentVisible(Minecraft minecraft, CommentEntry comment) {
         if (!transientPreference.commentVisibilityMask) return false;
-        if (comment.initiator.equals(minecraft.player.getGameProfile().getId())
+        if (comment.initiator.equals(minecraft.player.getGameProfile().id())
             && (System.currentTimeMillis() - comment.timestamp) < 30000) {
             // Show a newly placed comment to its owner for 30 seconds.
             return true;

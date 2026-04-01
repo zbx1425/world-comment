@@ -6,7 +6,7 @@ import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class PacketImageDownloadS2C {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("image_download");
+    public static final Identifier IDENTIFIER = Main.id("image_download");
 
     public static void send(ServerPlayer target, String fileName, byte[] imageData) {
         int totalChunks = (imageData.length + LocalStorageUploader.IMAGE_CHUNK_SIZE - 1) / LocalStorageUploader.IMAGE_CHUNK_SIZE;

@@ -1,13 +1,13 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
-import cn.zbx1425.worldcomment.mixin.GuiGraphicsAccessor;
+import cn.zbx1425.worldcomment.mixin.GuiGraphicsExtractorAccessor;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
@@ -18,16 +18,16 @@ import java.util.Optional;
 
 public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
-    private GuiGraphics sink;
+    private GuiGraphicsExtractor sink;
     private int currentColor = -1;
 
     private static SnGuiGraphics12106 INSTANCE = null;
 
-    private SnGuiGraphics12106(GuiGraphics sink) {
+    private SnGuiGraphics12106(GuiGraphicsExtractor sink) {
         this.sink = sink;
     }
 
-    public static SnGuiGraphics12106 withGuiParam(GuiGraphics sink) {
+    public static SnGuiGraphics12106 withGuiParam(GuiGraphicsExtractor sink) {
         if (INSTANCE == null) {
             INSTANCE = new SnGuiGraphics12106(sink);
         } else {
@@ -37,17 +37,17 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
     }
 
     @Override
-    public GuiGraphics getGuiParam() {
+    public GuiGraphicsExtractor getGuiParam() {
         return sink;
     }
 
     @Override
-    public void blit(ResourceLocation atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
+    public void blit(Identifier atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
         sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, uOffset, vOffset, padLeft, padTop, padLeft1, padTop1, texWidth, texHeight, currentColor);
     }
 
     @Override
-    public void blit(ResourceLocation atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
+    public void blit(Identifier atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
         sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, (float)uOffset, vOffset, uWidth, vHeight, 256, 256);
     }
 
@@ -68,22 +68,22 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void drawString(Font var1, String var2, int var3, int var4, int var5, boolean var6) {
-         sink.drawString(var1, var2, var3, var4, var5, var6);
+         sink.text(var1, var2, var3, var4, var5, var6);
     }
 
     @Override
     public void drawString(Font var1, FormattedCharSequence var2, int var3, int var4, int var5, boolean var6) {
-        sink.drawString(var1, var2, var3, var4, var5, var6);
+        sink.text(var1, var2, var3, var4, var5, var6);
     }
 
     @Override
     public void drawString(Font var1, Component var2, int var3, int var4, int var5) {
-        sink.drawString(var1, var2, var3, var4, var5);
+        sink.text(var1, var2, var3, var4, var5);
     }
 
     @Override
     public void drawString(Font var1, Component var2, int var3, int var4, int var5, boolean var6) {
-        sink.drawString(var1, var2, var3, var4, var5, var6);
+        sink.text(var1, var2, var3, var4, var5, var6);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void drawCenteredString(Font font, Component translatedKeyMessage, int i, int i1, int i2) {
-        sink.drawCenteredString(font, translatedKeyMessage, i, i1, i2);
+        sink.centeredText(font, translatedKeyMessage, i, i1, i2);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void blit(AbstractTexture texture, int x1, int y1, int x2, int y2) {
-        ((GuiGraphicsAccessor)sink).invokeSubmitBlit(RenderPipelines.GUI_TEXTURED, texture.getTextureView(),
+        ((GuiGraphicsExtractorAccessor)sink).invokeSubmitBlit(RenderPipelines.GUI_TEXTURED, texture.getTextureView(),
                 x1, y1, x2, y2, 0, 1, 0, 1, -1);
     }
 

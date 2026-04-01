@@ -5,14 +5,14 @@ import cn.zbx1425.worldcomment.data.ServerWorldMeta;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
 public class PacketClientConfigS2C {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("client_config");
+    public static final Identifier IDENTIFIER = Main.id("client_config");
 
     public static void send(ServerPlayer target, ServerWorldMeta worldMeta, ServerConfig config) {
         ClientConfig.ServerIssuedConfig clientCfg = new ClientConfig.ServerIssuedConfig(config);

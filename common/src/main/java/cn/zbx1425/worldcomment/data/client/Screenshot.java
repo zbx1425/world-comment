@@ -8,10 +8,10 @@ import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Util;
 import org.lwjgl.stb.STBImage;
 
 import java.io.ByteArrayOutputStream;

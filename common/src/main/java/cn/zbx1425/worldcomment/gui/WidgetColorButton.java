@@ -3,12 +3,12 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION >= "12002" import net.minecraft.client.gui.components.WidgetSprites; #endif
 import net.minecraft.client.gui.components.Button;
 #if MC_VERSION >= "12106" import net.minecraft.client.renderer.RenderPipelines; #endif
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 #if MC_VERSION >= "12000" import java.util.function.Supplier; #endif
@@ -23,18 +23,13 @@ public class WidgetColorButton extends Button implements IGuiCommon {
     }
 
 #if MC_VERSION >= "12100"
-private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.withDefaultNamespace("widget/button"), ResourceLocation.withDefaultNamespace("widget/button_disabled"), ResourceLocation.withDefaultNamespace("widget/button_highlighted"));
+private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"), Identifier.withDefaultNamespace("widget/button_disabled"), Identifier.withDefaultNamespace("widget/button_highlighted"));
 #elif MC_VERSION >= "12002"
-    private static final WidgetSprites SPRITES = new WidgetSprites(new ResourceLocation("widget/button"), new ResourceLocation("widget/button_disabled"), new ResourceLocation("widget/button_highlighted"));
+    private static final WidgetSprites SPRITES = new WidgetSprites(new Identifier("widget/button"), new Identifier("widget/button_disabled"), new Identifier("widget/button_highlighted"));
 #endif
 
     @Override
-#if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
-#else
-    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
-        super.render(guiParam, mouseX, mouseY, partialTick);
-#endif
+    protected void extractContents(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         Minecraft minecraft = Minecraft.getInstance();
         if (this.active) {
@@ -55,7 +50,8 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
         guiGraphics.disableBlend();
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.active ? 0xFFFFFF : 0xA0A0A0;
-        this.renderString(guiGraphics.getGuiParam(), minecraft.font, i | Mth.ceil(this.alpha * 255.0f) << 24);
+        this.extractDefaultLabel(guiGraphics.getGuiParam().textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
+//        this.renderString(guiGraphics.getGuiParam(), minecraft.font, i | Mth.ceil(this.alpha * 255.0f) << 24);
     }
 
     private int getTextureY() {
@@ -69,7 +65,7 @@ private static final WidgetSprites SPRITES = new WidgetSprites(ResourceLocation.
     }
 
 #if MC_VERSION < "12000"
-    public void renderString(GuiGraphics var1, net.minecraft.client.gui.Font var2, int var4) {
+    public void renderString(GuiGraphicsExtractor var1, net.minecraft.client.gui.Font var2, int var4) {
         int var3 = 2;
         int var5 = this.x + var3;
         int var6 = this.x + this.getWidth() - var3;

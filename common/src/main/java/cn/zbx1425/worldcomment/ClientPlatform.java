@@ -5,7 +5,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Consumer;
 
@@ -17,7 +17,7 @@ public class ClientPlatform {
     }
 
     @ExpectPlatform
-    public static void registerNetworkReceiver(ResourceLocation resourceLocation, Consumer<FriendlyByteBuf> consumer) {
+    public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
         throw new AssertionError();
     }
 
@@ -37,7 +37,7 @@ public class ClientPlatform {
     }
 
     @ExpectPlatform
-    public static void sendPacketToServer(ResourceLocation id, FriendlyByteBuf packet) {
+    public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {
         throw new AssertionError();
     }
 }

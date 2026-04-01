@@ -10,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 #if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
 #if MC_VERSION >= "12108" import net.minecraft.world.InteractionResult; #endif
@@ -35,7 +35,7 @@ public class CommentToolItem extends Item implements GroupedItem {
     @Override
     public @NotNull #if MC_VERSION < "12108" InteractionResultHolder<ItemStack> #else InteractionResult #endif use(Level level, Player player, InteractionHand usedHand) {
         ItemStack item = player.getItemInHand(usedHand);
-        if (!level.isClientSide) return #if MC_VERSION < "12108" InteractionResultHolder.pass(item) #else InteractionResult.PASS #endif;
+        if (!level.isClientSide()) return #if MC_VERSION < "12108" InteractionResultHolder.pass(item) #else InteractionResult.PASS #endif;
         if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
 
         if (Client.placeUploadJob(level, player, item)) {
@@ -91,8 +91,8 @@ public class CommentToolItem extends Item implements GroupedItem {
                         setUploadJobId(item, null);
                         return true;
                     } else {
-                        player.displayClientMessage(
-                                Component.translatable("gui.worldcomment.send_insufficient_clearance"), false);
+                        player.sendSystemMessage(
+                                Component.translatable("gui.worldcomment.send_insufficient_clearance"));
                     }
                 }
             }
@@ -103,7 +103,7 @@ public class CommentToolItem extends Item implements GroupedItem {
     public static Long getUploadJobId(ItemStack item) {
 #if MC_VERSION >= "12100"
         CustomData customData = item.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-        if (customData.contains("uploadJobId")) {
+        if (customData.copyTag().contains("uploadJobId")) {
             return customData.copyTag().getLong("uploadJobId") #if MC_VERSION >= "12108" .orElse(null) #endif;
         } else {
             return null;

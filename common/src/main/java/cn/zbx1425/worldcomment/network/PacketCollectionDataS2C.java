@@ -8,7 +8,7 @@ import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -16,14 +16,14 @@ import java.util.List;
 
 public class PacketCollectionDataS2C {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("collection_data");
+    public static final Identifier IDENTIFIER = Main.id("collection_data");
 
     public static void send(ServerPlayer target, List<CommentEntry> data, long nonce) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeLong(nonce);
         buffer.writeInt(data.size());
         for (CommentEntry comment : data) {
-            buffer.writeResourceLocation(comment.level);
+            buffer.writeIdentifier(comment.level);
             comment.writeBuffer(buffer, false);
         }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
@@ -36,7 +36,7 @@ public class PacketCollectionDataS2C {
             int commentSize = buffer.readInt();
             ArrayList<CommentEntry> comments = new ArrayList<>(commentSize);
             for (int j = 0; j < commentSize; j++) {
-                ResourceLocation level = buffer.readResourceLocation();
+                Identifier level = buffer.readIdentifier();
                 CommentEntry comment = new CommentEntry(level, buffer, false);
                 if (comment.deleted) continue;
                 comments.add(comment);

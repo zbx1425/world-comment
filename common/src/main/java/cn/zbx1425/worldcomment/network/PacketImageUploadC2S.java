@@ -10,7 +10,7 @@ import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -25,7 +25,7 @@ import java.util.Arrays;
 
 public class PacketImageUploadC2S {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("image_upload");
+    public static final Identifier IDENTIFIER = Main.id("image_upload");
     private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     public static class ClientLogics {
@@ -118,7 +118,7 @@ public class PacketImageUploadC2S {
                 byte[] completeImageData = collector.getCompleteData();
                 String baseFileName = Instant.ofEpochMilli(collector.getTimestamp())
                         .atOffset(ZoneOffset.UTC).format(FILE_DATE_FORMAT)
-                        + "-" + String.format("%016x", jobId) + "-" + initiator.getGameProfile().getName();
+                        + "-" + String.format("%016x", jobId) + "-" + initiator.getGameProfile().name();
 
                 Path serverImagePath = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
                         .resolve("world-comment").resolve("image");

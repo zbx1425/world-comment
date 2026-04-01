@@ -7,12 +7,12 @@ import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.S3PreSignedUploader;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 public class PacketPreSignResponseS2C {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("presign_response");
+    public static final Identifier IDENTIFIER = Main.id("presign_response");
 
     public static void send(ServerPlayer target, long jobId, S3PreSignedUploader.PreSignResponse preSignResponse) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());

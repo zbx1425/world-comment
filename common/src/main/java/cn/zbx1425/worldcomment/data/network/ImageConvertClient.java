@@ -89,7 +89,7 @@ public class ImageConvertClient {
                 int newHeight = (int) (height.get(0) * (newWidth / (double) width.get(0)));
                 ByteBuffer scaledPixels = OffHeapAllocator.allocate(newWidth * newHeight * 4);
                 try {
-                    if (!STBImageResize.stbir_resize_uint8(pixels, width.get(0), height.get(0), 0, scaledPixels, newWidth, newHeight, 0, 4)) {
+                    if (STBImageResize.stbir_resize_uint8_linear(pixels, width.get(0), height.get(0), 0, scaledPixels, newWidth, newHeight, 0, 4) != null) {
                         throw new IllegalStateException("Failed to resize image: " + STBImage.stbi_failure_reason());
                     }
                     try (ByteArrayWriteCallback writeCallback = new ByteArrayWriteCallback(pngImageBytes.length)) {

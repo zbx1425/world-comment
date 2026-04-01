@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -17,12 +17,12 @@ public class ServerPlatform {
     }
 
     @ExpectPlatform
-    public static void registerPacket(ResourceLocation resourceLocation) {
+    public static void registerPacket(Identifier resourceLocation) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static void registerNetworkReceiver(ResourceLocation resourceLocation, C2SPacketHandler packetCallback) {
+    public static void registerNetworkReceiver(Identifier resourceLocation, C2SPacketHandler packetCallback) {
         throw new AssertionError();
     }
 
@@ -52,7 +52,7 @@ public class ServerPlatform {
     }
 
     @ExpectPlatform
-    public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
+    public static void sendPacketToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf packet) {
         throw new AssertionError();
     }
 

@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.mixin;
 
 import cn.zbx1425.worldcomment.gui.PauseScreenAdditions;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

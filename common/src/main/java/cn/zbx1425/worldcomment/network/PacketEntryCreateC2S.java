@@ -5,23 +5,23 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.CommentCommand;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import io.netty.buffer.Unpooled;
-import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.io.IOException;
 
 public class PacketEntryCreateC2S {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("entry_create");
+    public static final Identifier IDENTIFIER = Main.id("entry_create");
 
     public static class ClientLogics {
 
         public static void send(CommentEntry comment) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-            buffer.writeResourceLocation(comment.level);
+            buffer.writeIdentifier(comment.level);
             comment.writeBuffer(buffer, false);
             if (CommentCommand.isCommand(comment)) {
                 CommentCommand.executeCommandClient(comment);
@@ -31,11 +31,11 @@ public class PacketEntryCreateC2S {
     }
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
-        ResourceLocation level = buffer.readResourceLocation();
+        Identifier level = buffer.readIdentifier();
         CommentEntry comment = new CommentEntry(level, buffer, false);
-        if (!comment.initiator.equals(initiator.getGameProfile().getId())) return;
+        if (!comment.initiator.equals(initiator.getGameProfile().id())) return;
         if (comment.message.length() > CommentEntry.MESSAGE_MAX_LENGTH) return;
-        if (CommentCommand.isCommand(comment) && !initiator.hasPermissions(3)) return;
+        if (CommentCommand.isCommand(comment) && !initiator.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) return;
         try {
             Main.DATABASE.insert(comment, false);
         } catch (IOException e) {

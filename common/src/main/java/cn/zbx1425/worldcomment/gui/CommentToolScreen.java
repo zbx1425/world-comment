@@ -12,7 +12,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -225,16 +225,16 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                     comment, checkBoxNoImage.selected() ? null : imageBytes,
                     (job, ex) -> Minecraft.getInstance().execute(() -> {
                         if (job == null) {
-                            player.displayClientMessage(
-                                    Component.translatable("gui.worldcomment.send_finish"), false);
+                            player.sendSystemMessage(
+                                    Component.translatable("gui.worldcomment.send_finish"));
                         } else {
                             if (ex != null) {
-                                player.displayClientMessage(
+                                player.sendSystemMessage(
                                         Component.translatable("gui.worldcomment.send_fail",
-                                                ex.getClass().getName() + ": " + ex.getMessage()), false);
+                                                ex.getClass().getName() + ": " + ex.getMessage()));
                             } else {
-                                player.displayClientMessage(
-                                        Component.translatable("gui.worldcomment.send_upload_incomplete"), false);
+                                player.sendSystemMessage(
+                                        Component.translatable("gui.worldcomment.send_upload_incomplete"));
                             }
                         }
                     }
@@ -242,8 +242,8 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             if (!withPlacingDown) {
                 SubmitDispatcher.placeJobAt(jobId, player.blockPosition().atY((int) Math.round(player.position().y - 1.0 / 16)));
             } else {
-                player.displayClientMessage(
-                        Component.translatable("gui.worldcomment.send_pending"), false);
+                player.sendSystemMessage(
+                        Component.translatable("gui.worldcomment.send_pending"));
                 ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
                 if (item != null) {
                     CommentToolItem.setUploadJobId(item, jobId);
@@ -254,21 +254,21 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
         guiGraphics.pushPose();
         boolean animationDone = setupAnimationTransform(guiGraphics);
         guiGraphics.translate(0, 0, 1);
-        super.render(guiParam, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
         guiGraphics.popPose();
     }
 
     @Override
-    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
+    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
-        super.renderBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
+        super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
         guiGraphics.pushPose();
         setupAnimationTransform(guiGraphics);
         guiGraphics.enableBlend();

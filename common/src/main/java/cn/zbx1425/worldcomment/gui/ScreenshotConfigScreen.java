@@ -5,7 +5,7 @@ import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -68,7 +68,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void renderBackground(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam
+    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         guiGraphics.enableBlend();
@@ -97,9 +97,9 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void render(#if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
         #if MC_VERSION < "12002" renderBackground(guiParam); #endif
-        super.render(guiParam, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
     }
 
     @Override

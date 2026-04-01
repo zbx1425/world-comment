@@ -4,7 +4,7 @@ import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 
 public class PacketImageDownloadC2S {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("image_download");
+    public static final Identifier IDENTIFIER = Main.id("image_download");
 
     public static class ClientLogics {
         public static void send(String fileName) {

@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
@@ -29,7 +29,7 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
 
     @Override
 #if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
 #else
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);

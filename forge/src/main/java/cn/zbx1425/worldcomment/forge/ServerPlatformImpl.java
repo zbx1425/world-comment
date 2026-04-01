@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.forge;
 import cn.zbx1425.worldcomment.ServerPlatform;
 import dev.architectury.networking.NetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -16,11 +16,11 @@ public class ServerPlatformImpl {
         return false;
     }
 
-    public static void registerPacket(ResourceLocation resourceLocation) {
+    public static void registerPacket(Identifier resourceLocation) {
 
     }
 
-    public static void registerNetworkReceiver(ResourceLocation resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
+    public static void registerNetworkReceiver(Identifier resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
         NetworkManager.registerReceiver(NetworkManager.Side.C2S, resourceLocation, (packet, context) -> {
             final Player player = context.getPlayer();
             if (player != null) {
@@ -50,7 +50,7 @@ public class ServerPlatformImpl {
         RegistryUtilities.registerTickEvent(consumer);
     }
 
-    public static void sendPacketToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf packet) {
+    public static void sendPacketToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf packet) {
         packet.readerIndex(0);
         NetworkManager.sendToPlayer(player, id, packet);
     }

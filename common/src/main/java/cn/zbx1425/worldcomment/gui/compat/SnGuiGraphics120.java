@@ -1,18 +1,18 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
-import cn.zbx1425.worldcomment.mixin.GuiGraphicsAccessor;
+import cn.zbx1425.worldcomment.mixin.GuiGraphicsExtractorAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.joml.Matrix4f;
@@ -24,16 +24,16 @@ import java.util.Optional;
 
 public class SnGuiGraphics120 implements ISnGuiGraphics {
 
-    private GuiGraphics sink;
+    private GuiGraphicsExtractor sink;
     private int currentColor = -1;
 
     private static SnGuiGraphics120 INSTANCE = null;
 
-    private SnGuiGraphics120(GuiGraphics sink) {
+    private SnGuiGraphics120(GuiGraphicsExtractor sink) {
         this.sink = sink;
     }
 
-    public static SnGuiGraphics120 withGuiParam(GuiGraphics sink) {
+    public static SnGuiGraphics120 withGuiParam(GuiGraphicsExtractor sink) {
         if (INSTANCE == null) {
             INSTANCE = new SnGuiGraphics120(sink);
         } else {
@@ -43,17 +43,17 @@ public class SnGuiGraphics120 implements ISnGuiGraphics {
     }
 
     @Override
-    public GuiGraphics getGuiParam() {
+    public GuiGraphicsExtractor getGuiParam() {
         return sink;
     }
 
     @Override
-    public void blit(ResourceLocation atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
+    public void blit(Identifier atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
         sink.blit(atlasLocation, x, y, uOffset, vOffset, padLeft, padTop, padLeft1, padTop1, texWidth, texHeight, currentColor);
     }
 
     @Override
-    public void blit(ResourceLocation atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
+    public void blit(Identifier atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
         sink.blit(atlasLocation, x, y, uOffset, vOffset, uWidth, vHeight);
     }
 

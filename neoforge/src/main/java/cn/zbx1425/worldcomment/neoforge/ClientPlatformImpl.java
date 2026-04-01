@@ -6,7 +6,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ClientPlatformImpl {
         KEY_MAPPINGS.add(keyMapping);
     }
 
-    public static void registerNetworkReceiver(ResourceLocation resourceLocation, Consumer<FriendlyByteBuf> consumer) {
+    public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.registerNetworkReceiverS2C(resourceLocation, consumer);
 #else
@@ -40,7 +40,7 @@ public class ClientPlatformImpl {
         ClientTickEvent.CLIENT_PRE.register(consumer::accept);
     }
 
-    public static void sendPacketToServer(ResourceLocation id, FriendlyByteBuf packet) {
+    public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {
         packet.readerIndex(0);
 #if MC_VERSION >= "12100"
         MainForge.PACKET_REGISTRY.sendC2S(id, packet);

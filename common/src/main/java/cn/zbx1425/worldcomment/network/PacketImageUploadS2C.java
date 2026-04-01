@@ -6,12 +6,12 @@ import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 public class PacketImageUploadS2C {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("image_upload");
+    public static final Identifier IDENTIFIER = Main.id("image_upload");
 
     public static void send(ServerPlayer target, long jobId, ThumbImage image) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());

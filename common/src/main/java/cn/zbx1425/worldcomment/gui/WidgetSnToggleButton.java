@@ -5,9 +5,10 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
 
     @Override
 #if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
 #else
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);
@@ -62,7 +63,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
         MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference = !MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference;
         MainClient.CLIENT_CONFIG.perServerPreference.isDirty = true;
     }

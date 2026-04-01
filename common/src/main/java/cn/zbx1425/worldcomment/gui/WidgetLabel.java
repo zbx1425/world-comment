@@ -6,12 +6,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000"
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 #if MC_VERSION >= "11700"
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 #endif
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 public class WidgetLabel extends AbstractWidget {
@@ -34,7 +35,7 @@ public class WidgetLabel extends AbstractWidget {
 
     @Override
 #if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
 #elif MC_VERSION >= "11904"
         public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
 #else
@@ -57,8 +58,8 @@ public class WidgetLabel extends AbstractWidget {
                         int offset = (int)(System.currentTimeMillis() / 25 % (textWidth + 40));
 #if MC_VERSION >= "12000"
                         guiGraphics.enableScissor(this.padX(), this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.padX() + this.padWidth(), this #if MC_VERSION >= "11903" .getY() #else .y #endif + this.height);
-                        guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x - offset, y, -1);
-                        guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
+                        guiGraphics.text(Minecraft.getInstance().font, lines[i], x - offset, y, -1);
+                        guiGraphics.text(Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
                         guiGraphics.disableScissor();
 #else
                         drawString(matrices, Minecraft.getInstance().font, lines[i], x - offset, y, -1);
@@ -67,14 +68,14 @@ public class WidgetLabel extends AbstractWidget {
 #endif
                     } else {
 #if MC_VERSION >= "12000"
-                        guiGraphics.drawString(Minecraft.getInstance().font, lines[i], x, y, -1);
+                        guiGraphics.text(Minecraft.getInstance().font, lines[i], x, y, -1);
 #else
                         drawString(matrices, Minecraft.getInstance().font, lines[i], x, y, -1);
 #endif
                     }
                     if (!isActive()) {
 #if MC_VERSION >= "12000"
-                        guiGraphics.drawString(Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
+                        guiGraphics.text(Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
 #else
                         drawString(matrices, Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
 #endif
@@ -82,11 +83,11 @@ public class WidgetLabel extends AbstractWidget {
                 }
             }
 
-            @Override
-            public void onClick(double d, double e) {
-                super.onClick(d, e);
-                if (onClick != null) onClick.run();
-            }
+    @Override
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
+        super.onClick(event, doubleClick);
+        if (onClick != null) onClick.run();
+    }
 
 #if MC_VERSION >= "11903"
             @Override

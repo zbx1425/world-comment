@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; import com.mojang.blaze3d.vertex.PoseStack; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -31,12 +31,7 @@ public class CommentTypeButton extends Button implements IGuiCommon {
     }
 
     @Override
-#if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
-#else
-    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
-        super.render(guiParam, mouseX, mouseY, partialTick);
-#endif
+    protected void extractContents(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         Minecraft minecraft = Minecraft.getInstance();
         guiGraphics.enableBlend();

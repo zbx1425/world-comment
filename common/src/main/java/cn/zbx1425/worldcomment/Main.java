@@ -7,7 +7,7 @@ import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.network.*;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
@@ -97,19 +97,19 @@ public class Main {
 		});
 	}
 
-	public static ResourceLocation id(String path) {
+	public static Identifier id(String path) {
 #if MC_VERSION >= "12100"
-		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 #else
-		return new ResourceLocation(MOD_ID, path);
+		return new Identifier(MOD_ID, path);
 #endif
 	}
 
-	public static ResourceLocation vanillaId(String path) {
+	public static Identifier vanillaId(String path) {
 #if MC_VERSION >= "12100"
-		return ResourceLocation.withDefaultNamespace(path);
+		return Identifier.withDefaultNamespace(path);
 #else
-		return new ResourceLocation(path);
+		return new Identifier(path);
 #endif
 	}
 

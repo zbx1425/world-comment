@@ -5,7 +5,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldMeta;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 
 import java.io.FileOutputStream;
@@ -33,9 +33,9 @@ public class FileSerializer {
         try (Stream<Path> levelFiles = Files.list(basePath.resolve("region"))) {
             for (Path levelPath : levelFiles.toList()) {
 #if MC_VERSION >= "12100"
-                ResourceLocation dimension = ResourceLocation.parse(levelPath.getFileName().toString().replace("+", ":"));
+                Identifier dimension = Identifier.parse(levelPath.getFileName().toString().replace("+", ":"));
 #else
-                ResourceLocation dimension = new ResourceLocation(levelPath.getFileName().toString().replace("+", ":"));
+                Identifier dimension = new Identifier(levelPath.getFileName().toString().replace("+", ":"));
 #endif
                 try (Stream<Path> files = Files.list(levelPath)) {
                     for (Path file : files.toList()) {
@@ -43,7 +43,7 @@ public class FileSerializer {
                         if (fileNameParts.length != 4 || !fileNameParts[3].equals("bin")) continue;
                         ChunkPos region = new ChunkPos(Integer.parseInt(fileNameParts[1]), Integer.parseInt(fileNameParts[2]));
                         byte[] fileContent = Files.readAllBytes(file);
-                        commentCache.loadRegion(dimension, region.toLong(), fileContent, true);
+                        commentCache.loadRegion(dimension, region.pack(), fileContent, true);
                     }
                 }
             }
@@ -59,15 +59,15 @@ public class FileSerializer {
         }
     }
 
-    private Path getLevelPath(ResourceLocation dimension) {
+    private Path getLevelPath(Identifier dimension) {
         return basePath.resolve("region")
                 .resolve(dimension.getNamespace() + "+" + dimension.getPath());
     }
 
-    private Path getLevelRegionPath(ResourceLocation dimension, ChunkPos region) {
+    private Path getLevelRegionPath(Identifier dimension, ChunkPos region) {
         return basePath.resolve("region")
                 .resolve(dimension.getNamespace() + "+" + dimension.getPath())
-                .resolve("r." + region.x + "." + region.z + ".bin");
+                .resolve("r." + region.x() + "." + region.z() + ".bin");
     }
 
     public void insert(CommentEntry newEntry) throws IOException {

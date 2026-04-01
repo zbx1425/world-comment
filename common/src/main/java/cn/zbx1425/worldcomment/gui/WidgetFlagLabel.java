@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.gui;
 
 #if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
-import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.network.chat.Component;
 
@@ -17,7 +17,7 @@ public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
 
     @Override
 #if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
 #else
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
 #endif
@@ -32,7 +32,7 @@ public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
                 118, 48, 10, 10, 256, 256);
         guiGraphics.setColor(1, 1, 1, 1);
 #if MC_VERSION >= "12000"
-        super.renderWidget(guiParam, mouseX, mouseY, partialTick);
+        super.extractWidgetRenderState(guiParam, mouseX, mouseY, partialTick);
 #else
         super.render(guiParam, mouseX, mouseY, partialTick);
 #endif

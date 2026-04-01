@@ -2,11 +2,11 @@ package cn.zbx1425.worldcomment.gui.compat;
 
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -18,13 +18,13 @@ import java.util.Optional;
 public interface ISnGuiGraphics extends ISnGuiGraphicsDrawUtil {
 
 #if MC_VERSION >= "12000"
-    GuiGraphics getGuiParam();
+    GuiGraphicsExtractor getGuiParam();
 #else
     PoseStack getGuiParam();
 #endif
 
-    void blit(ResourceLocation atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight);
-    void blit(ResourceLocation var1, int var10, int var14, int i, int i1, int var12, int var16);
+    void blit(Identifier atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight);
+    void blit(Identifier var1, int var10, int var14, int i, int i1, int var12, int var16);
     void fill(int i, int i1, int i2, int i3, int shadowColor);
     void enableScissor(int i, int i1, int i2, int i3);
     void disableScissor();
@@ -50,7 +50,7 @@ public interface ISnGuiGraphics extends ISnGuiGraphicsDrawUtil {
     void disableBlend();
 
 #if MC_VERSION >= "12000"
-    static ISnGuiGraphics fromGuiParam(GuiGraphics guiParam) {
+    static ISnGuiGraphics fromGuiParam(GuiGraphicsExtractor guiParam) {
 #else
     static ISnGuiGraphics fromGuiParam(PoseStack guiParam) {
 #endif

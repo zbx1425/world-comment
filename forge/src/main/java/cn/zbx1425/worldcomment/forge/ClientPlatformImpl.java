@@ -8,7 +8,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ClientPlatformImpl {
         KEY_MAPPINGS.add(keyMapping);
     }
 
-    public static void registerNetworkReceiver(ResourceLocation resourceLocation, Consumer<FriendlyByteBuf> consumer) {
+    public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
         NetworkManager.registerReceiver(NetworkManager.Side.S2C, resourceLocation, (packet, context) -> consumer.accept(packet));
     }
 
@@ -38,7 +38,7 @@ public class ClientPlatformImpl {
         ClientTickEvent.CLIENT_PRE.register(consumer::accept);
     }
 
-    public static void sendPacketToServer(ResourceLocation id, FriendlyByteBuf packet) {
+    public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {
         NetworkManager.sendToServer(id, packet);
     }
 }

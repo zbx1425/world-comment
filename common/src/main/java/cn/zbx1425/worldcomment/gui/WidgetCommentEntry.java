@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
@@ -16,6 +16,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.server.permissions.Permissions;
 #if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 
 import java.time.Instant;
@@ -63,11 +64,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     }
 
     @Override
-#if MC_VERSION >= "12000"
-    protected void renderWidget(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
-#else
-    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
-#endif
+    protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
 
         guiGraphics.blitNineSlicedFast(
@@ -97,7 +94,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         Component nameComponent = comment.initiatorName.isEmpty() ? Component.translatable("gui.worldcomment.anonymous")
                 : Component.literal(comment.initiatorName);
         String uuidToDisplay = comment.initiatorName.isEmpty()
-                ? (Minecraft.getInstance().player.hasPermissions(3) ? comment.initiator.toString() : "")
+                ? (Minecraft.getInstance().player.permissions().hasPermission(Permissions.COMMANDS_ADMIN) ? comment.initiator.toString() : "")
                 : "..." + comment.initiator.toString().substring(24);
         guiGraphics.drawString(font, nameComponent,
                 getX() + 34, getY() + 8, 0xFFFFFFFF, true);

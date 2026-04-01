@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 
@@ -25,7 +25,7 @@ public class CommentEntry {
 
     public long id;
     public long timestamp;
-    public ResourceLocation level;
+    public Identifier level;
     public ChunkPos region;
     public BlockPos location;
     public UUID initiator;
@@ -43,19 +43,19 @@ public class CommentEntry {
     public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message) {
         id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
-        level = initiator #if MC_VERSION >= "12000" .level() #else .level #endif .dimension().location();
-        this.initiator = initiator.getGameProfile().getId();
+        level = initiator #if MC_VERSION >= "12000" .level() #else .level #endif .dimension().identifier();
+        this.initiator = initiator.getGameProfile().id();
         if (isAnonymous) {
             initiatorName = "";
         } else {
-            initiatorName = initiator.getGameProfile().getName();
+            initiatorName = initiator.getGameProfile().name();
         }
         this.messageType = messageType;
         this.message = message;
         deleted = false;
     }
 
-    public CommentEntry(ResourceLocation level, FriendlyByteBuf src, boolean fromFile) {
+    public CommentEntry(Identifier level, FriendlyByteBuf src, boolean fromFile) {
         fileOffset = src.readerIndex();
 
         deleted = src.readBoolean();
@@ -153,14 +153,14 @@ public class CommentEntry {
 
     public ByteBuf toBinaryBuffer() {
         FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer(512));
-        dest.writeResourceLocation(level);
+        dest.writeIdentifier(level);
         writeBuffer(dest, false);
         return dest;
     }
 
     public static CommentEntry fromBinaryBuffer(ByteBuf buf) {
         FriendlyByteBuf src = new FriendlyByteBuf(buf);
-        ResourceLocation level = src.readResourceLocation();
+        Identifier level = src.readIdentifier();
         return new CommentEntry(level, src, false);
     }
 

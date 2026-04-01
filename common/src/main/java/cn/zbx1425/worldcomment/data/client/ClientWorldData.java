@@ -11,7 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class ClientWorldData {
 
     public static final long REGION_TTL = 300000;
 
-    public ResourceLocation level;
+    public Identifier level;
 
     public ProximityCommentSet proximityCommentSet = new ProximityCommentSet(16, 150 * 1000);
 
@@ -37,8 +37,8 @@ public class ClientWorldData {
             if (minecraft.player == null || minecraft.level == null) return;
             long currentTime = System.currentTimeMillis();
 
-            if (minecraft.level.dimension().location() != this.level) {
-                this.level = minecraft.level.dimension().location();
+            if (minecraft.level.dimension().identifier() != this.level) {
+                this.level = minecraft.level.dimension().identifier();
                 clear();
             }
 
@@ -49,7 +49,7 @@ public class ClientWorldData {
             List<ChunkPos> regionsToRequest = new ArrayList<>();
             for (int x = cx - 1; x <= cx + 1; x++) {
                 for (int z = cz - 1; z <= cz + 1; z++) {
-                    long chunkLong = ChunkPos.asLong(x, z);
+                    long chunkLong = ChunkPos.pack(x, z);
                     if (!regionExpiry.containsKey(chunkLong) || (regionExpiry.get(chunkLong) < currentTime)) {
                         regionExpiry.put(chunkLong, currentTime + REGION_TTL);
                         regionsToRequest.add(new ChunkPos(x, z));
@@ -57,7 +57,7 @@ public class ClientWorldData {
                 }
             }
             if (regionsToRequest.size() > 0) {
-                PacketRegionRequestC2S.ClientLogics.send(minecraft.level.dimension().location(), regionsToRequest);
+                PacketRegionRequestC2S.ClientLogics.send(minecraft.level.dimension().identifier(), regionsToRequest);
             }
 
             for (ObjectIterator<Long2LongMap.Entry> it = regionExpiry.long2LongEntrySet().iterator(); it.hasNext(); ) {
@@ -80,7 +80,7 @@ public class ClientWorldData {
         }
     }
 
-    public void acceptRegions(ResourceLocation level, Long2ObjectMap<List<CommentEntry>> regions) {
+    public void acceptRegions(Identifier level, Long2ObjectMap<List<CommentEntry>> regions) {
         synchronized (this) {
             if (!level.equals(this.level)) return;
             long currentTime = System.currentTimeMillis();
@@ -99,7 +99,7 @@ public class ClientWorldData {
     public void acceptUpdate(CommentEntry comment, boolean update) {
         synchronized (this) {
             if (!comment.level.equals(this.level)) return;
-            Map<BlockPos, List<CommentEntry>> regionData = regions.get(comment.region.toLong());
+            Map<BlockPos, List<CommentEntry>> regionData = regions.get(comment.region.pack());
             if (regionData != null) {
                 if (update) {
                     List<CommentEntry> blockData = regionData.get(comment.location);

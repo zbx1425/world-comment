@@ -44,9 +44,8 @@ public class ImageDump {
                 int finalI = i;
                 Minecraft.getInstance().execute(() -> {
                     if (Minecraft.getInstance().player != null) {
-                        Minecraft.getInstance().player.displayClientMessage(
-                            Component.literal("WorldComment: Downloading " + (finalI + 1) + "/" + comments.size()),
-                            true);
+                        Minecraft.getInstance().player.sendOverlayMessage(
+                            Component.literal("WorldComment: Downloading " + (finalI + 1) + "/" + comments.size()));
                     }
                 });
                 CommentEntry comment = comments.get(i);
@@ -71,9 +70,8 @@ public class ImageDump {
             }
             Minecraft.getInstance().execute(() -> {
                 if (Minecraft.getInstance().player != null) {
-                    Minecraft.getInstance().player.displayClientMessage(
-                            Component.literal("WorldComment: Download finished"),
-                            false);
+                    Minecraft.getInstance().player.sendSystemMessage(
+                            Component.literal("WorldComment: Download finished"));
                 }
             });
         });

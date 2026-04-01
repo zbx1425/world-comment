@@ -8,11 +8,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 #if MC_VERSION >= "11903" import com.mojang.math.Axis; #else import com.mojang.math.Vector3f; #endif
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,7 +27,7 @@ public class CommentWorldRenderer implements IGuiCommon {
     public static void renderComment(VertexConsumer vertices, PoseStack matrices, CommentEntry comment,
                                      boolean focused, boolean showIcon) {
         Minecraft minecraft = Minecraft.getInstance();
-        Vec3 cameraPos = minecraft.cameraEntity.position();
+        Vec3 cameraPos = minecraft.getCameraEntity().position();
 
         RANDOM.setSeed(comment.id);
         matrices.pushPose();
@@ -87,7 +87,7 @@ public class CommentWorldRenderer implements IGuiCommon {
     private static void vertex(VertexConsumer vertices, PoseStack.Pose pose, float x, float y, float z, float u, float v) {
 #if MC_VERSION >= "12100"
         vertices.addVertex(pose.pose(), x, y, z).setColor(0xFFFFFFFF).setUv(u, v)
-            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightTexture.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
+            .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightCoordsUtil.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
 #else
         vertices.vertex(pose.pose(), x, y, z).color(0xFFFFFFFF).uv(u, v)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(pose.normal(), 0, 1, 0).endVertex();
@@ -96,7 +96,7 @@ public class CommentWorldRenderer implements IGuiCommon {
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
         long currentTime = System.currentTimeMillis();
-        VertexConsumer vertices = buffers.getBuffer(RenderType.entityTranslucent(ATLAS_LOCATION));
+        VertexConsumer vertices = buffers.getBuffer(RenderTypes.entityTranslucent(ATLAS_LOCATION));
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
             for (int i = 0; i < blockData.getValue().size(); i++) {
                 CommentEntry comment = blockData.getValue().get(i);

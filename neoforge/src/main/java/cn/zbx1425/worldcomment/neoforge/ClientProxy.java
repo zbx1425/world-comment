@@ -13,7 +13,7 @@ import cn.zbx1425.worldcomment.render.OverlayLayer;
 #if MC_VERSION >= "12000"
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 #if MC_VERSION < "12002" import net.minecraft.client.gui.LayeredDraw; #endif
@@ -45,7 +45,7 @@ public class ClientProxy {
         private static class PickedCommentsOverlay implements #if MC_VERSION >= "12002" GuiLayer #else LayeredDraw.Layer #endif {
 
             @Override
-            public void render(GuiGraphics guiParam, DeltaTracker deltaTracker) {
+            public void render(GuiGraphicsExtractor guiParam, DeltaTracker deltaTracker) {
                 OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam));
             }
         }
@@ -60,8 +60,8 @@ public class ClientProxy {
         private static class PickedCommentsOverlay implements IGuiOverlay {
 
             @Override
-            public void render(ForgeGui forgeGui, #if MC_VERSION >= "12000" GuiGraphics #else PoseStack #endif guiGraphics, float f, int i, int j) {
-                OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphics.withPose(guiGraphics) #endif);
+            public void render(ForgeGui forgeGui, #if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiGraphics, float f, int i, int j) {
+                OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphicsExtractor.withPose(guiGraphics) #endif);
             }
         }
 #endif

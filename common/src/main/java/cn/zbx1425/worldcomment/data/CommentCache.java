@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.data;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 
 import java.io.IOException;
@@ -11,11 +11,11 @@ import java.util.*;
 
 public class CommentCache {
 
-    Map<ResourceLocation, Long2ObjectMap<List<CommentEntry>>> regionIndex = new HashMap<>();
+    Map<Identifier, Long2ObjectMap<List<CommentEntry>>> regionIndex = new HashMap<>();
     Map<UUID, List<CommentEntry>> playerIndex = new HashMap<>();
     Long2ObjectSortedMap<CommentEntry> timeIndex = new Long2ObjectAVLTreeMap<>(Comparator.reverseOrder());
 
-    public void loadRegion(ResourceLocation dimension, long region, byte[] data, boolean fromFile) {
+    public void loadRegion(Identifier dimension, long region, byte[] data, boolean fromFile) {
         synchronized (this) {
             List<CommentEntry> regionEntries = new ArrayList<>();
             FriendlyByteBuf src = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
@@ -32,11 +32,11 @@ public class CommentCache {
         }
     }
 
-    public List<CommentEntry> queryRegion(ResourceLocation level, ChunkPos region) {
+    public List<CommentEntry> queryRegion(Identifier level, ChunkPos region) {
         synchronized (this) {
             return regionIndex
                     .getOrDefault(level, Long2ObjectMaps.emptyMap())
-                    .getOrDefault(region.toLong(), List.of());
+                    .getOrDefault(region.pack(), List.of());
         }
     }
 
@@ -67,7 +67,7 @@ public class CommentCache {
     public void insert(CommentEntry newEntry) {
         synchronized (this) {
             regionIndex.computeIfAbsent(newEntry.level, ignored -> new Long2ObjectOpenHashMap<>())
-                    .computeIfAbsent(newEntry.region.toLong(), ignored -> new ArrayList<>())
+                    .computeIfAbsent(newEntry.region.pack(), ignored -> new ArrayList<>())
                     .add(newEntry);
             playerIndex.computeIfAbsent(newEntry.initiator, ignored -> new ArrayList<>())
                     .add(newEntry);
@@ -79,7 +79,7 @@ public class CommentCache {
     public CommentEntry update(CommentEntry newEntry) {
         synchronized (this) {
             List<CommentEntry> regionData = regionIndex.getOrDefault(newEntry.level, Long2ObjectMaps.emptyMap())
-                    .get(newEntry.region.toLong());
+                    .get(newEntry.region.pack());
             if (regionData == null) return null;
             for (CommentEntry existingEntry : regionData) {
                 if (existingEntry.id == newEntry.id) {
@@ -97,7 +97,7 @@ public class CommentCache {
     public List<CommentEntry> updateAllFields(CommentEntry newEntry) {
         synchronized (this) {
             List<CommentEntry> regionData = regionIndex.getOrDefault(newEntry.level, Long2ObjectMaps.emptyMap())
-                    .get(newEntry.region.toLong());
+                    .get(newEntry.region.pack());
             if (regionData == null) return null;
             for (CommentEntry existingEntry : regionData) {
                 if (existingEntry.id == newEntry.id) {

@@ -4,16 +4,17 @@ import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.List;
 import java.util.UUID;
 
 public class PacketCollectionRequestC2S {
 
-    public static final ResourceLocation IDENTIFIER = Main.id("collection_request");
+    public static final Identifier IDENTIFIER = Main.id("collection_request");
 
     public static class ClientLogics {
 
@@ -47,7 +48,7 @@ public class PacketCollectionRequestC2S {
             case 2 -> {
                 int offset = buffer.readInt();
                 int limit = buffer.readInt();
-                if (initiator.hasPermissions(3) || limit <= 40) {
+                if (initiator.permissions().hasPermission(Permissions.COMMANDS_ADMIN) || limit <= 40) {
                     PacketCollectionDataS2C.send(initiator, Main.DATABASE.comments.queryLatest(offset, limit), nonce);
                 } else {
                     PacketCollectionDataS2C.send(initiator, List.of(), nonce);

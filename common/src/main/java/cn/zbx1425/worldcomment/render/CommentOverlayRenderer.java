@@ -5,7 +5,7 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.WidgetCommentEntry;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphics; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphics; #endif
+#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class CommentOverlayRenderer {
             for (WidgetCommentEntry widget : cachedWidgets) {
                 if (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset + widget.getHeight() > 0
                         && widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset < guiGraphics.guiHeight()) {
-                    widget.render(guiGraphics.getGuiParam(), 0, 0, 0);
+                    widget.extractRenderState(guiGraphics.getGuiParam(), 0, 0, 0);
                 }
             }
             guiGraphics.popPose();
