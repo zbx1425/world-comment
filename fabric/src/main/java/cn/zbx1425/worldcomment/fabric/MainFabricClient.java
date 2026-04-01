@@ -2,10 +2,15 @@ package cn.zbx1425.worldcomment.fabric;
 
 import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 #if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
@@ -13,11 +18,11 @@ import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.world.phys.Vec3;
 
 public class MainFabricClient implements ClientModInitializer {
@@ -32,12 +37,12 @@ public class MainFabricClient implements ClientModInitializer {
 		MainFabric.PACKET_REGISTRY.commitClient();
 #endif
 
-		HudRenderCallback.EVENT.register((guiParam, delta) -> {
-			OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam));
-		});
+		HudElementRegistry.attachElementAfter(VanillaHudElements.SCOREBOARD, Main.id("picked_comments"),
+			(guiParam, deltaTracker) -> OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam)));
 
 #if MC_VERSION >= "12100"
-		WorldRenderEvents.AFTER_ENTITIES.register((context) -> {
+		// TODO: Correct timing?
+		LevelRenderEvents.AFTER_TRANSLUCENT_FEATURES.register((context) -> {
 			if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
 				if (!world_comment$lastFrameKeyPlayerListDown) {
 					CommentListScreen.handleKeyTab();
@@ -47,9 +52,9 @@ public class MainFabricClient implements ClientModInitializer {
 				world_comment$lastFrameKeyPlayerListDown = false;
 			}
 
-			PoseStack matrices = context.matrixStack();
+			PoseStack matrices = context.poseStack();
 			matrices.pushPose();
-			Vec3 cameraPos = context.camera().getPosition();
+			Vec3 cameraPos = context.gameRenderer().getMainCamera().position();
 			matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 			CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
 			matrices.popPose();
@@ -61,7 +66,7 @@ public class MainFabricClient implements ClientModInitializer {
 		});
 
 		ClientCommandRegistrationCallback.EVENT.register((commandDispatcher, commandBuildContext) -> {
-			ClientCommand.register(commandDispatcher, ClientCommandManager::literal, ClientCommandManager::argument);
+			ClientCommand.register(commandDispatcher, LiteralArgumentBuilder::literal, RequiredArgumentBuilder::argument);
 		});
 	}
 }

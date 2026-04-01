@@ -6,7 +6,7 @@ import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 #if MC_VERSION >= "12000"
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 #else
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -42,7 +42,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
 #endif
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), blockItem);
 #if MC_VERSION >= "12000"
-        ItemGroupEvents.modifyEntriesEvent(tab).register(consumer -> consumer.accept(blockItem));
+        CreativeModeTabEvents.modifyOutputEvent(tab).register(consumer -> consumer.accept(blockItem));
 #endif
     }
 
@@ -50,7 +50,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     public <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item) {
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), item.get());
 #if MC_VERSION >= "12000"
-        ItemGroupEvents.modifyEntriesEvent(item.get().getTab()).register(consumer -> consumer.accept(item.get()));
+        CreativeModeTabEvents.modifyOutputEvent(item.get().getTab()).register(consumer -> consumer.accept(item.get()));
 #endif
     }
 

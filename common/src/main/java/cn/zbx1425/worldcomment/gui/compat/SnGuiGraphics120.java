@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
-import cn.zbx1425.worldcomment.mixin.GuiGraphicsExtractorAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;

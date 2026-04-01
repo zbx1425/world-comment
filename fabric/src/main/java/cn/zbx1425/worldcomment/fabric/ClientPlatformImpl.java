@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.fabric;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 public class ClientPlatformImpl {
 
     public static void registerKeyBinding(KeyMapping keyMapping) {
-        KeyBindingHelper.registerKeyBinding(keyMapping);
+        KeyMappingHelper.registerKeyMapping(keyMapping);
     }
 
     public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {

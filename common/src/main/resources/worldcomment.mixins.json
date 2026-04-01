@@ -8,7 +8,6 @@
     "InventoryMixin",
     "InventoryScreenMixin",
     "KeyMappingMixin",
-    "LevelRendererAccessor",
     "LevelRendererMixin",
     "NativeImageAccessor",
     "PauseScreenMixin"

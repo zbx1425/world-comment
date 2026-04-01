@@ -40,8 +40,8 @@ public class ClientRayPicking {
                 BlockPos bp = blockData.getKey();
                 AABB blockHitArea = new AABB(bp.getX(), bp.getY(), bp.getZ(),
                         bp.getX() + 1, bp.getY() + 3, bp.getZ() + 1);
-                Frustum cullingFrustum = ((LevelRendererAccessor)minecraft.levelRenderer).getCullingFrustum();
-                if (cullingFrustum != null && !cullingFrustum.isVisible(blockHitArea)) continue;
+                Frustum cullingFrustum = minecraft.gameRenderer.getMainCamera().getCullFrustum();
+                if (!cullingFrustum.isVisible(blockHitArea)) continue;
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;
                 for (CommentEntry comment : blockData.getValue()) {

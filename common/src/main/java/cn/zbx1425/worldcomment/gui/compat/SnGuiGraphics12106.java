@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
-import cn.zbx1425.worldcomment.mixin.GuiGraphicsExtractorAccessor;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -118,8 +117,7 @@ public class SnGuiGraphics12106 implements ISnGuiGraphics {
 
     @Override
     public void blit(AbstractTexture texture, int x1, int y1, int x2, int y2) {
-        ((GuiGraphicsExtractorAccessor)sink).invokeSubmitBlit(RenderPipelines.GUI_TEXTURED, texture.getTextureView(),
-                x1, y1, x2, y2, 0, 1, 0, 1, -1);
+        sink.blit(texture.getTextureView(), texture.getSampler(), x1, y1, x2, y2, 0, 1, 0, 1);
     }
 
     @Override

@@ -7,6 +7,7 @@ import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,7 +33,7 @@ public class KeyMappingMixin {
     }
 
     @Inject(method = "matches", at = @At("RETURN"), cancellable = true)
-    private void matches(int keysym, int scancode, CallbackInfoReturnable<Boolean> cir) {
+    private void matches(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
         if ((Object)this == options.keyScreenshot) {
