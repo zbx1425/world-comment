@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -11,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
@@ -52,34 +54,24 @@ public class CommentWorldRenderer implements IGuiCommon {
 #endif
 
         {
+            TextureAtlasSprite poleSprite = EmojiRegistry.INSTANCE.getPoleSprite();
             matrices.scale(0.9f, 0.9f, 0.9f);
-            float u1 = 0.5f, v1 = 0f, u2 = u1 + 0.125f - (1f / 256), v2 = v1 + 0.375f;
             PoseStack.Pose pose = matrices.last();
-//            vertex(vertices, pose, -0.5f, 1f, 0f, u1, v1);
-//            vertex(vertices, pose, -0.5f, -2f, 0f, u1, v2);
-//            vertex(vertices, pose, 0.5f, -2f, 0f, u2, v2);
-//            vertex(vertices, pose, 0.5f, 1f, 0f, u2, v1);
-            vertex(vertices, pose, 0.5f, 1f, 0f, u1, v1);
-            vertex(vertices, pose, 0.5f, -2f, 0f, u1, v2);
-            vertex(vertices, pose, -0.5f, -2f, 0f, u2, v2);
-            vertex(vertices, pose, -0.5f, 1f, 0f, u2, v1);
+            vertex(vertices, pose, 0.5f, 1f, 0f, poleSprite.getU0(), poleSprite.getV0());
+            vertex(vertices, pose, 0.5f, -2f, 0f, poleSprite.getU0(), poleSprite.getV1());
+            vertex(vertices, pose, -0.5f, -2f, 0f, poleSprite.getU1(), poleSprite.getV1());
+            vertex(vertices, pose, -0.5f, 1f, 0f, poleSprite.getU1(), poleSprite.getV0());
         }
 
         if (showIcon) {
+            TextureAtlasSprite iconSprite = EmojiRegistry.INSTANCE.getSprite(comment.messageType);
             matrices.translate(0, 0.25f, 0);
             matrices.scale(0.5f, 0.5f, 0.5f);
-            float u1 = ((comment.messageType - 1) % 4) * 0.25f;
-            float v1 = (int)((comment.messageType - 1) / 4) * 0.25f + 0.5f;
-            float u2 = u1 + 0.25f, v2 = v1 + 0.25f;
             PoseStack.Pose pose = matrices.last();
-//            vertex(vertices, pose, -0.5f, 1f, 0.05f, u1, v1);
-//            vertex(vertices, pose, -0.5f, 0f, 0.05f, u1, v2);
-//            vertex(vertices, pose, 0.5f, 0f, 0.05f, u2, v2);
-//            vertex(vertices, pose, 0.5f, 1f, 0.05f, u2, v1);
-            vertex(vertices, pose, 0.5f, 1f, -0.05f, u1, v1);
-            vertex(vertices, pose, 0.5f, 0f, -0.05f, u1, v2);
-            vertex(vertices, pose, -0.5f, 0f, -0.05f, u2, v2);
-            vertex(vertices, pose, -0.5f, 1f, -0.05f, u2, v1);
+            vertex(vertices, pose, 0.5f, 1f, -0.05f, iconSprite.getU0(), iconSprite.getV0());
+            vertex(vertices, pose, 0.5f, 0f, -0.05f, iconSprite.getU0(), iconSprite.getV1());
+            vertex(vertices, pose, -0.5f, 0f, -0.05f, iconSprite.getU1(), iconSprite.getV1());
+            vertex(vertices, pose, -0.5f, 1f, -0.05f, iconSprite.getU1(), iconSprite.getV0());
         }
         matrices.popPose();
     }
@@ -96,7 +88,7 @@ public class CommentWorldRenderer implements IGuiCommon {
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {
         long currentTime = System.currentTimeMillis();
-        VertexConsumer vertices = buffers.getBuffer(RenderTypes.entityTranslucent(ATLAS_LOCATION));
+        VertexConsumer vertices = buffers.getBuffer(RenderTypes.entityTranslucent(EmojiRegistry.ATLAS_TEXTURE_ID));
         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : ClientRayPicking.visibleComments.entrySet()) {
             for (int i = 0; i < blockData.getValue().size(); i++) {
                 CommentEntry comment = blockData.getValue().get(i);

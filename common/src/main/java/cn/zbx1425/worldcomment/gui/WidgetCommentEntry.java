@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -12,6 +13,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -107,8 +110,12 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         }
 
         guiGraphics.enableBlend();
-        guiGraphics.blit(ATLAS_LOCATION, getX() + 6, getY() + 2, 18, 18,
-                ((comment.messageType - 1) % 4) * 64, (int)((comment.messageType - 1) / 4) * 64 + 128, 64, 64, 256, 256);
+        TextureAtlasSprite iconSprite = EmojiRegistry.INSTANCE.getSprite(comment.messageType);
+        guiParam.pose().pushMatrix();
+        guiParam.pose().translate(0.5f, 0.5f);
+        guiParam.blitSprite(RenderPipelines.GUI_TEXTURED, iconSprite, getX() + 7, getY() + 3, 18, 18, 0xFF404040);
+        guiParam.blitSprite(RenderPipelines.GUI_TEXTURED, iconSprite, getX() + 6, getY() + 2, 18, 18);
+        guiParam.pose().popMatrix();
         guiGraphics.disableBlend();
 
         if (mouseX > getX() + 4 && mouseX < getX() + getWidth() && mouseY > getY() && mouseY < getY() + 24) {

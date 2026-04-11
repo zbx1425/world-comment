@@ -4,6 +4,10 @@
       "type": "minecraft:directory",
       "prefix": "emoji/",
       "source": "emoji"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "worldcomment:entity/comment_pole"
     }
   ]
 }

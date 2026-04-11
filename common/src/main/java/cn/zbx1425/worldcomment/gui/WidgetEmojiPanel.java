@@ -51,9 +51,9 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
         int logicMouseX = mouseX - getX();
         int logicMouseY = mouseY - getY() + (int)scrollAmount();
 
-        for (int id = 0; id < EmojiRegistry.INSTANCE.getSpriteCount(); id++) {
-            int row = id / columns;
-            int col = id % columns;
+        for (int id = 1; id <= EmojiRegistry.INSTANCE.getSpriteCount(); id++) {
+            int row = (id - 1) / columns;
+            int col = (id - 1) % columns;
 
             int cellX = (col * (ITEM_SIZE + ITEM_SPACING_X)) + realPaddingX;
             int cellY = (row * (ITEM_SIZE + ITEM_SPACING_Y)) + PADDING_Y;
@@ -103,9 +103,9 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int logicMouseX = (int)event.x() - getX();
         int logicMouseY = (int)event.y() - getY() + (int)scrollAmount();
-        for (int id = 0; id < EmojiRegistry.INSTANCE.getSpriteCount(); id++) {
-            int row = id / columns;
-            int col = id % columns;
+        for (int id = 1; id <= EmojiRegistry.INSTANCE.getSpriteCount(); id++) {
+            int row = (id - 1) / columns;
+            int col = (id - 1) % columns;
             int cellX = (col * (ITEM_SIZE + ITEM_SPACING_X)) + realPaddingX;
             int cellY = (row * (ITEM_SIZE + ITEM_SPACING_Y)) + PADDING_Y;
             if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX

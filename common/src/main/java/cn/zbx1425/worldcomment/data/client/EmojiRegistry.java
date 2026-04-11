@@ -20,6 +20,7 @@ public class EmojiRegistry implements ResourceManagerReloadListener {
 
     private TextureAtlas atlas;
     private TextureAtlasSprite[] sprites;
+    private TextureAtlasSprite poleSprite;
 
     public static final EmojiRegistry INSTANCE = new EmojiRegistry();
 
@@ -30,7 +31,8 @@ public class EmojiRegistry implements ResourceManagerReloadListener {
         atlas = emojiAtlas;
 
         List<TextureAtlasSprite> spriteList = new ObjectArrayList<>();
-        for (int spriteId = 0; ; spriteId++) {
+        spriteList.add(atlas.missingSprite());
+        for (int spriteId = 1; ; spriteId++) {
             TextureAtlasSprite sprite = emojiAtlas.getSprite(Identifier.fromNamespaceAndPath(Main.MOD_ID,
                 String.format("emoji/id_%03d", spriteId)));
             if (sprite != emojiAtlas.missingSprite()) {
@@ -40,6 +42,8 @@ public class EmojiRegistry implements ResourceManagerReloadListener {
             }
         }
         sprites = spriteList.toArray(new TextureAtlasSprite[0]);
+
+        poleSprite = emojiAtlas.getSprite(Identifier.fromNamespaceAndPath(Main.MOD_ID, "entity/comment_pole"));
     }
 
     public TextureAtlasSprite getSprite(int id) {
@@ -48,6 +52,10 @@ public class EmojiRegistry implements ResourceManagerReloadListener {
     }
 
     public int getSpriteCount() {
-        return sprites.length;
+        return sprites.length - 1;
+    }
+
+    public TextureAtlasSprite getPoleSprite() {
+        return poleSprite;
     }
 }
