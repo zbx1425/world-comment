@@ -9,7 +9,6 @@ import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
@@ -18,13 +17,14 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameType;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -37,10 +37,26 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     private final byte[] imageBytes;
     private final boolean withPlacingDown;
 
-    private static final int SIDEBAR_OFFSET = 100;
+    private final WidgetUnmanagedImage widgetImage;
+    private final WidgetEmojiPanel emojiPanel;
+    private final MultiLineEditBox textBoxMessage;
+    private final WidgetColorButton btnScreenshotConfig;
+    private final WidgetSubtleToggleButton checkBoxNoImage;
+    private final WidgetSubtleToggleButton checkBoxAnonymous;
+    private final WidgetColorButton btnSaveScreenshot;
+    private final Button btnSendFeedback;
 
-    private static final int CONTAINER_PADDING_X = 8;
-    private static final int CONTAINER_PADDING_Y = 5;
+    boolean screenshotSaved;
+
+    private static final int ROOT_WIDTH = 300;
+    private static final int ROOT_HEIGHT = 200;
+    private static final int ASIDE_SPACING = 20;
+
+    private static final int ASIDE_WIDTH = (int)((ROOT_WIDTH - ASIDE_SPACING) * 0.35);
+    private static final int MAIN_WIDTH = (int)((ROOT_WIDTH - ASIDE_SPACING) * 0.65);
+    private static final int MAIN_XOFF = ROOT_WIDTH - MAIN_WIDTH;
+
+    private int rootOffX, rootOffY, asideHeight;
 
     public CommentToolScreen(byte[] imageBytes, boolean withPlacingDown) {
         super(Component.literal("Comment Tool"));
@@ -53,7 +69,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             offHeapBuffer.rewind();
 #if MC_VERSION >= "12106"
             this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(
-                    () -> Screenshot.getAvailableFile().toPath().toString(), NativeImage.read(offHeapBuffer)));
+                () -> Screenshot.getAvailableFile().toPath().toString(), NativeImage.read(offHeapBuffer)));
 #else
             this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(offHeapBuffer)));
 #endif
@@ -62,164 +78,138 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         } finally {
             OffHeapAllocator.free(offHeapBuffer);
         }
+
+        this.emojiPanel = new WidgetEmojiPanel(MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2);
+        this.textBoxMessage = new MultiLineEditBox.Builder()
+            .setPlaceholder(Component.translatable("gui.worldcomment.message"))
+            .build(font, MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2, CommonComponents.EMPTY);
+        textBoxMessage.setValue("");
+        textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
+        this.btnSendFeedback = new WidgetColorButton(
+            CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+            Component.translatable("gui.worldcomment.submit"), 0xFFC5E1A5,
+            sender -> sendReport()
+        );
+
+        this.checkBoxAnonymous = new WidgetSubtleToggleButton(
+            80, 128,
+            Component.translatable("gui.worldcomment.anonymous.disable"), Component.translatable("gui.worldcomment.anonymous.enable"),
+            false, null
+        );
+        this.checkBoxNoImage = new WidgetSubtleToggleButton(
+            160, 128,
+            Component.translatable("gui.worldcomment.exclude_screenshot.disable"), Component.translatable("gui.worldcomment.exclude_screenshot.enable"),
+            false, null
+        );
+
+        this.btnScreenshotConfig = new WidgetColorButton(
+            SQ_SIZE, SQ_SIZE,
+            Component.literal(""), 0xFFAAAAAA, sender -> {
+            minecraft.setScreen(new ScreenshotConfigScreen());
+        });
+        btnScreenshotConfig.useIcon(0, 128);
+        btnScreenshotConfig.setTooltip(Tooltip.create(Component.translatable("gui.worldcomment.screenshot_config")));
+
+        this.btnSaveScreenshot = new WidgetColorButton(
+            ASIDE_WIDTH - 10, SQ_SIZE,
+            Component.translatable("gui.worldcomment.save_screenshot"), 0xFF81D4FA, sender -> saveScreenshot());
     }
-
-    @Override
-    public void onClose() {
-        widgetImage.close();
-        super.onClose();
-    }
-
-    private List<CommentTypeButton> radioButtons = new ArrayList<>();
-    private WidgetUnmanagedImage widgetImage;
-    private MultiLineEditBox textBoxMessage;
-    private Button btnScreenshotConfig;
-    private net.minecraft.client.gui.components.Checkbox checkBoxNoImage;
-    private net.minecraft.client.gui.components.Checkbox checkBoxAnonymous;
-    private WidgetColorButton btnSaveScreenshot;
-    private Button btnSendFeedback;
-    private int selectedCommentType = 0;
-
-    boolean screenshotSaved;
-
-    public int containerWidth, containerHeight, containerOffsetX, containerOffsetY;
 
     @Override
     protected void init() {
         super.init();
 
-        clearWidgets();
-        Minecraft minecraft = Minecraft.getInstance();
+        rootOffX = (width - ROOT_WIDTH) / 2;
+        rootOffY = (height - ROOT_HEIGHT) / 2;
 
-        int baseY = CONTAINER_PADDING_Y;
-        radioButtons.clear();
-
-        assert minecraft.player != null && minecraft.gameMode != null;
-        boolean canAccessBuildTools = MainClient.CLIENT_CONFIG.canAccessBuildMarkers(minecraft);
-
-        for (int r = 0; r < (canAccessBuildTools ? 2 : 1); r++) {
-            addRenderableWidget(new WidgetFlagLabel(
-                    SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 4 + 10, SQ_SIZE / 2,
-                    0xFF2196F3, Component.translatable("gui.worldcomment.comment_type.r" + (r + 1))
-            ));
-            for (int c = 0; c < 4; c++) {
-                CommentTypeButton selectBtn = new CommentTypeButton(
-                        SIDEBAR_OFFSET + CommentTypeButton.BTN_WIDTH * c,
-                    baseY + SQ_SIZE / 2,
-                    r * 4 + c + 1, sender -> {
-                        selectedCommentType = ((CommentTypeButton)sender).commentType;
-                        for (CommentTypeButton radioButton : radioButtons) {
-                            radioButton.active = radioButton.commentType != selectedCommentType;
-                        }
-                        updateBtnSendFeedback();
-                    }
-                );
-                selectBtn.active = selectBtn.commentType != selectedCommentType;
-                addRenderableWidget(selectBtn);
-                radioButtons.add(selectBtn);
-            }
-            baseY += CommentTypeButton.BTN_HEIGHT + SQ_SIZE / 2;
-        }
-        if (!canAccessBuildTools) {
-            baseY += SQ_SIZE / 2;
-        }
-
-        addRenderableWidget(new WidgetFlagLabel(
-                SIDEBAR_OFFSET - 4, baseY, CommentTypeButton.BTN_WIDTH * 5 + 10, SQ_SIZE / 2,
-                0xFF00BCD4, Component.translatable("gui.worldcomment.message")
-        ));
-        baseY += SQ_SIZE / 2;
-        textBoxMessage =
-                MultiLineEditBox.builder()
-                        .setX(SIDEBAR_OFFSET)
-                        .setY(baseY)
-                        .setPlaceholder(Component.translatable("gui.worldcomment.message.placeholder"))
-                        .build(Minecraft.getInstance().font, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4, Component.literal(""));
-
-//        new MultiLineEditBox(
-//                Minecraft.getInstance().font,
-//                SIDEBAR_OFFSET, baseY, CommentTypeButton.BTN_WIDTH * 5, SQ_SIZE * 4,
-//                // On 1.19.2 this doesn't rescale with the poseStack
-//                #if MC_VERSION >= "12000" Component.translatable("gui.worldcomment.message.placeholder") #else Component.literal("") #endif,
-//                Component.literal("")
-//        );
-        textBoxMessage.setValue("");
-        textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
+        emojiPanel.setPosition(rootOffX + MAIN_XOFF, rootOffY + 14);
+        textBoxMessage.setPosition(rootOffX + MAIN_XOFF, rootOffY + 14 + (ROOT_HEIGHT - 14 - 26) / 2);
+        btnSendFeedback.setPosition(rootOffX + ROOT_WIDTH - CommentTypeButton.BTN_WIDTH * 2 - 5, rootOffY + ROOT_HEIGHT - 3 - 20);
+        addRenderableWidget(emojiPanel);
         addRenderableWidget(textBoxMessage);
-        baseY += textBoxMessage.getHeight();
-
-        baseY += 8;
-        addRenderableWidget(new WidgetLabel(0, baseY, SIDEBAR_OFFSET + CommentTypeButton.BTN_WIDTH * 5, font.lineHeight,
-                Component.translatable("gui.worldcomment.send.guide_just_screenshot").withStyle(ChatFormatting.GRAY)));
-        baseY += font.lineHeight;
-
-        baseY += CONTAINER_PADDING_Y;
-
-        btnSendFeedback = new WidgetColorButton(
-                SIDEBAR_OFFSET + CommentTypeButton.BTN_WIDTH * 3, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
-                Component.translatable("gui.worldcomment.submit"), 0xFFC5E1A5,
-                sender -> sendReport()
-        );
-        updateBtnSendFeedback();
         addRenderableWidget(btnSendFeedback);
 
-        baseY = CONTAINER_PADDING_Y;
-        widgetImage.setBounds(0, baseY, SIDEBAR_OFFSET - SQ_SIZE);
-        addRenderableWidget(widgetImage);
-        baseY += widgetImage.getHeight() + SQ_SIZE / 2;
-        btnScreenshotConfig = new WidgetColorButton(
-                0, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
-                Component.translatable("gui.worldcomment.screenshot_config"), 0xFFAAAAAA, sender -> {
-                    minecraft.setScreen(new ScreenshotConfigScreen());
-                }
-        );
+        WidgetMultiLineLabel mainTitle = new WidgetMultiLineLabel(rootOffX + MAIN_XOFF + 5, rootOffY + 3, MAIN_WIDTH - 10, 8,
+            Component.translatable("gui.worldcomment.comment_tool.title").withColor(0xFF404040));
+        mainTitle.repositionEntries();
+        addRenderableWidget(mainTitle);
+
+        updateBtnSendFeedback();
+
+        int baseY = rootOffY;
+        widgetImage.setBounds(rootOffX, baseY, ASIDE_WIDTH);
+//        addRenderableWidget(widgetImage);
+        baseY += widgetImage.getHeight() - 10;
+        btnScreenshotConfig.setPosition(rootOffX + ASIDE_WIDTH - 30, baseY);
         addRenderableWidget(btnScreenshotConfig);
-        baseY += SQ_SIZE + SQ_SIZE / 2;
-        checkBoxNoImage = Checkbox
-                .builder(Component.translatable("gui.worldcomment.exclude_screenshot"), minecraft.font)
-                .pos(0, baseY).selected(false).build();
-        addRenderableWidget(checkBoxNoImage);
-        baseY += SQ_SIZE;
-        checkBoxAnonymous = Checkbox
-                .builder(Component.translatable("gui.worldcomment.anonymous"), minecraft.font)
-                .pos(0, baseY).selected(false).build();
+        baseY += SQ_SIZE + 5;
+
+        checkBoxAnonymous.setPosition(rootOffX + MAIN_XOFF + 5, rootOffY + ROOT_HEIGHT - 20 - 3);
         addRenderableWidget(checkBoxAnonymous);
+        checkBoxNoImage.setPosition(rootOffX + MAIN_XOFF + 5 + 20, rootOffY + ROOT_HEIGHT - 20 - 3);
+        addRenderableWidget(checkBoxNoImage);
 
-        containerWidth = SIDEBAR_OFFSET - 4 + CommentTypeButton.BTN_WIDTH * 5 + 10;
-        containerHeight = btnSendFeedback #if MC_VERSION >= "11903" .getY() #else .y #endif + btnSendFeedback.getHeight();
-
-        containerOffsetX = (width - (containerWidth + CONTAINER_PADDING_X * 2)) / 2 + CONTAINER_PADDING_X;
-        containerOffsetY = (height - (containerHeight + CONTAINER_PADDING_Y * 2)) / 2 + CONTAINER_PADDING_Y;
-        for (GuiEventListener child : children()) {
-            AbstractWidget widget = (AbstractWidget)child;
-            widget #if MC_VERSION >= "11903" .setX #else .x = #endif (widget #if MC_VERSION >= "11903" .getX() #else .x #endif + containerOffsetX);
-            widget #if MC_VERSION >= "11903" .setY #else .y = #endif (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + containerOffsetY);
-        }
-
-        btnSaveScreenshot = new WidgetColorButton(
-                containerOffsetX, btnSendFeedback #if MC_VERSION >= "11903" .getY() #else .y #endif, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
-                Component.translatable("gui.worldcomment.save_screenshot"), 0xFF81D4FA, sender -> {
-                    Path persistentPath = Screenshot.getAvailableFile().toPath();
-                    try {
-                        Files.write(persistentPath, imageBytes);
-                        screenshotSaved = true;
-                        btnSaveScreenshot.active = false;
-                    } catch (IOException e) {
-                        Main.LOGGER.error("Copy image", e);
-                    }
-                }
+        WidgetMultiLineLabel lblScreenshotGuide = new WidgetMultiLineLabel(
+            rootOffX + 5, baseY, ASIDE_WIDTH - 10, 50,
+            Component.translatable("gui.worldcomment.send.guide_just_screenshot").withColor(0xFF404040)
         );
+        lblScreenshotGuide.repositionEntries();
+        addRenderableWidget(lblScreenshotGuide);
+        baseY += lblScreenshotGuide.getHeight() + 5;
+
+        btnSaveScreenshot.setPosition(rootOffX + 5, baseY);
         btnSaveScreenshot.active = !screenshotSaved;
         addRenderableWidget(btnSaveScreenshot);
+
+        baseY += SQ_SIZE;
+        asideHeight = baseY - rootOffY + 5;
+    }
+
+    @Override
+    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
+        guiGraphics.pushPose();
+//        boolean animationDone = setupAnimationTransform(guiGraphics);
+//        guiGraphics.translate(0, 0, 1);
+        super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
+        guiGraphics.popPose();
+    }
+
+    @Override
+    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
+                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
+        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
+        guiGraphics.pushPose();
+//        setupAnimationTransform(guiGraphics);
+        guiGraphics.enableBlend();
+
+        guiGraphics.blitNineSlicedFast(
+            ATLAS_LOCATION,
+            rootOffX - 3, rootOffY - 3, ASIDE_WIDTH + 6, asideHeight + 6,
+            80, 58, 40, 40, 256, 256, 4, 4, 4, 4
+        );
+
+        guiGraphics.blitNineSlicedFast(
+            ATLAS_LOCATION,
+            rootOffX + MAIN_XOFF - 3, rootOffY - 3, MAIN_WIDTH + 6, ROOT_HEIGHT + 6,
+            80, 58, 40, 40, 256, 256, 4, 4, 4, 4
+        );
+
+        widgetImage.extractWidgetRenderState(guiParam, mouseX, mouseY, partialTick);
+
+        guiGraphics.disableBlend();
+        guiGraphics.popPose();
     }
 
     private void sendReport() {
-        if (selectedCommentType == 0) return;
+        if (emojiPanel.getSelectedId() == 0) return;
         Minecraft.getInstance().execute(() -> {
             Player player = Minecraft.getInstance().player;
             CommentEntry comment = new CommentEntry(
                     player, checkBoxAnonymous.selected(),
-                    selectedCommentType, textBoxMessage.getValue()
+                    emojiPanel.getSelectedId(), textBoxMessage.getValue()
             );
             long jobId = SubmitDispatcher.addJob(
                     comment, checkBoxNoImage.selected() ? null : imageBytes,
@@ -253,77 +243,23 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         onClose();
     }
 
-    @Override
-    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
-        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
-        guiGraphics.pushPose();
-        boolean animationDone = setupAnimationTransform(guiGraphics);
-        guiGraphics.translate(0, 0, 1);
-        super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
-        guiGraphics.popPose();
-    }
+    private void saveScreenshot() {
+        Path persistentPath = Screenshot.getAvailableFile().toPath();
+        try {
+            Files.write(persistentPath, imageBytes);
+            screenshotSaved = true;
+            btnSaveScreenshot.active = false;
 
-    @Override
-    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
-                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
-        super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
-        guiGraphics.pushPose();
-        setupAnimationTransform(guiGraphics);
-        guiGraphics.enableBlend();
-        guiGraphics.fill(
-                containerOffsetX - CONTAINER_PADDING_X,
-                containerOffsetY - CONTAINER_PADDING_Y,
-                containerOffsetX + containerWidth + CONTAINER_PADDING_X,
-                containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
-                0x99222222
-        );
-        guiGraphics.fill(
-                containerOffsetX - CONTAINER_PADDING_X,
-                containerOffsetY + containerHeight - SQ_SIZE + CONTAINER_PADDING_Y,
-                containerOffsetX + containerWidth + CONTAINER_PADDING_X,
-                containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
-                0x66546e7a
-        );
-        guiGraphics.disableBlend();
-        guiGraphics.popPose();
-    }
-
-    private long timestampOpenGui = 0L;
-
-    /** @return true if animation is done */
-    private boolean setupAnimationTransform(ISnGuiGraphics guiGraphics) {
-        long timestampNow = System.currentTimeMillis();
-        if (timestampOpenGui == 0) timestampOpenGui = timestampNow;
-
-        float animProgress = Mth.clamp((timestampNow - timestampOpenGui) / 600f, 0f, 1f);
-        float x1, x2, y1, y2;
-        float s1PadW = width / 10f, s1PadH = height / 10f;
-        if (animProgress < 0.4) {
-            float subProgress = (float)Mth.map(animProgress, 0, 0.4, 0, 1);
-            float easedProgress = 1 - (float)Math.pow(1 - subProgress, 3);
-            x1 = Mth.lerp(easedProgress, 0, s1PadW);
-            x2 = Mth.lerp(easedProgress, width, width - s1PadW);
-            y1 = Mth.lerp(easedProgress, 0, s1PadH);
-            y2 = Mth.lerp(easedProgress, height, height - s1PadH);
-        } else if (animProgress < 1) {
-            float x = (float)Mth.map(animProgress, 0.4, 1, 0, 1);
-            float easedProgress = x < 0.5f ? 4 * x * x * x : 1 - (float)Math.pow(-2 * x + 2, 3) / 2;
-            x1 = Mth.lerp(easedProgress, s1PadW, containerOffsetX);
-            x2 = Mth.lerp(easedProgress, width - s1PadW, containerOffsetX + widgetImage.getWidth());
-            y1 = Mth.lerp(easedProgress, s1PadH, containerOffsetY + CONTAINER_PADDING_Y);
-            y2 = Mth.lerp(easedProgress, height - s1PadH, containerOffsetY + CONTAINER_PADDING_Y + widgetImage.getHeight());
-        } else {
-            return true;
+            onClose();
+        } catch (IOException e) {
+            Main.LOGGER.error("Copy image", e);
         }
+    }
 
-        float scaleX = (x2 - x1) / widgetImage.getWidth();
-        float scaleY = (y2 - y1) / widgetImage.getHeight();
-        guiGraphics.translate(x1, y1, 0);
-        guiGraphics.scale(scaleX, scaleY);
-        guiGraphics.translate(-containerOffsetX, -(containerOffsetY + CONTAINER_PADDING_Y), 0);
-        return false;
+    @Override
+    public void onClose() {
+        widgetImage.close();
+        super.onClose();
     }
 
     @Override
@@ -332,7 +268,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     }
 
     private void updateBtnSendFeedback() {
-        if (selectedCommentType == 0) {
+        if (emojiPanel.getSelectedId() == 0) {
             btnSendFeedback.active = false;
 #if MC_VERSION >= "12000"
             btnSendFeedback.setTooltip(Tooltip.create(Component.translatable("gui.worldcomment.require_comment_type").withStyle(ChatFormatting.RED)));

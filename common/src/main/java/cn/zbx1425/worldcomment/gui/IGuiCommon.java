@@ -11,5 +11,7 @@ public interface IGuiCommon {
 
     int SQ_SIZE = 20;
     Identifier ATLAS_LOCATION = Main.id("textures/gui/comment-tool.png");
+    int ATLAS_SIZE = 256;
+
 
 }

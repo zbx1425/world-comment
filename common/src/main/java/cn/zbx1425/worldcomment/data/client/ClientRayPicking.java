@@ -2,7 +2,6 @@ package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.mixin.LevelRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;

@@ -4,11 +4,13 @@ import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
-#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -23,6 +25,8 @@ import net.minecraft.client.Minecraft;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.phys.Vec3;
 
 public class MainFabricClient implements ClientModInitializer {
@@ -68,5 +72,11 @@ public class MainFabricClient implements ClientModInitializer {
 		ClientCommandRegistrationCallback.EVENT.register((commandDispatcher, commandBuildContext) -> {
 			ClientCommand.register(commandDispatcher, LiteralArgumentBuilder::literal, RequiredArgumentBuilder::argument);
 		});
+
+		
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(
+			Identifier.fromNamespaceAndPath(Main.MOD_ID, "emoji_atlas"),
+			EmojiRegistry.INSTANCE
+		);
 	}
 }

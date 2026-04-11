@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
@@ -38,11 +39,11 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
         int x1 = getX(), x2 = getX() + getWidth();
         int y1 = getY(), y2 = getY() + getHeight();
 
-        int shadowColor = 0xFF111111;
+        int shadowColor = 0xFF404040;
         int shadowOffset = 2;
         guiGraphics.fill(
-                (int) (x1 + shadowOffset), (int) (y1 + shadowOffset),
-                (int) (x2 + shadowOffset), (int) (y2 + shadowOffset),
+                (int) (x1), (int) (y1 + shadowOffset),
+                (int) (x2), (int) (y2 + shadowOffset),
                 shadowColor
         );
         guiGraphics.blit(texture, x1, y1, x2, y2);
@@ -54,6 +55,11 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
 #else
     public void updateNarration(NarrationElementOutput narrationElementOutput) { }
 #endif
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        return false;
+    }
 
     @Override
     public void close() {

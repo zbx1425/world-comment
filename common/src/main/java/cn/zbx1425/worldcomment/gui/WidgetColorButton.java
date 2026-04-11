@@ -1,7 +1,6 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION >= "12002" import net.minecraft.client.gui.components.WidgetSprites; #endif
@@ -9,7 +8,6 @@ import net.minecraft.client.gui.components.Button;
 #if MC_VERSION >= "12106" import net.minecraft.client.renderer.RenderPipelines; #endif
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 
 #if MC_VERSION >= "12000" import java.util.function.Supplier; #endif
 
@@ -17,8 +15,15 @@ public class WidgetColorButton extends Button implements IGuiCommon {
 
     int color;
 
+    int iconU = -1, iconV = -1;
+
     public WidgetColorButton(int i, int j, int k, int l, Component component, int color, OnPress onPress) {
         super(i, j, k, l, component, onPress #if MC_VERSION >= "12000" , Supplier::get #endif);
+        this.color = color;
+    }
+
+    public WidgetColorButton(int k, int l, Component component, int color, OnPress onPress) {
+        super(0, 0, k, l, component, onPress #if MC_VERSION >= "12000" , Supplier::get #endif);
         this.color = color;
     }
 
@@ -50,6 +55,10 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
         guiGraphics.disableBlend();
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.active ? 0xFFFFFF : 0xA0A0A0;
+        if (iconU > -1) {
+            guiParam.blit(RenderPipelines.GUI_TEXTURED, ATLAS_LOCATION, getX(), getY(), iconU, iconV,
+                20, 20, 40, 40, ATLAS_SIZE, ATLAS_SIZE, i | 0xFF000000);
+        }
         this.extractDefaultLabel(guiGraphics.getGuiParam().textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
 //        this.renderString(guiGraphics.getGuiParam(), minecraft.font, i | Mth.ceil(this.alpha * 255.0f) << 24);
     }
@@ -62,6 +71,11 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
             i = 2;
         }
         return 46 + i * 20;
+    }
+
+    public void useIcon(int iconU, int iconV) {
+        this.iconU = iconU;
+        this.iconV = iconV;
     }
 
 #if MC_VERSION < "12000"
