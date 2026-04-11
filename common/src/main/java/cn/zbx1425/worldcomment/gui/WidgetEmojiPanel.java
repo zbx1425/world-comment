@@ -12,6 +12,7 @@ import net.minecraft.network.chat.CommonComponents;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.function.IntConsumer;
 
 public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCommon {
 
@@ -28,9 +29,11 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
     private int contentHeight;
     private int selectedId;
 
-    public WidgetEmojiPanel(int width, int height) {
-        super(0, 0, width, height, CommonComponents.EMPTY, defaultSettings(ITEM_SIZE / 2));
+    private IntConsumer onSelectionChange;
 
+    public WidgetEmojiPanel(int width, int height, IntConsumer onSelectionChange) {
+        super(0, 0, width, height, CommonComponents.EMPTY, defaultSettings(ITEM_SIZE / 2));
+        this.onSelectionChange = onSelectionChange;
         this.repositionEntries();
         this.refreshScrollAmount();
     }
@@ -111,7 +114,10 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
             if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX
                 && cellY <= logicMouseY && cellY + ITEM_SIZE >= logicMouseY
                 && 0 <= logicMouseY && getHeight() >= logicMouseY) {
-                selectedId = id;
+                if (selectedId != id) {
+                    selectedId = id;
+                    onSelectionChange.accept(id);
+                }
                 return true;
             }
         }

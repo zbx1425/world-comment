@@ -1,5 +1,5 @@
 plugins {
-	id "com.github.johnrengelman.shadow"
+	id "com.gradleup.shadow" version "9.2.2"
 }
 
 architectury {
@@ -60,7 +60,8 @@ shadowJar {
 	exclude "*.bmp"
 
 	configurations = [project.configurations.shadowCommon]
-	archiveClassifier = "dev-shadow"
+	archiveBaseName = "WorldComment-fabric"
+	archiveClassifier = null
 
 	dependencies {
 		it.exclude it.dependency('io.netty:.*')
@@ -75,6 +76,17 @@ if (rootProject.minecraft_version_int < 260000) {
 		input.set shadowJar.archiveFile
 		dependsOn shadowJar
 		archiveClassifier = null
+	}
+}
+
+configurations {
+	apiElements {
+		outgoing.artifacts.clear()
+		outgoing.artifact(shadowJar)
+	}
+	runtimeElements {
+		outgoing.artifacts.clear()
+		outgoing.artifact(shadowJar)
 	}
 }
 

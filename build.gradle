@@ -7,8 +7,7 @@ plugins {
 	id "architectury-plugin" version "3.5-SNAPSHOT"
 	id "dev.architectury.loom-no-remap" version "1.14-SNAPSHOT" apply false
 	id "de.undercouch.download" version "4.1.2"
-	id "com.github.johnrengelman.shadow" version "8.1.1"
-	id "io.github.pacifistmc.forgix" version "1.2.9"
+	id "com.gradleup.shadow" version "9.2.2"
 	id "base"
 }
 
@@ -100,29 +99,29 @@ allprojects {
 		}
 	}
 
-	build.finalizedBy(mergeJars)
-	assemble.finalizedBy(mergeJars)
+//	build.finalizedBy(mergeJars)
+//	assemble.finalizedBy(mergeJars)
 }
-
-forgix {
-	group = "cn.zbx1425"
-	mergedJarName = "WorldComment" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
-	outputDir = "build/"
-
-	if (minecraft_version_int < 12100) {
-		forge {
-			projectName = "forge"
-			jarLocation = "build/libs/forge" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
-		}
-	} else {
-		neoforge {
-			projectName = "neoforge"
-			jarLocation = "build/libs/neoforge" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
-		}
-	}
-
-	fabric {
-		projectName = "fabric"
-		jarLocation = "build/libs/fabric" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
-	}
-}
+//
+//forgix {
+//	group = "cn.zbx1425"
+//	mergedJarName = "WorldComment" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+//	outputDir = "build/"
+//
+//	if (minecraft_version_int < 12100) {
+//		forge {
+//			projectName = "forge"
+//			jarLocation = "build/libs/forge" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+//		}
+//	} else {
+//		neoforge {
+//			projectName = "neoforge"
+//			jarLocation = "build/libs/neoforge" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+//		}
+//	}
+//
+//	fabric {
+//		projectName = "fabric"
+//		jarLocation = "build/libs/fabric" + "-" + rootProject.mod_version + "+" + minecraft_version + ".jar"
+//	}
+//}

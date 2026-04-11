@@ -79,7 +79,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             OffHeapAllocator.free(offHeapBuffer);
         }
 
-        this.emojiPanel = new WidgetEmojiPanel(MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2);
+        this.emojiPanel = new WidgetEmojiPanel(MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2, _ -> updateBtnSendFeedback());
         this.textBoxMessage = new MultiLineEditBox.Builder()
             .setPlaceholder(Component.translatable("gui.worldcomment.message"))
             .build(font, MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2, CommonComponents.EMPTY);
@@ -142,7 +142,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         baseY += widgetImage.getHeight() - 10;
         btnScreenshotConfig.setPosition(rootOffX + ASIDE_WIDTH - 30, baseY);
         addRenderableWidget(btnScreenshotConfig);
-        baseY += SQ_SIZE + 5;
+        baseY += SQ_SIZE + 8;
 
         checkBoxAnonymous.setPosition(rootOffX + MAIN_XOFF + 5, rootOffY + ROOT_HEIGHT - 20 - 3);
         addRenderableWidget(checkBoxAnonymous);

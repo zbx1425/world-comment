@@ -72,12 +72,23 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
         ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
         guiGraphics.enableBlend();
+        guiGraphics.blitNineSlicedFast(
+            ATLAS_LOCATION,
+            containerOffsetX - CONTAINER_PADDING_X,
+            containerOffsetY - CONTAINER_PADDING_Y,
+            containerWidth + CONTAINER_PADDING_X * 2,
+            containerHeight + CONTAINER_PADDING_Y * 2,
+            80, 58, 40, 40, 256, 256, 4, 4, 4, 4
+        );
         guiGraphics.fill(
-                containerOffsetX - CONTAINER_PADDING_X,
-                containerOffsetY - CONTAINER_PADDING_Y,
-                containerOffsetX + containerWidth + CONTAINER_PADDING_X,
-                containerOffsetY + containerHeight + CONTAINER_PADDING_Y,
-                0x99222222
+            containerOffsetX, cbIncludeHud.getY(),
+            containerOffsetX + containerWidth, cbIncludeHud.getY() + cbIncludeHud.getHeight(),
+                0xFF606060
+        );
+        guiGraphics.fill(
+            containerOffsetX, cbIncludeComments.getY(),
+            containerOffsetX + containerWidth, cbIncludeComments.getY() + cbIncludeComments.getHeight(),
+            0xFF606060
         );
         guiGraphics.fill(
                 containerOffsetX - CONTAINER_PADDING_X,

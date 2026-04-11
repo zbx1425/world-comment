@@ -78,7 +78,8 @@ public class Screenshot {
             FrameTask.enqueue(() -> {
                 grabScreenshot(imageBytes -> minecraft.execute(() -> {
                     boolean onGround = #if MC_VERSION >= "12000" minecraft.player.onGround() #else minecraft.player.isOnGround() #endif;
-                    boolean canSend = withPlacingDown || onGround;
+//                    boolean canSend = withPlacingDown || onGround;
+                    boolean canSend = true;
                     if (minecraft.player != null && canSend) {
                         minecraft.player.playSound(shutterSoundEvent);
                         Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));

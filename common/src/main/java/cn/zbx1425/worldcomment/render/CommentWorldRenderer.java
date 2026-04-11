@@ -5,10 +5,13 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 #if MC_VERSION >= "11903" import com.mojang.math.Axis; #else import com.mojang.math.Vector3f; #endif
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -17,6 +20,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 import java.util.List;
 import java.util.Map;
@@ -41,37 +47,42 @@ public class CommentWorldRenderer implements IGuiCommon {
         float cycleHoverLength = focused ? 1000 : 8000;
         float cycleHoverX = ((System.currentTimeMillis() + RANDOM.nextLong(0, (long)cycleHoverLength)) % (long)cycleHoverLength) / cycleHoverLength;
         float cycleHoverY = (float)Math.sin(cycleHoverX * Math.PI * 2) / 2 + 0.5f;
-        matrices.translate(
-                RANDOM.nextFloat(-0.3f, 0.3f),
-                cycleHoverY * 0.1,
-                RANDOM.nextFloat(-0.3f, 0.3f)
-        );
-        float yaw = (float)Mth.atan2(comment.location.getX() + 0.5 - cameraPos.x(), comment.location.getZ() + 0.5 - cameraPos.z());
+        float randomXOff = RANDOM.nextFloat(-0.3f, 0.3f), randomZOff = RANDOM.nextFloat(-0.3f, 0.3f);
+        matrices.translate(randomXOff, cycleHoverY * 0.1, randomZOff);
+        float yaw = (float)Mth.atan2(comment.location.getX() + 0.5 + randomXOff - cameraPos.x(), comment.location.getZ() + 0.5 + randomZOff - cameraPos.z());
 #if MC_VERSION >= "12000"
         matrices.mulPose(Axis.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
 #else
         matrices.mulPose(Vector3f.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
 #endif
 
+        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+
         {
             TextureAtlasSprite poleSprite = EmojiRegistry.INSTANCE.getPoleSprite();
             matrices.scale(0.9f, 0.9f, 0.9f);
-            PoseStack.Pose pose = matrices.last();
-            vertex(vertices, pose, 0.5f, 1f, 0f, poleSprite.getU0(), poleSprite.getV0());
-            vertex(vertices, pose, 0.5f, -2f, 0f, poleSprite.getU0(), poleSprite.getV1());
-            vertex(vertices, pose, -0.5f, -2f, 0f, poleSprite.getU1(), poleSprite.getV1());
-            vertex(vertices, pose, -0.5f, 1f, 0f, poleSprite.getU1(), poleSprite.getV0());
+            PoseStack.Pose pose = matrices.last().copy();
+
+            vertex(vertices, pose, 0.5f, 0.1875f, 0f, poleSprite.getU0(), poleSprite.getV0());
+            vertex(vertices, pose, 0.5f, -1.8125f, 0f, poleSprite.getU0(), poleSprite.getV1());
+            vertex(vertices, pose, -0.5f, -1.8125f, 0f, poleSprite.getU(31 / 32f), poleSprite.getV1());
+            vertex(vertices, pose, -0.5f, 0.1875f, 0f, poleSprite.getU(31 / 32f), poleSprite.getV0());
         }
 
         if (showIcon) {
             TextureAtlasSprite iconSprite = EmojiRegistry.INSTANCE.getSprite(comment.messageType);
-            matrices.translate(0, 0.25f, 0);
-            matrices.scale(0.5f, 0.5f, 0.5f);
+            matrices.translate(0, 0.75f, 0);
+
+            Matrix3f cameraRotMat = new Matrix3f();
+            camera.rotation().get(cameraRotMat);
             PoseStack.Pose pose = matrices.last();
-            vertex(vertices, pose, 0.5f, 1f, -0.05f, iconSprite.getU0(), iconSprite.getV0());
-            vertex(vertices, pose, 0.5f, 0f, -0.05f, iconSprite.getU0(), iconSprite.getV1());
-            vertex(vertices, pose, -0.5f, 0f, -0.05f, iconSprite.getU1(), iconSprite.getV1());
-            vertex(vertices, pose, -0.5f, 1f, -0.05f, iconSprite.getU1(), iconSprite.getV0());
+            pose.pose().set3x3(cameraRotMat).scale(0.8f);
+            pose.normal().identity().scale(1, -1, 1);
+
+            vertex(vertices, pose, 0.5f, 0.5f, -0.05f, iconSprite.getU0(), iconSprite.getV0());
+            vertex(vertices, pose, 0.5f, -0.5f, -0.05f, iconSprite.getU0(), iconSprite.getV1());
+            vertex(vertices, pose, -0.5f, -0.5f, -0.05f, iconSprite.getU1(), iconSprite.getV1());
+            vertex(vertices, pose, -0.5f, 0.5f, -0.05f, iconSprite.getU1(), iconSprite.getV0());
         }
         matrices.popPose();
     }

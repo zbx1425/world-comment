@@ -41,6 +41,7 @@ public class ClientRayPicking {
                         bp.getX() + 1, bp.getY() + 3, bp.getZ() + 1);
                 Frustum cullingFrustum = minecraft.gameRenderer.getMainCamera().getCullFrustum();
                 if (!cullingFrustum.isVisible(blockHitArea)) continue;
+                if (minecraft.level.isLoaded(bp) && minecraft.level.getBlockState(bp.below()).isAir()) continue;
                 Optional<Vec3> clipPos = blockHitArea.clip(pickStart, pickEnd);
                 boolean isPicked = clipPos.isPresent() && clipPos.get().distanceToSqr(pickStart) < vanillaDistSqr;
                 for (CommentEntry comment : blockData.getValue()) {
@@ -54,7 +55,7 @@ public class ClientRayPicking {
                 }
             }
         }
-        overlayOffset = Math.min(overlayOffset, Math.max(pickedComments.size() - 1, 0));
+        overlayOffset = Math.clamp(pickedComments.size() - 1, 0, overlayOffset);
         ClientRayPicking.nearbyCommentsCount = nearbyCommentsCount;
     }
 }
