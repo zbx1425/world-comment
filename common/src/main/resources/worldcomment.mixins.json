@@ -4,6 +4,7 @@
   "package": "cn.zbx1425.worldcomment.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "CreativeModeInventoryScreenMixin",
     "GameRendererMixin",
     "InventoryMixin",
     "InventoryScreenMixin",

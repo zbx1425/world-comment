@@ -55,6 +55,9 @@
   "gui.worldcomment.list.remove.confirm": "再点击一次确认移除",
   "gui.worldcomment.list.empty": "此处没有内容",
   "gui.worldcomment.list.like": "点赞",
+  "gui.worldcomment.detail.click_to_view": "点击查看大图",
+  "gui.worldcomment.imageview.hints": "滚轮缩放 | 拖动平移 | Esc 返回",
+  "gui.worldcomment.anonymous": "匿名",
 
   "gui.worldcomment.send_pending": "§6§l请选择一个喜欢的位置，然后放下评论！",
   "gui.worldcomment.send_upload_incomplete": "§b您的评论图片还没有完成上传，请您稍等。",

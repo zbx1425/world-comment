@@ -55,6 +55,9 @@
   "gui.worldcomment.list.remove.confirm": "Click again to CONFIRM",
   "gui.worldcomment.list.empty": "Nothing here",
   "gui.worldcomment.list.like": "Like",
+  "gui.worldcomment.detail.click_to_view": "Click to view full image",
+  "gui.worldcomment.imageview.hints": "Scroll: Zoom | Drag: Pan | Esc: Back",
+  "gui.worldcomment.anonymous": "Anonymous",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down!",
   "gui.worldcomment.send_upload_incomplete": "§bYour image is still being uploaded. Please wait.",

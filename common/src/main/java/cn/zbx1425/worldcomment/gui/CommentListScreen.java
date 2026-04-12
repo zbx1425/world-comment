@@ -19,7 +19,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Mth;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Style;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import java.util.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public class CommentListScreen extends Screen implements IGuiCommon {
 
@@ -47,9 +55,31 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     private final net.minecraft.client.gui.components.Button[] pageButtons = new net.minecraft.client.gui.components.Button[4];
 
     final List<CommentEntry> commentList = new ArrayList<>();
-    int commentListOffset = 0;
     int latestCommentsRequestedAmount = 0;
     private static final int LATEST_PAGE_SIZE = 20;
+
+    private double scrollCurrentPixel = 0;
+    private double scrollTargetPixel = 0;
+    private double scrollAnimStartPixel = 0;
+    private long scrollAnimStartNanos = 0;
+    private int[] snapPoints = new int[0];
+    private int[] commentHeights = new int[0];
+    private int totalContentHeight = 0;
+    private int maxScrollPixel = 0;
+
+    private static final long SCROLL_ANIM_DURATION_NS = 200_000_000L;
+
+    private static double easeOutCubic(double t) {
+        double t1 = 1.0 - t;
+        return 1.0 - t1 * t1 * t1;
+    }
+
+    private static double animateScroll(double startPixel, double targetPixel, long startNanos, long nowNanos) {
+        if (startNanos == 0) return targetPixel;
+        double t = (double) (nowNanos - startNanos) / SCROLL_ANIM_DURATION_NS;
+        if (t >= 1.0) return targetPixel;
+        return startPixel + (targetPixel - startPixel) * easeOutCubic(t);
+    }
 
     CommentEntry commentForDetail;
     private CommentEntry commentToDelete;
@@ -82,6 +112,33 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         listWidth = listAndLeftWidth - ASIDE_L_WIDTH - 2 - 2;
     }
 
+    private void recomputeSnapPoints() {
+        if (height == 0 || listWidth <= 0) return;
+        snapPoints = new int[commentList.size()];
+        commentHeights = new int[commentList.size()];
+        int y = 0;
+        for (int i = 0; i < commentList.size(); i++) {
+            snapPoints[i] = y;
+            WidgetCommentEntry widget = getWidget(commentList.get(i));
+            widget.showImage = true;
+            widget.setBounds(xListL + 5, 0, listWidth - 10);
+            commentHeights[i] = widget.getHeight() + 6;
+            y += commentHeights[i];
+        }
+        totalContentHeight = y;
+        int viewportHeight = height - 42;
+        maxScrollPixel = Math.max(0, totalContentHeight - viewportHeight);
+        scrollTargetPixel = Mth.clamp(scrollTargetPixel, 0, maxScrollPixel);
+        scrollCurrentPixel = Mth.clamp(scrollCurrentPixel, 0, maxScrollPixel);
+    }
+
+    private int findSnapIndex(double pixelOffset) {
+        for (int i = snapPoints.length - 1; i > 0; i--) {
+            if (snapPoints[i] <= pixelOffset + 0.5) return i;
+        }
+        return 0;
+    }
+
     // ---- Sub-views ----
 
     private final ListSubView listView = new ListSubView();
@@ -108,7 +165,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             PacketEntryActionC2S.ClientLogics.send(comment, PacketEntryActionC2S.ACTION_DELETE);
             commentList.remove(comment);
             commentToDelete = null;
-            commentListOffset = Mth.clamp(commentListOffset, 0, Math.max(commentList.size() - 1, 0));
+            recomputeSnapPoints();
             return true;
         } else {
             commentToDelete = comment;
@@ -157,6 +214,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         super.init();
         clearWidgets();
         updateLayout();
+        recomputeSnapPoints();
 
         pageButtons[0] = addRenderableWidget(new WidgetColorButton(xAsideLeftL + 10, 40, 80, 20,
                 Component.translatable("gui.worldcomment.list.nearby_posts"), 0xffe57373, sender -> switchTo(Tab.NEARBY)));
@@ -221,8 +279,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         guiParam.fill(xListL - 2, 0, xListL - 1, height, 0x33FFFFFF);
         guiParam.fill(xListL - 1, 0, xListL, height, 0xBF000000);
 
-        guiParam.fill(xAsideRightL - 2, 0, xAsideRightL - 1, height, 0xBF000000);
-        guiParam.fill(xAsideRightL - 1, 0, xAsideRightL, height, 0x33FFFFFF);
+        if (currentTab != Tab.DETAIL) {
+            guiParam.fill(xAsideRightL - 2, 0, xAsideRightL - 1, height, 0xBF000000);
+            guiParam.fill(xAsideRightL - 1, 0, xAsideRightL, height, 0x33FFFFFF);
+        }
 
         guiGraphics.disableBlend();
     }
@@ -268,7 +328,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         if (nonce != lastRequestNonce) return;
         commentList.addAll(data);
         commentList.sort(Comparator.comparingLong(entry -> -entry.timestamp));
-        commentListOffset = Mth.clamp(commentListOffset, 0, Math.max(commentList.size() - 1, 0));
+        recomputeSnapPoints();
     }
 
     public static void triggerOpen() {
@@ -307,7 +367,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         public void onEnter() {
             Minecraft minecraft = Minecraft.getInstance();
             commentList.clear();
-            commentListOffset = 0;
+            scrollCurrentPixel = 0;
+            scrollTargetPixel = 0;
+            scrollAnimStartPixel = 0;
+            scrollAnimStartNanos = 0;
             switch (currentTab) {
                 case NEARBY -> {
                     BlockPos playerPos = minecraft.player.blockPosition();
@@ -340,39 +403,55 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         @Override
         public void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
                            ISnGuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-            guiParam.blit(RenderPipelines.GUI_TEXTURED, INWORLD_MENU_LIST_BACKGROUND,
-                xListL, 0, 0, commentListOffset,
-                listWidth, height, 32, 32);
-//            guiGraphics.enableScissor(0, 0, width, height);
+            scrollCurrentPixel = animateScroll(
+                    scrollAnimStartPixel, scrollTargetPixel, scrollAnimStartNanos, System.nanoTime());
 
-            int yOffset = 20;
-            for (int i = commentListOffset; i < commentList.size(); i++) {
+            int viewportTop = 20;
+            int viewportBottom = height;
+
+            guiParam.blit(RenderPipelines.GUI_TEXTURED, INWORLD_MENU_LIST_BACKGROUND,
+                xListL, 0, 0, (int) scrollCurrentPixel,
+                listWidth, height, 32, 32);
+
+            guiGraphics.enableScissor(xListL, viewportTop, xListL + listWidth, viewportBottom);
+            for (int i = 0; i < commentList.size(); i++) {
+                int itemScreenY = viewportTop + snapPoints[i] - (int) scrollCurrentPixel;
+                int itemBottom = itemScreenY + commentHeights[i] - 6;
+                if (itemBottom <= viewportTop) continue;
+                if (itemScreenY >= viewportBottom) break;
+
                 CommentEntry comment = commentList.get(i);
                 WidgetCommentEntry widget = getWidget(comment);
                 widget.showImage = true;
-                widget.setBounds(xListL + 5, yOffset, listWidth - 10);
+                widget.setBounds(xListL + 5, itemScreenY, listWidth - 10);
                 widget.extractRenderState(guiParam, mouseX, mouseY, partialTick);
+            }
+            guiGraphics.disableScissor();
 
+            for (int i = 0; i < commentList.size(); i++) {
+                int itemScreenY = viewportTop + snapPoints[i] - (int) scrollCurrentPixel;
+                int itemBottom = itemScreenY + commentHeights[i] - 6;
+                if (itemBottom <= viewportTop) continue;
+                if (itemScreenY >= viewportBottom) break;
+                if (itemScreenY < viewportTop) continue;
+
+                CommentEntry comment = commentList.get(i);
                 int iconX = xAsideRightL + 5;
-                renderIcon(guiGraphics, iconX, yOffset + 4, 16, 196, 60, mouseX, mouseY);
+                renderIcon(guiGraphics, iconX, itemScreenY + 4, 16, 196, 60, mouseX, mouseY);
 
                 if (canDelete(comment)) {
-                    renderIcon(guiGraphics, iconX, yOffset + 4 + 16, 16, 216, 60, mouseX, mouseY);
-                    if (hitTest(mouseX, mouseY, iconX, yOffset + 4 + 16, 16) && commentToDelete == comment) {
+                    renderIcon(guiGraphics, iconX, itemScreenY + 4 + 16, 16, 216, 60, mouseX, mouseY);
+                    if (hitTest(mouseX, mouseY, iconX, itemScreenY + 4 + 16, 16) && commentToDelete == comment) {
                         guiGraphics.renderTooltip(font, Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
                     }
                 }
-
-                yOffset += widget.getHeight() + 6;
-                if (yOffset > height - 22) break;
             }
-//            guiGraphics.disableScissor();
 
             if (commentList.size() > 1) {
-                String pageStr = String.format("↕ %d / %d", commentListOffset + 1, commentList.size());
+                int topIndex = findSnapIndex(scrollCurrentPixel) + 1;
+                String pageStr = String.format("↕ %d / %d", topIndex, commentList.size());
                 guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
-                    xAsideRightL + 5,
-                        5, 0xFFA5D6A7, true);
+                    xAsideRightL + 5, 5, 0xFFA5D6A7, true);
             } else if (commentList.isEmpty()) {
                 guiGraphics.drawCenteredString(Minecraft.getInstance().font,
                         Component.translatable("gui.worldcomment.list.empty"),
@@ -382,39 +461,45 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
         @Override
         public boolean handleClick(double mouseX, double mouseY) {
-            int yOffset = 20;
-            for (int i = commentListOffset; i < commentList.size(); i++) {
+            int viewportTop = 20;
+            int viewportBottom = height - 22;
+
+            for (int i = 0; i < commentList.size(); i++) {
+                int itemScreenY = viewportTop + snapPoints[i] - (int) scrollCurrentPixel;
+                int itemBottom = itemScreenY + commentHeights[i] - 6;
+                if (itemBottom <= viewportTop) continue;
+                if (itemScreenY >= viewportBottom) break;
+                if (itemScreenY < viewportTop) continue;
+
                 CommentEntry comment = commentList.get(i);
-                WidgetCommentEntry widget = getWidget(comment);
                 int iconX = xAsideRightL + 5;
 
-                if (hitTest(mouseX, mouseY, iconX, yOffset + 4, 16)) {
+                if (hitTest(mouseX, mouseY, iconX, itemScreenY + 4, 16)) {
                     commentForDetail = comment;
                     switchTo(Tab.DETAIL);
                     return true;
                 }
 
-                if (canDelete(comment) && hitTest(mouseX, mouseY, iconX, yOffset + 4 + 16, 16)) {
+                if (canDelete(comment) && hitTest(mouseX, mouseY, iconX, itemScreenY + 4 + 16, 16)) {
                     tryDelete(comment);
                     return true;
                 }
-
-                yOffset += widget.getHeight() + 6;
-                if (yOffset > height - 22) break;
             }
             return false;
         }
 
         @Override
         public boolean handleScroll(int scrollAmount) {
-            if (commentList.size() <= 1) {
-                commentListOffset = 0;
-                return false;
-            }
-            int dir = -(int)Math.signum(scrollAmount);
-            commentListOffset = Mth.clamp(commentListOffset + dir, 0, Math.max(commentList.size() - 1, 0));
+            if (commentList.isEmpty()) return false;
+            int dir = -(int) Math.signum(scrollAmount);
+            int currentSnapIndex = findSnapIndex(scrollTargetPixel);
+            int newIndex = Mth.clamp(currentSnapIndex + dir, 0, commentList.size() - 1);
+            double newTarget = Mth.clamp((double) snapPoints[newIndex], 0, maxScrollPixel);
+            scrollAnimStartPixel = scrollCurrentPixel;
+            scrollAnimStartNanos = System.nanoTime();
+            scrollTargetPixel = newTarget;
 
-            if (currentTab == Tab.RECENT && commentListOffset >= latestCommentsRequestedAmount - LATEST_PAGE_SIZE / 2) {
+            if (currentTab == Tab.RECENT && newIndex >= latestCommentsRequestedAmount - LATEST_PAGE_SIZE / 2) {
                 lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
                 PacketCollectionRequestC2S.ClientLogics.sendLatest(
                         latestCommentsRequestedAmount, LATEST_PAGE_SIZE, lastRequestNonce);
@@ -428,8 +513,26 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     private class DetailSubView implements SubView {
 
+        private double detailScrollCurrent = 0;
+        private double detailScrollTarget = 0;
+        private double detailScrollAnimStart = 0;
+        private long detailScrollAnimStartNanos = 0;
+        private int detailContentHeight = 0;
+        private int detailMaxScroll = 0;
+
+        private int cachedImgX, cachedImgY, cachedImgW, cachedImgH;
+        private boolean hasImage = false;
+        private int cachedDeleteBtnX, cachedDeleteBtnY;
+        private boolean hasDeleteBtn = false;
+
+        private static final int PADDING = 12;
+
         @Override
         public void onEnter() {
+            detailScrollCurrent = 0;
+            detailScrollTarget = 0;
+            detailScrollAnimStart = 0;
+            detailScrollAnimStartNanos = 0;
         }
 
         @Override
@@ -437,53 +540,168 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                            ISnGuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
             Minecraft minecraft = Minecraft.getInstance();
             CommentEntry comment = commentForDetail;
+            if (comment == null) return;
 
-            int maxPicWidth = width - 100 - 20 - 20;
-            int maxPicHeight = height - 30 - 20 - 20;
+            int dLeft = xListL;
+            int dWidth = (xAsideRightL + ASIDE_R_WIDTH) - xListL;
+            int contentWidth = dWidth - 2 * PADDING;
+            int contentLeft = dLeft + PADDING;
 
-            ImageDownload.ImageState imageToDraw = ImageDownload.getTexture(comment.image, false);
-            int picWidth = Math.min(maxPicWidth, maxPicHeight * imageToDraw.width / imageToDraw.height);
-            int picHeight = picWidth * imageToDraw.height / imageToDraw.width;
-            int x1 = 100 + 10, x2 = 100 + 10 + picWidth;
-            int y1 = 30 + 10, y2 = 30 + 10 + picHeight;
-            guiGraphics.fill(x1 + 3, y1 + 3, x2 + 3, y2 + 3, 0xFF000000);
-            guiGraphics.blit(imageToDraw.getFriendlyTexture(minecraft.getTextureManager()), x1, y1, x2, y2);
+            detailScrollCurrent = animateScroll(
+                    detailScrollAnimStart, detailScrollTarget,
+                    detailScrollAnimStartNanos, System.nanoTime());
 
-            WidgetCommentEntry widget = getWidget(comment);
-            widget.showImage = false;
-            int imgAreaWidth = width - 100 - 20 - 10;
-            widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), 0, imgAreaWidth / 2);
-            widget.setBounds(100 + 10 + imgAreaWidth - (imgAreaWidth / 2), height - 20 - widget.getHeight(),
-                    imgAreaWidth / 2);
-            widget.extractRenderState(guiParam, mouseX, mouseY, partialTick);
+            int viewportTop = 10;
+            int viewportBottom = height;
+            int viewportHeight = viewportBottom - viewportTop;
 
-            if (canDelete(comment)) {
-                int deleteBtnX = 100 + 18, deleteBtnY = height - 20 - 22;
-                renderIcon(guiGraphics, deleteBtnX, deleteBtnY, 20, 216, 60, mouseX, mouseY);
-                if (hitTest(mouseX, mouseY, deleteBtnX, deleteBtnY, 20) && commentToDelete == comment) {
-                    guiGraphics.renderTooltip(font, Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
-                }
+            guiParam.blit(RenderPipelines.GUI_TEXTURED, INWORLD_MENU_LIST_BACKGROUND,
+                xListL, 0, 0, (int) scrollCurrentPixel,
+                dWidth, height, 32, 32);
+
+            guiGraphics.enableScissor(dLeft, viewportTop, dLeft + dWidth, viewportBottom);
+
+            int y = viewportTop - (int) detailScrollCurrent;
+            int startY = y;
+
+            // --- Metadata ---
+            TextureAtlasSprite iconSprite = EmojiRegistry.INSTANCE.getSprite(comment.messageType);
+            guiGraphics.enableBlend();
+            guiParam.pose().pushMatrix();
+            guiParam.pose().translate(0.5f, 0.5f);
+            guiParam.blitSprite(RenderPipelines.GUI_TEXTURED, iconSprite, contentLeft, y + 1, 14, 14);
+            guiParam.pose().popMatrix();
+            guiGraphics.disableBlend();
+            Component typeName = Component.translatable("gui.worldcomment.comment_type." + comment.messageType)
+                    .setStyle(Style.EMPTY.withBold(true).withColor(
+                            CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF));
+            guiGraphics.drawString(font, typeName, contentLeft + 18, y + 3, 0xFFFFFFFF, true);
+            y += 25;
+
+            Component nameComponent = comment.initiatorName.isEmpty()
+                    ? Component.translatable("gui.worldcomment.anonymous")
+                    : Component.literal(comment.initiatorName);
+            guiGraphics.drawString(font, nameComponent, contentLeft, y, 0xFFFFFFFF, true);
+            if (minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) {
+                y += 14;
+                String uuid = comment.initiator.toString();
+                guiGraphics.drawString(font, uuid,
+                        contentLeft, y, 0xFF888888, true);
             }
+            y += 14;
+
+            String timeStr = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
+                    .format(Instant.ofEpochMilli(comment.timestamp)
+                            .atZone(ZoneId.systemDefault()).toLocalDateTime());
+            guiGraphics.drawString(font, timeStr, contentLeft, y, 0xFFBBBBBB, true);
+            y += 14;
+
+            String locStr = comment.level.toString() + "  " + comment.location.toShortString();
+            guiGraphics.drawString(font, locStr, contentLeft, y, 0xFFBBBBBB, true);
+            y += 14;
+
+            y += 6;
+            guiGraphics.fill(contentLeft, y, contentLeft + contentWidth, y + 1, 0x44FFFFFF);
+            y += 7;
+
+            // --- Comment text ---
+            if (!comment.message.isEmpty()) {
+                List<FormattedCharSequence> lines = Language.getInstance().getVisualOrder(
+                        font.getSplitter().splitLines(comment.message, contentWidth, Style.EMPTY));
+                for (FormattedCharSequence line : lines) {
+                    guiGraphics.drawString(font, line, contentLeft, y, 0xFFEEEEEE, true);
+                    y += font.lineHeight + 1;
+                }
+                y += 6;
+            }
+
+            // --- Image ---
+            hasImage = false;
+            if (!comment.image.url.isEmpty()) {
+                ImageDownload.ImageState imageState = ImageDownload.getTexture(comment.image, false);
+                int maxImgW = (int) (contentWidth * 0.8);
+                int maxImgH = height / 2;
+                int imgW, imgH;
+                if (imageState.width * maxImgH > imageState.height * maxImgW) {
+                    imgW = maxImgW;
+                    imgH = Math.max(1, maxImgW * imageState.height / imageState.width);
+                } else {
+                    imgH = maxImgH;
+                    imgW = Math.max(1, maxImgH * imageState.width / imageState.height);
+                }
+                int imgX = contentLeft + (contentWidth - imgW) / 2;
+
+                guiGraphics.fill(imgX + 2, y + 2, imgX + imgW + 2, y + imgH + 2, 0xFF000000);
+                guiGraphics.blit(imageState.getFriendlyTexture(minecraft.getTextureManager()),
+                        imgX, y, imgX + imgW, y + imgH);
+
+                cachedImgX = imgX;
+                cachedImgY = y;
+                cachedImgW = imgW;
+                cachedImgH = imgH;
+                hasImage = true;
+
+                y += imgH + 4;
+
+                Component hint = Component.translatable("gui.worldcomment.detail.click_to_view");
+                int hintWidth = font.width(hint);
+                guiGraphics.drawString(font, hint,
+                        contentLeft + (contentWidth - hintWidth) / 2, y, 0xFF8888FF, true);
+                y += font.lineHeight + 4;
+            }
+
+            // --- Delete button ---
+            hasDeleteBtn = false;
+            if (canDelete(comment)) {
+                y += 4;
+                cachedDeleteBtnX = contentLeft;
+                cachedDeleteBtnY = y;
+                hasDeleteBtn = true;
+                renderIcon(guiGraphics, contentLeft, y, 20, 216, 60, mouseX, mouseY);
+                if (hitTest(mouseX, mouseY, contentLeft, y, 20) && commentToDelete == comment) {
+                    guiGraphics.renderTooltip(font,
+                            Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
+                }
+                y += 24;
+            }
+
+            guiGraphics.disableScissor();
+
+            detailContentHeight = y - startY;
+            detailMaxScroll = Math.max(0, detailContentHeight - viewportHeight);
+            detailScrollTarget = Mth.clamp(detailScrollTarget, 0, detailMaxScroll);
+            detailScrollCurrent = Mth.clamp(detailScrollCurrent, 0, detailMaxScroll);
         }
 
         @Override
         public boolean handleClick(double mouseX, double mouseY) {
             CommentEntry comment = commentForDetail;
-            if (canDelete(comment)) {
-                int deleteBtnX = 100 + 18, deleteBtnY = height - 20 - 22;
-                if (hitTest(mouseX, mouseY, deleteBtnX, deleteBtnY, 20)) {
-                    if (tryDelete(comment)) {
-                        onClose();
-                    }
-                    return true;
-                }
+            if (comment == null) return false;
+
+            if (hasImage && mouseX >= cachedImgX && mouseX < cachedImgX + cachedImgW
+                    && mouseY >= cachedImgY && mouseY < cachedImgY + cachedImgH) {
+                Minecraft.getInstance().setScreen(
+                        new ImageViewScreen(CommentListScreen.this, comment.image));
+                return true;
             }
+
+            if (hasDeleteBtn && hitTest(mouseX, mouseY, cachedDeleteBtnX, cachedDeleteBtnY, 20)) {
+                if (tryDelete(comment)) {
+                    onClose();
+                }
+                return true;
+            }
+
             return false;
         }
 
         @Override
         public boolean handleScroll(int scrollAmount) {
-            return false;
+            if (detailMaxScroll <= 0) return false;
+            detailScrollAnimStart = detailScrollCurrent;
+            detailScrollAnimStartNanos = System.nanoTime();
+            detailScrollTarget = Mth.clamp(detailScrollTarget - scrollAmount * 20, 0, detailMaxScroll);
+            return true;
         }
     }
 }
