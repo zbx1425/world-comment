@@ -66,6 +66,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     private int[] commentHeights = new int[0];
     private int totalContentHeight = 0;
     private int maxScrollPixel = 0;
+    private boolean noMoreData = false;
+    private int footerHeight = 0;
 
     private static final long SCROLL_ANIM_DURATION_NS = 200_000_000L;
 
@@ -126,6 +128,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             y += commentHeights[i];
         }
         totalContentHeight = y;
+        footerHeight = 0;
+        if (noMoreData && !commentList.isEmpty()) {
+            footerHeight = 20 + (font != null ? font.lineHeight : 9) + 20;
+            totalContentHeight += footerHeight;
+        }
         int viewportHeight = height - 42;
         maxScrollPixel = Math.max(0, totalContentHeight - viewportHeight);
         scrollTargetPixel = Mth.clamp(scrollTargetPixel, 0, maxScrollPixel);
@@ -324,10 +331,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     // ---- Public API ----
 
-    public void handleCommentDataUI(List<CommentEntry> data, long nonce) {
+    public void handleCommentDataUI(List<CommentEntry> data, long nonce, int rawCount) {
         if (nonce != lastRequestNonce) return;
         commentList.addAll(data);
         commentList.sort(Comparator.comparingLong(entry -> -entry.timestamp));
+        if (currentTab == Tab.MY_POSTS || (currentTab == Tab.RECENT && rawCount < LATEST_PAGE_SIZE)) {
+            noMoreData = true;
+        }
         recomputeSnapPoints();
     }
 
@@ -371,6 +381,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             scrollTargetPixel = 0;
             scrollAnimStartPixel = 0;
             scrollAnimStartNanos = 0;
+            noMoreData = false;
             switch (currentTab) {
                 case NEARBY -> {
                     BlockPos playerPos = minecraft.player.blockPosition();
@@ -383,6 +394,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                         }
                     }
                     commentList.sort(Comparator.comparingDouble(entry -> entry.location.distSqr(playerPos)));
+                    noMoreData = true;
                 }
                 case RECENT -> {
                     lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
@@ -447,6 +459,15 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 }
             }
 
+            if (footerHeight > 0) {
+                int footerTextY = viewportTop + (totalContentHeight - footerHeight) + 20 - (int) scrollCurrentPixel;
+                if (footerTextY < viewportBottom && footerTextY + font.lineHeight > viewportTop) {
+                    guiGraphics.drawCenteredString(font,
+                            Component.translatable("gui.worldcomment.list.no_more"),
+                            xListL + listWidth / 2, footerTextY, 0xFFA5D6A7);
+                }
+            }
+
             if (commentList.size() > 1) {
                 int topIndex = findSnapIndex(scrollCurrentPixel) + 1;
                 String pageStr = String.format("↕ %d / %d", topIndex, commentList.size());
@@ -462,7 +483,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         @Override
         public boolean handleClick(double mouseX, double mouseY) {
             int viewportTop = 20;
-            int viewportBottom = height - 22;
+            int viewportBottom = height;
 
             for (int i = 0; i < commentList.size(); i++) {
                 int itemScreenY = viewportTop + snapPoints[i] - (int) scrollCurrentPixel;
@@ -492,14 +513,28 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         public boolean handleScroll(int scrollAmount) {
             if (commentList.isEmpty()) return false;
             int dir = -(int) Math.signum(scrollAmount);
-            int currentSnapIndex = findSnapIndex(scrollTargetPixel);
-            int newIndex = Mth.clamp(currentSnapIndex + dir, 0, commentList.size() - 1);
-            double newTarget = Mth.clamp((double) snapPoints[newIndex], 0, maxScrollPixel);
+            int lastSnap = snapPoints.length > 0 ? snapPoints[snapPoints.length - 1] : 0;
+            boolean pastLastSnap = scrollTargetPixel > lastSnap + 0.5;
+
+            double newTarget;
+            if (dir < 0 && pastLastSnap) {
+                newTarget = lastSnap;
+            } else if (dir > 0 && !pastLastSnap
+                    && findSnapIndex(scrollTargetPixel) == commentList.size() - 1
+                    && footerHeight > 0) {
+                newTarget = maxScrollPixel;
+            } else {
+                int currentSnapIndex = findSnapIndex(scrollTargetPixel);
+                int newIndex = Mth.clamp(currentSnapIndex + dir, 0, commentList.size() - 1);
+                newTarget = Mth.clamp((double) snapPoints[newIndex], 0, maxScrollPixel);
+            }
             scrollAnimStartPixel = scrollCurrentPixel;
             scrollAnimStartNanos = System.nanoTime();
             scrollTargetPixel = newTarget;
 
-            if (currentTab == Tab.RECENT && newIndex >= latestCommentsRequestedAmount - LATEST_PAGE_SIZE / 2) {
+            int visibleIndex = findSnapIndex(scrollTargetPixel);
+            if (currentTab == Tab.RECENT && !noMoreData
+                    && visibleIndex >= latestCommentsRequestedAmount - LATEST_PAGE_SIZE / 2) {
                 lastRequestNonce = ServerWorldData.SNOWFLAKE.nextId();
                 PacketCollectionRequestC2S.ClientLogics.sendLatest(
                         latestCommentsRequestedAmount, LATEST_PAGE_SIZE, lastRequestNonce);

@@ -230,7 +230,15 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                     }
             ));
             if (!withPlacingDown) {
-                SubmitDispatcher.placeJobAt(jobId, player.blockPosition().atY((int) Math.round(player.position().y - 1.0 / 16)));
+                boolean placedOnGround = SubmitDispatcher.placeJobAtSnapping(
+                    jobId,
+                    player.blockPosition().atY((int) Math.round(player.position().y - 1.0 / 16)),
+                    player.level()
+                );
+                if (!placedOnGround) {
+                    player.sendSystemMessage(
+                        Component.translatable("gui.worldcomment.send_in_air"));
+                }
             } else {
                 player.sendSystemMessage(
                         Component.translatable("gui.worldcomment.send_pending"));

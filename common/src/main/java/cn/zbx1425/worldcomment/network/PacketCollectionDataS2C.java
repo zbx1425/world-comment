@@ -44,7 +44,7 @@ public class PacketCollectionDataS2C {
 
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.screen instanceof CommentListScreen) {
-                ((CommentListScreen)minecraft.screen).handleCommentDataUI(comments, nonce);
+                ((CommentListScreen)minecraft.screen).handleCommentDataUI(comments, nonce, commentSize);
             }
 
             ImageDump.handleDumpResponse(comments, nonce);

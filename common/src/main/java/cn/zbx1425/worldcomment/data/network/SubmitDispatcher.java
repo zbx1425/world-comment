@@ -9,6 +9,7 @@ import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -59,6 +60,28 @@ public class SubmitDispatcher {
             pendingJobs.get(jobId).setLocation(blockPos);
             trySendPackage(jobId);
         }
+    }
+
+    public static boolean placeJobAtSnapping(long jobId, BlockPos blockPos, Level level) {
+        BlockPos groundPos = null;
+        final int MAX_GROUND_DISTANCE = 3;
+        for (int i = 0; i < MAX_GROUND_DISTANCE; i++) {
+            BlockPos testGroundPos = blockPos.below(i + 1);
+            if (level.isLoaded(testGroundPos) && !level.getBlockState(testGroundPos).isAir()) {
+                groundPos = testGroundPos;
+                break;
+            }
+        }
+        synchronized (pendingJobs) {
+            if (!pendingJobs.containsKey(jobId)) return true;
+            if (groundPos != null) {
+                pendingJobs.get(jobId).setLocation(groundPos.above());
+            } else {
+                pendingJobs.get(jobId).setLocation(blockPos);
+            }
+            trySendPackage(jobId);
+        }
+        return groundPos != null;
     }
 
     public static void removeJob(long jobId) {
