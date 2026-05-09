@@ -9,6 +9,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -66,13 +67,17 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
                     cellX + ITEM_SIZE + ITEM_PADDING, cellY + ITEM_SIZE + ITEM_PADDING,
                     0xFF999999
                 );
-            } else if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX
+            }
+            if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX
                 && cellY <= logicMouseY && cellY + ITEM_SIZE >= logicMouseY
                 && 0 <= logicMouseY && getHeight() >= logicMouseY) {
-                graphics.fill(cellX - ITEM_PADDING, cellY - ITEM_PADDING,
-                    cellX + ITEM_SIZE + ITEM_PADDING, cellY + ITEM_SIZE + ITEM_PADDING,
-                    0xFFDDDD99
-                );
+                if (selectedId != id) {
+                    graphics.fill(cellX - ITEM_PADDING, cellY - ITEM_PADDING,
+                        cellX + ITEM_SIZE + ITEM_PADDING, cellY + ITEM_SIZE + ITEM_PADDING,
+                        0xFFDDDD99
+                    );
+                }
+                graphics.setTooltipForNextFrame(Component.translatable("gui.worldcomment.comment_type." + id), mouseX, mouseY);
             }
 
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EmojiRegistry.INSTANCE.getSprite(id),

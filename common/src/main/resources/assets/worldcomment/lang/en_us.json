@@ -1,5 +1,5 @@
 {
-  "item.worldcomment.comment_tool": "§l§6WorldComment§r Tool",
+  "item.worldcomment.comment_tool": "§l§6WorldComment§r Usage Guide",
   "item.worldcomment.comment_eyeglass": "§l§6WorldComment§r Projection Eyeglasses",
   "item.worldcomment.placeable_comment": "§l§6WorldComment§r to be Placed Down",
 
@@ -7,14 +7,11 @@
 
   "gui.worldcomment.comment_tool.title": "Share your idea",
 
-  "gui.worldcomment.comment_type.1": "Great",
-  "gui.worldcomment.comment_type.2": "Good",
-  "gui.worldcomment.comment_type.3": "Advice",
-  "gui.worldcomment.comment_type.4": "NoGood",
-  "gui.worldcomment.comment_type.5": "ToDo",
-  "gui.worldcomment.comment_type.6": "Warn",
-  "gui.worldcomment.comment_type.7": "Tip",
-  "gui.worldcomment.comment_type.8": "Memo",
+  "gui.worldcomment.comment_type.1": "Wow",
+  "gui.worldcomment.comment_type.2": "Heh",
+  "gui.worldcomment.comment_type.3": "Thinking",
+  "gui.worldcomment.comment_type.4": "Pleading",
+  "gui.worldcomment.comment_type.5": "Ascension",
   "gui.worldcomment.comment_type.65472": "Tip",
 
   "gui.worldcomment.message": "Enter feedback here (Optional)",
@@ -65,11 +62,11 @@
   "gui.worldcomment.anonymous": "Anonymous",
 
   "gui.worldcomment.instruction.title": "How to Use WorldComment",
-  "gui.worldcomment.instruction.send_header": "#### §0Sending Comments",
-  "gui.worldcomment.instruction.send_content": "Press %s at §lany time§r\nNo need to hold this tool",
-  "gui.worldcomment.instruction.hide_header": "#### §0Hiding Comments",
+  "gui.worldcomment.instruction.send_header": "#### Sending Comments",
+  "gui.worldcomment.instruction.send_content": "Press %s (rebindable) at §lany time§r\nNo need to hold this tool",
+  "gui.worldcomment.instruction.hide_header": "#### Hiding Comments",
   "gui.worldcomment.instruction.hide_content": "Use the button on inventory screen or pause menu",
-  "gui.worldcomment.instruction.list_header": "#### §0Viewing Comment List",
+  "gui.worldcomment.instruction.list_header": "#### Viewing Comment List",
   "gui.worldcomment.instruction.list_content": "Use the command '/wc list'",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down!",

@@ -18,6 +18,6 @@ public class CreativeModeInventoryScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("RETURN"))
     void onInit(CallbackInfo ci) {
-        PauseScreenAdditions.init(this, this::addRenderableWidget);
+//        PauseScreenAdditions.init(this, this::addRenderableWidget);
     }
 }

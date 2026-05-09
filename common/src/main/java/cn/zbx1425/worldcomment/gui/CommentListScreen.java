@@ -644,12 +644,12 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             // --- Comment text ---
             if (!comment.message.isEmpty()) {
                 List<SizedFormattedText> lines = SizedFormattedText.splitLines(comment.message, font, contentWidth, Style.EMPTY,
-                    comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID);
+                    comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID, true);
                 for (SizedFormattedText line : lines) {
                     guiGraphics.pushPose();
                     guiGraphics.translate(contentLeft, y, 0);
                     guiGraphics.scale(line.sizeModifier, line.sizeModifier);
-                    guiGraphics.drawString(font, line.ordered, 0, 0, 0xFFEEEEEE, true);
+                    guiGraphics.drawString(font, line.ordered, 0, 0, 0xFFDDDDDD, true);
                     guiGraphics.popPose();
                     y += (int)(font.lineHeight * line.sizeModifier) + 1;
                 }
@@ -698,8 +698,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 cachedDeleteBtnX = contentLeft + contentWidth - 30;
                 cachedDeleteBtnY = y;
                 hasDeleteBtn = true;
-                renderIcon(guiGraphics, contentLeft, y, 20, 216, 60, mouseX, mouseY);
-                if (hitTest(mouseX, mouseY, contentLeft, y, 20) && commentToDelete == comment) {
+                renderIcon(guiGraphics, contentLeft + contentWidth - 30, y, 20, 216, 60, mouseX, mouseY);
+                if (hitTest(mouseX, mouseY, contentLeft + contentWidth - 30, y, 20) && commentToDelete == comment) {
                     guiGraphics.renderTooltip(font,
                             Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
                 }

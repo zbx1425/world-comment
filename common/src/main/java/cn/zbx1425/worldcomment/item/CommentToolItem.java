@@ -64,9 +64,6 @@ public class CommentToolItem extends Item implements GroupedItem {
             GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT, GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT,
             GLFW.GLFW_KEY_LEFT_SUPER, GLFW.GLFW_KEY_RIGHT_SUPER, GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL
         };
-//        private static final KeyEvent[] MODIFIER_EVENTS = Util.make(() ->
-//            Arrays.stream(MODIFIER_SYMS).mapToObj(sym -> new KeyEvent(sym, 0, 0)).toArray(KeyEvent[]::new)
-//        );
         private static final Function<InputConstants.Key, Boolean> HOTKEY_IS_MODIFIER_SUPPLIER = Util.memoize(_ ->
             Arrays.stream(MODIFIER_SYMS).anyMatch(it -> ((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey().getValue() == it)
         );

@@ -8,6 +8,7 @@ import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,12 +39,15 @@ public class KeyMappingMixin {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
         boolean isScreenshotHotkey = CommentToolItem.Client.getSendHotkeyIsModifier()
-            ? ((Object)this == options.keyScreenshot && MainClient.KEY_SEND_COMMENT_MODIFIER.get().isDown())
-            : ((Object)this == MainClient.KEY_SEND_COMMENT_MODIFIER.get());
+            ? (options.keyScreenshot.same((KeyMapping)(Object)this) && MainClient.KEY_SEND_COMMENT_MODIFIER.get().isDown())
+            : (MainClient.KEY_SEND_COMMENT_MODIFIER.get().same((KeyMapping)(Object)this));
         if (isScreenshotHotkey) {
             if (CommentToolItem.Client.handleScreenshotKey()) {
                 cir.setReturnValue(false);
             }
+        }
+        if (options.keyScreenshot.same((KeyMapping)(Object)this) && Minecraft.getInstance().screen instanceof KeyBindsScreen) {
+            cir.setReturnValue(false);
         }
     }
 }

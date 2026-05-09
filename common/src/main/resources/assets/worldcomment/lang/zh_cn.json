@@ -1,5 +1,5 @@
 {
-  "item.worldcomment.comment_tool": "§l§6随笔评论§r 工具",
+  "item.worldcomment.comment_tool": "§l§6随笔评论§r 使用指南",
   "item.worldcomment.comment_eyeglass": "§l§6随笔评论§r 投影眼镜",
   "item.worldcomment.placeable_comment": "待放置的 §l§6随笔评论§r",
 
@@ -7,14 +7,11 @@
 
   "gui.worldcomment.comment_tool.title": "分享您的想法",
 
-  "gui.worldcomment.comment_type.1": "好惊艳",
-  "gui.worldcomment.comment_type.2": "挺不错",
-  "gui.worldcomment.comment_type.3": "小建议",
-  "gui.worldcomment.comment_type.4": "要提高",
-  "gui.worldcomment.comment_type.5": "待办",
-  "gui.worldcomment.comment_type.6": "警告",
-  "gui.worldcomment.comment_type.7": "提示",
-  "gui.worldcomment.comment_type.8": "留言",
+  "gui.worldcomment.comment_type.1": "这么强",
+  "gui.worldcomment.comment_type.2": "嘻嘻",
+  "gui.worldcomment.comment_type.3": "思考",
+  "gui.worldcomment.comment_type.4": "哭哭",
+  "gui.worldcomment.comment_type.5": "†升天†",
   "gui.worldcomment.comment_type.65472": "提示",
 
   "gui.worldcomment.message": "在此处留言 (非必填)",
@@ -65,11 +62,11 @@
   "gui.worldcomment.anonymous": "匿名",
 
   "gui.worldcomment.instruction.title": "如何使用随笔评论？",
-  "gui.worldcomment.instruction.send_header": "#### §0发送评论",
-  "gui.worldcomment.instruction.send_content": "在§l任何时候§r按下 %s 即可\n不必手持此工具",
-  "gui.worldcomment.instruction.hide_header": "#### §0隐藏评论",
+  "gui.worldcomment.instruction.send_header": "#### 发送评论",
+  "gui.worldcomment.instruction.send_content": "在§l任何时候§r按下 %s (可换绑) 即可\n不必手持此工具",
+  "gui.worldcomment.instruction.hide_header": "#### 隐藏评论",
   "gui.worldcomment.instruction.hide_content": "使用物品栏界面或暂停菜单上的按钮",
-  "gui.worldcomment.instruction.list_header": "#### §0查看评论列表",
+  "gui.worldcomment.instruction.list_header": "#### 查看评论列表",
   "gui.worldcomment.instruction.list_content": "使用 /wc list 指令",
 
   "gui.worldcomment.send_pending": "§6§l请选择一个喜欢的位置，然后放下评论！",
