@@ -11,6 +11,7 @@ import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 #if MC_VERSION >= "12000"
+import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
@@ -68,9 +69,10 @@ public class ClientProxy {
 
         @SubscribeEvent
         public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-            for (KeyMapping keyMapping : ClientPlatformImpl.KEY_MAPPINGS) {
-                keyMapping.setKeyConflictContext(NoConflictKeyConflictContext.INSTANCE);
-                event.register(keyMapping);
+            for (RegistryObject<KeyMapping> keyMapping : ClientPlatformImpl.KEY_MAPPINGS) {
+                KeyMapping key = keyMapping.get();
+                key.setKeyConflictContext(NoConflictKeyConflictContext.INSTANCE);
+                event.register(key);
             }
         }
 

@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.util;
 
 import cn.zbx1425.worldcomment.item.GroupedItem;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -25,5 +26,7 @@ public interface RegistriesWrapper {
     void registerEntityType(String id, RegistryObject<? extends EntityType<? extends Entity>> entityType);
 
     void registerSoundEvent(String id, SoundEvent soundEvent);
+
+    <T> void registerDataComponentType(String id, RegistryObject<DataComponentType<T>> componentType);
 
 }

@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment;
 
+import cn.zbx1425.worldcomment.util.RegistryObject;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 public class ClientPlatform {
 
     @ExpectPlatform
-    public static void registerKeyBinding(KeyMapping keyMapping) {
+    public static void registerKeyBinding(RegistryObject<KeyMapping> keyMapping) {
         throw new AssertionError();
     }
 

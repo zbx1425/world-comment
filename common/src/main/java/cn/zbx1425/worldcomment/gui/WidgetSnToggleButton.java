@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -47,10 +48,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
                                     Component.translatable("gui.worldcomment.toggler.disabled")),
                     Component.translatable("gui.worldcomment.toggler.toggle"),
                     Component.translatable("gui.worldcomment.toggler.create",
-                        Minecraft.getInstance().options.keySprint.getTranslatedKeyMessage().copy()
-                            .append(" + ")
-                            .append(Minecraft.getInstance().options.keyScreenshot.getTranslatedKeyMessage())
-                            .withStyle(ChatFormatting.BLUE)),
+                        CommentToolItem.Client.getSendHotkeyDescription().copy().withStyle(ChatFormatting.BLUE)),
                     Component.translatable("gui.worldcomment.toggler.nearby",
                             Component.literal(String.valueOf(ClientRayPicking.nearbyCommentsCount)).withStyle(ChatFormatting.GOLD)),
                     Component.translatable("gui.worldcomment.toggler.manage")

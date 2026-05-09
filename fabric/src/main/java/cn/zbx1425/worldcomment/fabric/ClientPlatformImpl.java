@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.fabric;
 
+import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -15,8 +16,8 @@ import java.util.function.Consumer;
 
 public class ClientPlatformImpl {
 
-    public static void registerKeyBinding(KeyMapping keyMapping) {
-        KeyMappingHelper.registerKeyMapping(keyMapping);
+    public static void registerKeyBinding(RegistryObject<KeyMapping> keyMapping) {
+        KeyMappingHelper.registerKeyMapping(keyMapping.get());
     }
 
     public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
@@ -42,7 +43,7 @@ public class ClientPlatformImpl {
     }
 
     public static void registerTickEvent(Consumer<Minecraft> consumer) {
-        ClientTickEvents.START_CLIENT_TICK.register(consumer::accept);
+        ClientTickEvents.END_CLIENT_TICK.register(consumer::accept);
     }
 
     public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {

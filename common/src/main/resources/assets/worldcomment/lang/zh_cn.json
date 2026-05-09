@@ -1,6 +1,9 @@
 {
-  "item.worldcomment.comment_tool": "§l§6随处随笔§r 快速评论工具",
-  "item.worldcomment.comment_eyeglass": "§l§6随处随笔§r 投影眼镜",
+  "item.worldcomment.comment_tool": "§l§6随笔评论§r 工具",
+  "item.worldcomment.comment_eyeglass": "§l§6随笔评论§r 投影眼镜",
+  "item.worldcomment.placeable_comment": "待放置的 §l§6随笔评论§r",
+
+  "gui.worldcomment.placeable_comment.encapsulation": "将它放下之后即返还您的 %s",
 
   "gui.worldcomment.comment_tool.title": "分享您的想法",
 
@@ -77,5 +80,5 @@
   "gui.worldcomment.send_in_air": "§c§l注意：在空中放置的评论将不会在游戏中展示，但仍然可以通过评论列表查看。",
   "gui.worldcomment.image_global_kill_feedback": "图像全局禁用开关已被设定为 %s。",
 
-  "key.worldcomment.comment_detail": "查看评论详情"
+  "key.worldcomment.send_comment_modifier": "随笔评论: 发送键或修饰键"
 }

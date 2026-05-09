@@ -5,8 +5,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
-import cn.zbx1425.worldcomment.item.CommentToolItem;
-import cn.zbx1425.worldcomment.network.PacketDemandToolPresenceC2S;
+import cn.zbx1425.worldcomment.network.PacketRequestPlacementC2S;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
@@ -19,7 +18,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -236,7 +234,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             } else {
                 player.sendSystemMessage(
                         Component.translatable("gui.worldcomment.send_pending"));
-                PacketDemandToolPresenceC2S.ClientLogics.sendBeginPlacement(jobId);
+                PacketRequestPlacementC2S.ClientLogics.sendBeginPlacement(jobId);
             }
         });
         onClose();

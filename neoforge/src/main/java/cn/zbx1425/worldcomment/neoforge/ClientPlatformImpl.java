@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.neoforge;
 
+import cn.zbx1425.worldcomment.util.RegistryObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -8,6 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.ArrayList;
@@ -16,9 +18,9 @@ import java.util.function.Consumer;
 
 public class ClientPlatformImpl {
 
-    public static List<KeyMapping> KEY_MAPPINGS = new ArrayList<>();
+    public static List<RegistryObject<KeyMapping>> KEY_MAPPINGS = new ArrayList<>();
 
-    public static void registerKeyBinding(KeyMapping keyMapping) {
+    public static void registerKeyBinding(RegistryObject<KeyMapping> keyMapping) {
         KEY_MAPPINGS.add(keyMapping);
     }
 
@@ -69,6 +71,13 @@ public class ClientPlatformImpl {
             if (event.getEntity().level().isClientSide()) return;
             for (Runnable consumer : PLAYER_QUIT_EVENT) {
                 consumer.run();
+            }
+        }
+
+        @SubscribeEvent
+        public static void onClientTickPost(ClientTickEvent.Post event) {
+            for (Consumer<Minecraft> consumer : TICK_EVENT) {
+                consumer.accept(Minecraft.getInstance());
             }
         }
     }

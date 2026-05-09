@@ -3,13 +3,12 @@ package cn.zbx1425.worldcomment;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
-import cn.zbx1425.worldcomment.item.GroupedItem;
+import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import cn.zbx1425.worldcomment.network.*;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +30,16 @@ public class Main {
 	public static final Executor IO_EXECUTOR = Executors.newCachedThreadPool();
 
 	public static final RegistryObject<CommentToolItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);
+	public static final RegistryObject<PlaceableCommentItem> ITEM_PLACEABLE_COMMENT = new RegistryObject<>(PlaceableCommentItem::new);
+
+	public static final RegistryObject<DataComponentType<PlaceableCommentItem.MetaComponent>> DATA_COMPONENT_TYPE_PLACEABLE_COMMENT_META = new RegistryObject<>(
+		() -> ServerPlatform.createDataComponentType(PlaceableCommentItem.MetaComponent.CODEC, PlaceableCommentItem.MetaComponent.STREAM_CODEC));
 
 	public static void init(RegistriesWrapper registries) {
 		registries.registerItem("comment_tool", ITEM_COMMENT_TOOL);
+		registries.registerItem("placeable_comment", ITEM_PLACEABLE_COMMENT);
+
+		registries.registerDataComponentType("placeable_comment_meta", DATA_COMPONENT_TYPE_PLACEABLE_COMMENT_META);
 
 		ServerPlatform.registerPacket(PacketClientConfigS2C.IDENTIFIER);
 		ServerPlatform.registerPacket(PacketCollectionDataS2C.IDENTIFIER);
@@ -49,7 +55,7 @@ public class Main {
 		ServerPlatform.registerPacket(PacketImageDownloadS2C.IDENTIFIER);
 		ServerPlatform.registerPacket(PacketPreSignRequestC2S.IDENTIFIER);
 		ServerPlatform.registerPacket(PacketPreSignResponseS2C.IDENTIFIER);
-		ServerPlatform.registerPacket(PacketDemandToolPresenceC2S.IDENTIFIER);
+		ServerPlatform.registerPacket(PacketRequestPlacementC2S.IDENTIFIER);
 
 		ServerPlatform.registerNetworkReceiver(
 				PacketRegionRequestC2S.IDENTIFIER, PacketRegionRequestC2S::handle);
@@ -66,7 +72,7 @@ public class Main {
 		ServerPlatform.registerNetworkReceiver(
 				PacketPreSignRequestC2S.IDENTIFIER, PacketPreSignRequestC2S::handle);
 		ServerPlatform.registerNetworkReceiver(
-				PacketDemandToolPresenceC2S.IDENTIFIER, PacketDemandToolPresenceC2S::handle);
+				PacketRequestPlacementC2S.IDENTIFIER, PacketRequestPlacementC2S::handle);
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {

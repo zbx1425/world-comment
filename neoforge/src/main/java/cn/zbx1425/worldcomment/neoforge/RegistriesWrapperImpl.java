@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -44,6 +45,7 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, Main.MOD_ID);
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, Main.MOD_ID);
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Main.MOD_ID);
+    private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, Main.MOD_ID);
 #else
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Main.MOD_ID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MOD_ID);
@@ -92,6 +94,12 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
     }
 
 
+    @Override
+    public <T> void registerDataComponentType(String id, RegistryObject<DataComponentType<T>> componentType) {
+        DATA_COMPONENT_TYPES.register(id, componentType::get);
+    }
+
+
     public final List<KeyMapping> keyMappings = new ArrayList<>();
 
     public void registerAllDeferred(IEventBus eventBus) {
@@ -100,12 +108,14 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
         BLOCK_ENTITY_TYPES.register(eventBus);
         ENTITY_TYPES.register(eventBus);
         SOUND_EVENTS.register(eventBus);
+        DATA_COMPONENT_TYPES.register(eventBus);
     }
 
 
     private static final Map<#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif, ArrayList<Item>> CREATIVE_TABS = new HashMap<>();
 
     public static void registerCreativeModeTab(#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif resourceLocation, Item item) {
+        if (resourceLocation == null) return;
         CREATIVE_TABS.computeIfAbsent(resourceLocation, ignored -> new ArrayList<>()).add(item);
     }
 

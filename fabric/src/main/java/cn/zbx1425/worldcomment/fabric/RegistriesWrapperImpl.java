@@ -13,6 +13,8 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 #endif
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
@@ -50,6 +52,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     public <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item) {
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), item.get());
 #if MC_VERSION >= "12000"
+        if (item.get().getTab() == null) return;
         CreativeModeTabEvents.modifyOutputEvent(item.get().getTab()).register(consumer -> consumer.accept(item.get()));
 #endif
     }
@@ -67,5 +70,10 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     @Override
     public void registerSoundEvent(String id, SoundEvent soundEvent) {
         Registry.register(RegistryUtilities.registryGetSoundEvent(), Main.id(id), soundEvent);
+    }
+
+    @Override
+    public <T> void registerDataComponentType(String id, RegistryObject<DataComponentType<T>> componentType) {
+        Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Main.id(id), componentType.get());
     }
 }

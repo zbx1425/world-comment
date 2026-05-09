@@ -1,12 +1,11 @@
 package cn.zbx1425.worldcomment.render;
 
-import cn.zbx1425.worldcomment.MainClient;
-import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
+import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -61,14 +60,13 @@ public class ControlTipRenderer implements IGuiCommon {
             return;
         }
         if (Screenshot.isGrabbing) return;
-        ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
-        if (item != null) {
-            if (CommentToolItem.getUploadJobId(item) != null) {
-                TIP_PLACE_COMMENT.visible = true;
-            } else {
-//                TIP_CREATE.visible = true;
-            }
-//            TIP_VIEW_MANAGE.visible = true;
+        ItemStack toolItem = CommentToolItem.Client.getHolding();
+        if (toolItem != null) {
+            TIP_VIEW_MANAGE.visible = true;
+        }
+        ItemStack placeableItem = PlaceableCommentItem.Client.getHolding();
+        if (placeableItem != null) {
+            TIP_PLACE_COMMENT.visible = true;
         }
         if (!ClientRayPicking.pickedComments.isEmpty()) {
             if (ClientRayPicking.pickedComments.size() > 1) {

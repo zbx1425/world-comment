@@ -9,6 +9,7 @@
     "GameRendererMixin",
     "InventoryMixin",
     "InventoryScreenMixin",
+    "KeyMappingAccessor",
     "KeyMappingMixin",
     "LevelRendererMixin",
     "NativeImageAccessor",

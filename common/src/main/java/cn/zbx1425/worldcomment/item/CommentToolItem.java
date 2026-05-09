@@ -1,27 +1,31 @@
 package cn.zbx1425.worldcomment.item;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
-#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.network.PacketDemandToolPresenceC2S;
+#if MC_VERSION >= "12000"
+import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
+import cn.zbx1425.worldcomment.data.client.Screenshot;
+import cn.zbx1425.worldcomment.mixin.KeyMappingAccessor;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.Options;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.core.registries.Registries; #endif
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-#if MC_VERSION >= "12100" import net.minecraft.core.component.DataComponents; #endif
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.InteractionHand;
 #if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
-#if MC_VERSION >= "12108" import net.minecraft.world.InteractionResult; #endif
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-#if MC_VERSION >= "12100" import net.minecraft.world.item.component.CustomData; #endif
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.Arrays;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CommentToolItem extends Item implements GroupedItem {
 
@@ -29,19 +33,6 @@ public class CommentToolItem extends Item implements GroupedItem {
         super(GroupedItem.createProperties(properties ->
                 properties.stacksTo(1)
         , Main.id("comment_tool"), CommentToolItem::getTabImpl));
-    }
-
-    @Override
-    public @NotNull #if MC_VERSION < "12108" InteractionResultHolder<ItemStack> #else InteractionResult #endif use(Level level, Player player, InteractionHand usedHand) {
-        ItemStack item = player.getItemInHand(usedHand);
-        if (!level.isClientSide()) return #if MC_VERSION < "12108" InteractionResultHolder.pass(item) #else InteractionResult.PASS #endif;
-        if (!item.is(Main.ITEM_COMMENT_TOOL.get())) return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
-
-        if (Client.placeUploadJob(level, player, item)) {
-            return #if MC_VERSION < "12108" InteractionResultHolder.success(item) #else InteractionResult.SUCCESS #endif;
-        } else {
-            return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
-        }
     }
 
     @Override
@@ -59,7 +50,7 @@ public class CommentToolItem extends Item implements GroupedItem {
 
     public static class Client {
 
-        public static ItemStack getHoldingCommentTool() {
+        public static ItemStack getHolding() {
             Player player = Minecraft.getInstance().player;
             if (player == null) return null;
             ItemStack mainHandStack = player.getMainHandItem();
@@ -69,81 +60,64 @@ public class CommentToolItem extends Item implements GroupedItem {
             return null;
         }
 
-        public static boolean placeUploadJob(Level level, Player player, ItemStack item) {
-            Long jobId = getUploadJobId(item);
-            if (jobId != null) {
-                HitResult hitResult = Minecraft.getInstance().hitResult;
-                if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
-                    BlockHitResult blockHitResult = (BlockHitResult) hitResult;
-                    BlockPos facePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                    boolean hasClearance = true;
-                    for (int y = 0; y < 3; y++) {
-                        if (level.getBlockState(facePos.offset(0, y, 0)) #if MC_VERSION < "12000" .getMaterial() #endif .isSolid()) {
-                            hasClearance = false;
-                            break;
-                        }
-                    }
-                    if (hasClearance) {
-                        SubmitDispatcher.placeJobAt(jobId, facePos);
-                        PacketDemandToolPresenceC2S.ClientLogics.sendEndPlacement();
-                        return true;
-                    } else {
-                        player.sendSystemMessage(
-                                Component.translatable("gui.worldcomment.send_insufficient_clearance"));
-                    }
-                }
+        private static final int[] MODIFIER_SYMS = new int[] {
+            GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT, GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT,
+            GLFW.GLFW_KEY_LEFT_SUPER, GLFW.GLFW_KEY_RIGHT_SUPER, GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL
+        };
+//        private static final KeyEvent[] MODIFIER_EVENTS = Util.make(() ->
+//            Arrays.stream(MODIFIER_SYMS).mapToObj(sym -> new KeyEvent(sym, 0, 0)).toArray(KeyEvent[]::new)
+//        );
+        private static final Function<InputConstants.Key, Boolean> HOTKEY_IS_MODIFIER_SUPPLIER = Util.memoize(_ ->
+            Arrays.stream(MODIFIER_SYMS).anyMatch(it -> ((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey().getValue() == it)
+        );
+        private static final Function<InputConstants.Key, Component> HOTKEY_DESCRIPTION_SUPPLIER = Util.memoize(_ -> {
+            if (HOTKEY_IS_MODIFIER_SUPPLIER.apply(((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey())) {
+                return MainClient.KEY_SEND_COMMENT_MODIFIER.get().getTranslatedKeyMessage().copy()
+                    .append(" + ")
+                    .append(Minecraft.getInstance().options.keyScreenshot.getTranslatedKeyMessage());
+            } else {
+                return MainClient.KEY_SEND_COMMENT_MODIFIER.get().getTranslatedKeyMessage();
+            }
+        });
+        public static boolean getSendHotkeyIsModifier() {
+            return HOTKEY_IS_MODIFIER_SUPPLIER.apply(((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey());
+        }
+        public static Component getSendHotkeyDescription() {
+            return HOTKEY_DESCRIPTION_SUPPLIER.apply(((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey());
+        }
+
+        private static final BiFunction<InputConstants.Key, String, CommentEntry> USAGE_HELP_MESSAGE_SUPPLIER = Util.memoize((_, _) -> {
+            String usageHelpContent = Component.translatable("gui.worldcomment.instruction.send_header").getString() + "\n"
+                + Component.translatable("gui.worldcomment.instruction.send_content",
+                getSendHotkeyDescription().copy()
+            ).getString() + "\n\n"
+                + Component.translatable("gui.worldcomment.instruction.hide_header").getString() + "\n"
+                + Component.translatable("gui.worldcomment.instruction.hide_content").getString() + "\n\n"
+                + Component.translatable("gui.worldcomment.instruction.list_header").getString() + "\n"
+                + Component.translatable("gui.worldcomment.instruction.list_content").getString();
+            return CommentEntry.createSystemMessage(
+                EmojiRegistry.HIGH_EMOJI_BASE_ID,
+                usageHelpContent,
+                Component.translatable("gui.worldcomment.instruction.title").getString()
+            );
+        });
+        public static CommentEntry getUsageHelpMessage() {
+            return USAGE_HELP_MESSAGE_SUPPLIER.apply(
+                ((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey(),
+                Minecraft.getInstance().options.languageCode
+            );
+        }
+
+        public static boolean handleScreenshotKey() {
+            Minecraft minecraft = Minecraft.getInstance();
+            if (minecraft.player == null) return false;
+
+            ItemStack item = PlaceableCommentItem.Client.getHolding();
+            if (item == null) {
+                Screenshot.triggerCommentSend(true);
+                return true;
             }
             return false;
-        }
-    }
-
-    public static Long getUploadJobId(ItemStack item) {
-#if MC_VERSION >= "12100"
-        CustomData customData = item.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-        if (customData.copyTag().contains("uploadJobId")) {
-            return customData.copyTag().getLong("uploadJobId") #if MC_VERSION >= "12108" .orElse(null) #endif;
-        } else {
-            return null;
-        }
-#else
-        if (item.getOrCreateTag().contains("uploadJobId", Tag.TAG_LONG)) {
-            return item.getOrCreateTag().getLong("uploadJobId");
-        } else {
-            return null;
-        }
-#endif
-    }
-
-    public static void setDataForBeginningPlacement(ItemStack item, long jobId, boolean isNewlySpawned,
-                                                    int previousMainHandItemIsNowInSlot) {
-        CompoundTag tag = new CompoundTag();
-        tag.putLong("uploadJobId", jobId);
-        tag.putBoolean("isNewlySpawned", isNewlySpawned);
-        tag.putInt("previousMainHandItemIsNowInSlot", previousMainHandItemIsNowInSlot);
-        item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-    }
-
-    public static PlacementEndResult setDataForEndingPlacement(ItemStack item) {
-        CustomData customData = item.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-        CompoundTag tag = customData.copyTag();
-        if (tag.getBooleanOr("isNewlySpawned", false)) {
-            return new PlacementEndResult(true,
-                tag.getIntOr("previousMainHandItemIsNowInSlot", -1));
-        } else {
-            item.remove(DataComponents.CUSTOM_DATA);
-            return new PlacementEndResult(false,
-                tag.getIntOr("previousMainHandItemIsNowInSlot", -1));
-        }
-    }
-
-    public static class PlacementEndResult {
-
-        public boolean shouldCommentToolBeRemoved;
-        public int slotToBeSwappedIntoMainHand;
-
-        public PlacementEndResult(boolean shouldCommentToolBeRemoved, int slotToBeSwappedIntoMainHand) {
-            this.shouldCommentToolBeRemoved = shouldCommentToolBeRemoved;
-            this.slotToBeSwappedIntoMainHand = slotToBeSwappedIntoMainHand;
         }
     }
 }

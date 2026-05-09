@@ -41,11 +41,9 @@ public class ClientRayPicking {
         pickedComments.clear();
 
         // Add built-in info comments
-        ItemStack holdingCommentTool = CommentToolItem.Client.getHoldingCommentTool();
+        ItemStack holdingCommentTool = CommentToolItem.Client.getHolding();
         if (holdingCommentTool != null) {
-            if (CommentToolItem.getUploadJobId(holdingCommentTool) == null) {
-                pickedComments.add(EmojiRegistry.INSTANCE.usageInstructionMessage);
-            }
+            pickedComments.add(CommentToolItem.Client.getUsageHelpMessage());
         }
 
         // Add in-world comments

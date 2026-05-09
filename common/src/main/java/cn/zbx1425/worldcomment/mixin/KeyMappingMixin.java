@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
+import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -25,7 +26,7 @@ public class KeyMappingMixin {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player == null) return;
 
-            if (CommentToolItem.Client.getHoldingCommentTool() != null) {
+            if (CommentToolItem.Client.getHolding() != null) {
                 CommentListScreen.triggerOpen();
                 cir.setReturnValue(false);
             }
@@ -36,21 +37,11 @@ public class KeyMappingMixin {
     private void matches(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
-        if ((Object)this == options.keyScreenshot && options.keySprint.isDown()) {
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.player == null) return;
-
-            ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
-            if (item != null) {
-                if (CommentToolItem.getUploadJobId(item) == null) {
-                    Screenshot.triggerCommentSend(true);
-                    cir.setReturnValue(false);
-                }
-                return;
-            }
-
-            if (MainClient.CLIENT_CONFIG.serverIssuedConfig.screenshotKeyTriggersComment) {
-                Screenshot.triggerCommentSend(true);
+        boolean isScreenshotHotkey = CommentToolItem.Client.getSendHotkeyIsModifier()
+            ? ((Object)this == options.keyScreenshot && MainClient.KEY_SEND_COMMENT_MODIFIER.get().isDown())
+            : ((Object)this == MainClient.KEY_SEND_COMMENT_MODIFIER.get());
+        if (isScreenshotHotkey) {
+            if (CommentToolItem.Client.handleScreenshotKey()) {
                 cir.setReturnValue(false);
             }
         }

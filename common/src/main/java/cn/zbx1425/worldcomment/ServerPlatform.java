@@ -1,8 +1,13 @@
 package cn.zbx1425.worldcomment;
 
 
+import com.mojang.serialization.Codec;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +19,12 @@ public class ServerPlatform {
     @ExpectPlatform
     public static boolean isFabric() {
         throw new AssertionError();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> DataComponentType<T> createDataComponentType(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
+        return (DataComponentType<T>) DataComponentType.builder().persistent((Codec<Object>)codec)
+            .networkSynchronized((StreamCodec<? super RegistryFriendlyByteBuf, Object>)streamCodec).build();
     }
 
     @ExpectPlatform

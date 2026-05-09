@@ -2,14 +2,21 @@ package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.interop.BulletChatInterop;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.network.*;
+import cn.zbx1425.worldcomment.util.RegistryObject;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import org.lwjgl.glfw.GLFW;
 
 public class MainClient {
 
 	public static ClientConfig CLIENT_CONFIG = new ClientConfig();
+
+	public static RegistryObject<KeyMapping> KEY_SEND_COMMENT_MODIFIER = new RegistryObject<>(() ->
+		new KeyMapping("key.worldcomment.send_comment_modifier", GLFW.GLFW_KEY_LEFT_ALT, KeyMapping.Category.MISC));
 
 	public static void init() {
 		ClientWorldData.INSTANCE.proximityCommentSet.onCommentApproach = (comment -> {
@@ -38,6 +45,14 @@ public class MainClient {
 		ClientPlatform.registerPlayerLeaveEvent(() -> {
 			CLIENT_CONFIG.save();
 		});
+
+		ClientPlatform.registerTickEvent(ignored -> {
+			if (!CommentToolItem.Client.getSendHotkeyIsModifier() && KEY_SEND_COMMENT_MODIFIER.get().consumeClick()) {
+				CommentToolItem.Client.handleScreenshotKey();
+			}
+		});
+
+		ClientPlatform.registerKeyBinding(KEY_SEND_COMMENT_MODIFIER);
 	}
 
 }

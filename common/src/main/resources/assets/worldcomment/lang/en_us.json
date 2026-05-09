@@ -1,6 +1,9 @@
 {
   "item.worldcomment.comment_tool": "§l§6WorldComment§r Tool",
   "item.worldcomment.comment_eyeglass": "§l§6WorldComment§r Projection Eyeglasses",
+  "item.worldcomment.placeable_comment": "§l§6WorldComment§r to be Placed Down",
+
+  "gui.worldcomment.placeable_comment.encapsulation": "Placing it down will return your %s",
 
   "gui.worldcomment.comment_tool.title": "Share your idea",
 
@@ -77,5 +80,5 @@
   "gui.worldcomment.send_fail": "§c§lError occurred when processing your message: %s\n  §c§lError occurred when processing your message.",
   "gui.worldcomment.image_global_kill_feedback": "Image global kill switch has been set to %s.",
 
-  "key.worldcomment.comment_detail": "View Comment Detail"
+  "key.worldcomment.send_comment_modifier": "WorldComment: Send / Modifier"
 }
