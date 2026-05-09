@@ -60,8 +60,6 @@ public class CommentToolItem extends Item implements GroupedItem {
 
     public static class Client {
 
-        public static final int COMMENT_HIDE_TICKS = 60 * 4 * 20;
-
         public static ItemStack getHoldingCommentTool() {
             Player player = Minecraft.getInstance().player;
             if (player == null) return null;

@@ -689,7 +689,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             hasDeleteBtn = false;
             if (canDelete(comment)) {
                 y += 4;
-                cachedDeleteBtnX = contentLeft;
+                cachedDeleteBtnX = contentLeft + contentWidth - 30;
                 cachedDeleteBtnY = y;
                 hasDeleteBtn = true;
                 renderIcon(guiGraphics, contentLeft, y, 20, 216, 60, mouseX, mouseY);

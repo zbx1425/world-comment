@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
@@ -17,6 +18,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.server.permissions.Permissions;
@@ -34,7 +36,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     private final CommentEntry comment;
     private final Font font;
 
-    private List<FormattedCharSequence> wrappedText = List.of();
+    private List<SizedFormattedText> wrappedText = List.of();
 
     public boolean showImage = true;
 
@@ -57,13 +59,16 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     private void calculateHeight() {
         int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
         int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
-        wrappedText = Language.getInstance().getVisualOrder(
-                font.getSplitter().splitLines(comment.message, textWidth, Style.EMPTY));
-        int textHeight = 26
-                + (comment.message.isEmpty() ? 0 : 9 * wrappedText.size())
+        wrappedText = SizedFormattedText.create(font.getSplitter().splitLines(comment.message, textWidth, Style.EMPTY));
+        int textHeight = 0;
+        for (SizedFormattedText formattedText : wrappedText) {
+            textHeight += (int) (9 * formattedText.sizeModifier);
+        }
+        int textAreaHeight = 26
+                + (comment.message.isEmpty() ? 0 : textHeight)
                 + 4;
         int picHeight = 20 + ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4 + 4;
-        height = Math.max(Math.max(textHeight, picHeight), 28 + 4);
+        height = Math.max(Math.max(textAreaHeight, picHeight), 28 + 4);
     }
 
     @Override
@@ -81,9 +86,13 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
         if (!comment.message.isEmpty()) {
             int lineY = getY() + 26;
-            for (FormattedCharSequence formattedCharSequence : wrappedText) {
-                guiGraphics.drawString(font, formattedCharSequence, getX() + 16, lineY, 0xFF444444, false);
-                lineY += font.lineHeight;
+            for (SizedFormattedText formattedText : wrappedText) {
+                guiGraphics.pushPose();
+                guiGraphics.translate(getX() + 16, lineY, 0);
+                guiGraphics.scale(formattedText.sizeModifier, formattedText.sizeModifier);
+                guiGraphics.drawString(font, formattedText.ordered, 0, 0, 0xFF444444, false);
+                guiGraphics.popPose();
+                lineY += (int) (font.lineHeight * formattedText.sizeModifier);
             }
         }
 
@@ -127,6 +136,27 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
                             .toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)),
                     Component.literal("  " + nameComponent.getString() + " " + uuidToDisplay).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY))
             ), Optional.empty(), mouseX, mouseY);
+        }
+    }
+
+    private static class SizedFormattedText {
+
+        public final float sizeModifier;
+        public final String asString;
+        public final FormattedCharSequence ordered;
+
+        public SizedFormattedText(FormattedText formattedText) {
+            this.asString = formattedText.getString();
+            if (this.asString.startsWith("# ")) {
+                this.sizeModifier = 2;
+            } else {
+                this.sizeModifier = 1;
+            }
+            this.ordered = Language.getInstance().getVisualOrder(formattedText);
+        }
+
+        public static List<SizedFormattedText> create(final List<FormattedText> lines) {
+            return lines.stream().map(SizedFormattedText::new).collect(ImmutableList.toImmutableList());
         }
     }
 
