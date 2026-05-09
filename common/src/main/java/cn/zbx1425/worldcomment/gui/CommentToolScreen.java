@@ -1,12 +1,12 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
+import cn.zbx1425.worldcomment.network.PacketDemandToolPresenceC2S;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
@@ -14,14 +14,10 @@ import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
 import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,8 +25,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CommentToolScreen extends Screen implements IGuiCommon {
 
@@ -242,10 +236,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             } else {
                 player.sendSystemMessage(
                         Component.translatable("gui.worldcomment.send_pending"));
-                ItemStack item = CommentToolItem.Client.getHoldingCommentTool();
-                if (item != null) {
-                    CommentToolItem.setUploadJobId(item, jobId);
-                }
+                PacketDemandToolPresenceC2S.ClientLogics.sendBeginPlacement(jobId);
             }
         });
         onClose();

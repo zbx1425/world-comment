@@ -61,12 +61,12 @@
   "gui.worldcomment.imageview.hints": "Scroll: Zoom | Drag: Pan | Esc: Back",
   "gui.worldcomment.anonymous": "Anonymous",
 
-  "gui.worldcomment.instruction.title": "How to Use",
-  "gui.worldcomment.instruction.send_header": "### Sending Comment",
+  "gui.worldcomment.instruction.title": "How to Use WorldComment",
+  "gui.worldcomment.instruction.send_header": "#### §0Sending Comments",
   "gui.worldcomment.instruction.send_content": "Press %s at §lany time§r\nNo need to hold this tool",
-  "gui.worldcomment.instruction.hide_header": "### Hiding Comment",
+  "gui.worldcomment.instruction.hide_header": "#### §0Hiding Comments",
   "gui.worldcomment.instruction.hide_content": "Use the button on inventory screen or pause menu",
-  "gui.worldcomment.instruction.list_header": "### Viewing Comment List",
+  "gui.worldcomment.instruction.list_header": "#### §0Viewing Comment List",
   "gui.worldcomment.instruction.list_content": "Use the command '/wc list'",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down!",

@@ -48,8 +48,8 @@ public class CommentWorldRenderer implements IGuiCommon {
         float cycleHoverY = (float)Math.sin(cycleHoverX * Math.PI * 2) / 2 + 0.5f;
 
         matrices.translate(commentAndSituation.renderOffset.x, cycleHoverY * 0.1, commentAndSituation.renderOffset.y);
-        float yaw = (float)Mth.atan2(comment.location.getX() + 0.5 + commentAndSituation.renderOffset.x - cameraPos.x(),
-            comment.location.getZ() + 0.5 + commentAndSituation.renderOffset.y - cameraPos.z());
+        float yaw = (float)Mth.atan2(comment.location.getX() + commentAndSituation.renderOffset.x - cameraPos.x(),
+            comment.location.getZ() + commentAndSituation.renderOffset.y - cameraPos.z());
 #if MC_VERSION >= "12000"
         matrices.mulPose(Axis.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
 #else

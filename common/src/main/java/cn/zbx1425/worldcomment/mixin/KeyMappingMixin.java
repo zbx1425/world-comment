@@ -50,7 +50,7 @@ public class KeyMappingMixin {
             }
 
             if (MainClient.CLIENT_CONFIG.serverIssuedConfig.screenshotKeyTriggersComment) {
-                Screenshot.triggerCommentSend(false);
+                Screenshot.triggerCommentSend(true);
                 cir.setReturnValue(false);
             }
         }

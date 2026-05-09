@@ -2,15 +2,14 @@ package cn.zbx1425.worldcomment.item;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
-#if MC_VERSION >= "12000" import net.minecraft.core.registries.Registries; #endif
+#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.network.PacketDemandToolPresenceC2S;
+import net.minecraft.core.registries.Registries; #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 #if MC_VERSION >= "12100" import net.minecraft.core.component.DataComponents; #endif
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 #if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
 #if MC_VERSION >= "12108" import net.minecraft.world.InteractionResult; #endif
@@ -86,7 +85,7 @@ public class CommentToolItem extends Item implements GroupedItem {
                     }
                     if (hasClearance) {
                         SubmitDispatcher.placeJobAt(jobId, facePos);
-                        setUploadJobId(item, null);
+                        PacketDemandToolPresenceC2S.ClientLogics.sendEndPlacement();
                         return true;
                     } else {
                         player.sendSystemMessage(
@@ -115,21 +114,36 @@ public class CommentToolItem extends Item implements GroupedItem {
 #endif
     }
 
-    public static void setUploadJobId(ItemStack item, Long jobId) {
-#if MC_VERSION >= "12100"
-        if (jobId == null) {
+    public static void setDataForBeginningPlacement(ItemStack item, long jobId, boolean isNewlySpawned,
+                                                    int previousMainHandItemIsNowInSlot) {
+        CompoundTag tag = new CompoundTag();
+        tag.putLong("uploadJobId", jobId);
+        tag.putBoolean("isNewlySpawned", isNewlySpawned);
+        tag.putInt("previousMainHandItemIsNowInSlot", previousMainHandItemIsNowInSlot);
+        item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+    }
+
+    public static PlacementEndResult setDataForEndingPlacement(ItemStack item) {
+        CustomData customData = item.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+        CompoundTag tag = customData.copyTag();
+        if (tag.getBooleanOr("isNewlySpawned", false)) {
+            return new PlacementEndResult(true,
+                tag.getIntOr("previousMainHandItemIsNowInSlot", -1));
+        } else {
             item.remove(DataComponents.CUSTOM_DATA);
-        } else {
-            CompoundTag tag = new CompoundTag();
-            tag.putLong("uploadJobId", jobId);
-            item.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+            return new PlacementEndResult(false,
+                tag.getIntOr("previousMainHandItemIsNowInSlot", -1));
         }
-#else
-        if (jobId == null) {
-            item.getOrCreateTag().remove("uploadJobId");
-        } else {
-            item.getOrCreateTag().putLong("uploadJobId", jobId);
+    }
+
+    public static class PlacementEndResult {
+
+        public boolean shouldCommentToolBeRemoved;
+        public int slotToBeSwappedIntoMainHand;
+
+        public PlacementEndResult(boolean shouldCommentToolBeRemoved, int slotToBeSwappedIntoMainHand) {
+            this.shouldCommentToolBeRemoved = shouldCommentToolBeRemoved;
+            this.slotToBeSwappedIntoMainHand = slotToBeSwappedIntoMainHand;
         }
-#endif
     }
 }

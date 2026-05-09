@@ -18,12 +18,12 @@ public class ClientCommand {
                                     BiFunction<String, ArgumentType<?>, RequiredArgumentBuilder<T, ?>> argument) {
         dispatcher.register(literal.apply("wc")
                 .executes(context -> {
-                    Screenshot.triggerCommentSend(false);
+                    Screenshot.triggerCommentSend(true);
                     return 1;
                 })
                 .then(literal.apply("send")
                         .executes(context -> {
-                            Screenshot.triggerCommentSend(false);
+                            Screenshot.triggerCommentSend(true);
                             return 1;
                         }))
 //                .then(literal.apply("visible")

@@ -121,7 +121,7 @@ public class ControlTipRenderer implements IGuiCommon {
             }
             if (critical) {
                 long currentTime = System.currentTimeMillis();
-                if (currentTime % 400 < 200) {
+                if (currentTime % 300 < 200) {
                     guiGraphics.fill(x + 1, y + 1, x + innerWidth + 4 + 1, y + 20 + 1, 0xFF444444);
                     guiGraphics.fill(x, y, x + innerWidth + 4, y + 20, 0xFFDDDD66);
                 }

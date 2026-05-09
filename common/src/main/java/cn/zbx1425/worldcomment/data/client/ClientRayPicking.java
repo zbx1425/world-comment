@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
@@ -40,8 +41,11 @@ public class ClientRayPicking {
         pickedComments.clear();
 
         // Add built-in info comments
-        if (CommentToolItem.Client.getHoldingCommentTool() != null) {
-            pickedComments.add(EmojiRegistry.INSTANCE.usageInstructionMessage);
+        ItemStack holdingCommentTool = CommentToolItem.Client.getHoldingCommentTool();
+        if (holdingCommentTool != null) {
+            if (CommentToolItem.getUploadJobId(holdingCommentTool) == null) {
+                pickedComments.add(EmojiRegistry.INSTANCE.usageInstructionMessage);
+            }
         }
 
         // Add in-world comments
