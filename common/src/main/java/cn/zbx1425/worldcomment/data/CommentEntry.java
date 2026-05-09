@@ -23,6 +23,8 @@ public class CommentEntry {
     public static int REGION_SHIFT = 2;
     public static final int MESSAGE_MAX_LENGTH = 256;
 
+    public static UUID SYSTEM_MESSAGE_MAGIC_INITIATOR = UUID.fromString("21b8b366-0adf-44ef-b93c-c6ec8377fa26");
+
     public long id;
     public long timestamp;
     public Identifier level;
@@ -76,6 +78,19 @@ public class CommentEntry {
         image = new ThumbImage(src.readUtf(), src.readUtf());
 
         if (fromFile) src.skipBytes(16 - (src.readerIndex() % 16));
+    }
+
+    private CommentEntry(int messageType, String message, String title) {
+        id = ServerWorldData.SNOWFLAKE.nextId();
+        timestamp = System.currentTimeMillis();
+        level = Identifier.withDefaultNamespace("overworld");
+        this.initiator = SYSTEM_MESSAGE_MAGIC_INITIATOR;
+        this.initiatorName = title;
+        this.messageType = messageType;
+        this.message = message;
+        deleted = false;
+        this.image = ThumbImage.NONE;
+        this.setLocation(BlockPos.ZERO);
     }
 
     public void setLocation(BlockPos location) {
@@ -162,6 +177,10 @@ public class CommentEntry {
         FriendlyByteBuf src = new FriendlyByteBuf(buf);
         Identifier level = src.readIdentifier();
         return new CommentEntry(level, src, false);
+    }
+
+    public static CommentEntry createSystemMessage(int messageType, String message, String title) {
+        return new CommentEntry(messageType, message, title);
     }
 
     @Override

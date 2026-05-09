@@ -54,7 +54,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
         int logicMouseX = mouseX - getX();
         int logicMouseY = mouseY - getY() + (int)scrollAmount();
 
-        for (int id = 1; id <= EmojiRegistry.INSTANCE.getSpriteCount(); id++) {
+        for (int id : EmojiRegistry.INSTANCE.getSpriteIds()) {
             int row = (id - 1) / columns;
             int col = (id - 1) % columns;
 
@@ -87,7 +87,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
     protected void repositionEntries() {
         columns = (width - PADDING_X * 2 - scrollbarWidth() - ITEM_SIZE) / (ITEM_SIZE + ITEM_SPACING_X) + 1;
         realPaddingX = (width - scrollbarWidth() - (ITEM_SIZE + (ITEM_SIZE + ITEM_SPACING_X) * (columns - 1))) / 2;
-        contentHeight = ((int)Math.ceil(EmojiRegistry.INSTANCE.getSpriteCount() / (float)columns) - 1) * (ITEM_SIZE + ITEM_SPACING_Y)
+        contentHeight = ((int)Math.ceil(EmojiRegistry.INSTANCE.getSpriteIds().length / (float)columns) - 1) * (ITEM_SIZE + ITEM_SPACING_Y)
             + ITEM_SIZE + PADDING_Y * 2;
     }
 
@@ -106,7 +106,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int logicMouseX = (int)event.x() - getX();
         int logicMouseY = (int)event.y() - getY() + (int)scrollAmount();
-        for (int id = 1; id <= EmojiRegistry.INSTANCE.getSpriteCount(); id++) {
+        for (int id : EmojiRegistry.INSTANCE.getSpriteIds()) {
             int row = (id - 1) / columns;
             int col = (id - 1) % columns;
             int cellX = (col * (ITEM_SIZE + ITEM_SPACING_X)) + realPaddingX;

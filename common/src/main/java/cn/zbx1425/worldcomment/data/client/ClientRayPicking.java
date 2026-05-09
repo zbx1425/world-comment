@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -38,6 +38,13 @@ public class ClientRayPicking {
         int nearbyCommentsCount = 0;
         visibleComments.clear();
         pickedComments.clear();
+
+        // Add built-in info comments
+        if (CommentToolItem.Client.getHoldingCommentTool() != null) {
+            pickedComments.add(EmojiRegistry.INSTANCE.usageInstructionMessage);
+        }
+
+        // Add in-world comments
         for (Map<BlockPos, List<CommentEntry>> region : ClientWorldData.INSTANCE.regions.values()) {
             for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
                 nearbyCommentsCount += blockData.getValue().size();

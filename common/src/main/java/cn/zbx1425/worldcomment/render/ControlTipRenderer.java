@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.render;
 
 import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
@@ -65,9 +66,9 @@ public class ControlTipRenderer implements IGuiCommon {
             if (CommentToolItem.getUploadJobId(item) != null) {
                 TIP_PLACE_COMMENT.visible = true;
             } else {
-                TIP_CREATE.visible = true;
+//                TIP_CREATE.visible = true;
             }
-            TIP_VIEW_MANAGE.visible = true;
+//            TIP_VIEW_MANAGE.visible = true;
         }
         if (!ClientRayPicking.pickedComments.isEmpty()) {
             if (ClientRayPicking.pickedComments.size() > 1) {

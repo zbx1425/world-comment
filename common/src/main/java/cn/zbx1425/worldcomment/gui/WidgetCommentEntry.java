@@ -4,16 +4,12 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.locale.Language;
@@ -22,14 +18,16 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.server.permissions.Permissions;
-#if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
@@ -59,12 +57,13 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     private void calculateHeight() {
         int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
         int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
-        wrappedText = SizedFormattedText.create(font.getSplitter().splitLines(comment.message, textWidth, Style.EMPTY));
+        wrappedText = SizedFormattedText.splitLines(comment.message, font, textWidth, Style.EMPTY,
+            comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID);
         int textHeight = 0;
         for (SizedFormattedText formattedText : wrappedText) {
             textHeight += (int) (9 * formattedText.sizeModifier);
         }
-        int textAreaHeight = 26
+        int textAreaHeight = 28
                 + (comment.message.isEmpty() ? 0 : textHeight)
                 + 4;
         int picHeight = 20 + ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4 + 4;
@@ -85,7 +84,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         int picHeight = ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4;
 
         if (!comment.message.isEmpty()) {
-            int lineY = getY() + 26;
+            int lineY = getY() + 28;
             for (SizedFormattedText formattedText : wrappedText) {
                 guiGraphics.pushPose();
                 guiGraphics.translate(getX() + 16, lineY, 0);
@@ -111,7 +110,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         guiGraphics.drawString(font, nameComponent,
                 getX() + 34, getY() + 8, 0xFFFFFFFF, true);
 
-        if (showImage) {
+        if (showImage && !comment.initiator.equals(CommentEntry.SYSTEM_MESSAGE_MAGIC_INITIATOR)) {
             String timeStr = DateTimeFormatter.ofPattern("MM-dd HH:mm", Locale.ROOT)
                     .format(Instant.ofEpochMilli(comment.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime());
             guiGraphics.drawString(font, timeStr,
@@ -130,33 +129,12 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         if (mouseX > getX() + 4 && mouseX < getX() + getWidth() && mouseY > getY() && mouseY < getY() + 24) {
             guiGraphics.renderTooltip(font, List.of(
                     Component.translatable("gui.worldcomment.comment_type." + comment.messageType)
-                            .setStyle(Style.EMPTY.withBold(true).withColor(CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF))
+                            .setStyle(Style.EMPTY.withBold(true) /*.withColor(CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF) */)
                             .append(Component.literal("  (" + comment.location.toShortString() + ")").setStyle(Style.EMPTY.withBold(false).withColor(ChatFormatting.WHITE))),
                     Component.literal("  " + Instant.ofEpochMilli(comment.timestamp).atZone(ZoneId.systemDefault())
                             .toLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)),
                     Component.literal("  " + nameComponent.getString() + " " + uuidToDisplay).withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY))
             ), Optional.empty(), mouseX, mouseY);
-        }
-    }
-
-    private static class SizedFormattedText {
-
-        public final float sizeModifier;
-        public final String asString;
-        public final FormattedCharSequence ordered;
-
-        public SizedFormattedText(FormattedText formattedText) {
-            this.asString = formattedText.getString();
-            if (this.asString.startsWith("# ")) {
-                this.sizeModifier = 2;
-            } else {
-                this.sizeModifier = 1;
-            }
-            this.ordered = Language.getInstance().getVisualOrder(formattedText);
-        }
-
-        public static List<SizedFormattedText> create(final List<FormattedText> lines) {
-            return lines.stream().map(SizedFormattedText::new).collect(ImmutableList.toImmutableList());
         }
     }
 

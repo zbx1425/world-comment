@@ -34,10 +34,18 @@ public class CommentOverlayRenderer {
             calculateLayout(guiGraphics.guiWidth());
             cachedWidth = guiGraphics.guiWidth();
         }
-        if (cachedComments.size() > 0) {
+        if (!cachedComments.isEmpty()) {
             guiGraphics.pushPose();
+            WidgetCommentEntry pickedWidget = cachedWidgets.get(ClientRayPicking.overlayOffset);
+
             int baseYOffset = guiGraphics.guiHeight() / 2
-                    - (cachedWidgets.get(ClientRayPicking.overlayOffset) #if MC_VERSION >= "11903" .getY() #else .y #endif + WidgetCommentEntry.TOP_SINK);
+                    - (pickedWidget #if MC_VERSION >= "11903" .getY() #else .y #endif + WidgetCommentEntry.TOP_SINK);
+
+            // Make sure the picked comment is fully visible
+            if (baseYOffset + pickedWidget.getY() + pickedWidget.getHeight() + 10 > guiGraphics.guiHeight()) {
+                baseYOffset = guiGraphics.guiHeight() - 10 - pickedWidget.getHeight() - pickedWidget.getY();
+            }
+
             guiGraphics.translate(0, baseYOffset, 0);
             for (WidgetCommentEntry widget : cachedWidgets) {
                 if (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset + widget.getHeight() > 0

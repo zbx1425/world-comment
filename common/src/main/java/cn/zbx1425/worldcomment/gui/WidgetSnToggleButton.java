@@ -47,7 +47,10 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
                                     Component.translatable("gui.worldcomment.toggler.disabled")),
                     Component.translatable("gui.worldcomment.toggler.toggle"),
                     Component.translatable("gui.worldcomment.toggler.create",
-                            Minecraft.getInstance().options.keyScreenshot.getTranslatedKeyMessage().copy().withStyle(ChatFormatting.BLUE)),
+                        Minecraft.getInstance().options.keySprint.getTranslatedKeyMessage().copy()
+                            .append(" + ")
+                            .append(Minecraft.getInstance().options.keyScreenshot.getTranslatedKeyMessage())
+                            .withStyle(ChatFormatting.BLUE)),
                     Component.translatable("gui.worldcomment.toggler.nearby",
                             Component.literal(String.valueOf(ClientRayPicking.nearbyCommentsCount)).withStyle(ChatFormatting.GOLD)),
                     Component.translatable("gui.worldcomment.toggler.manage")

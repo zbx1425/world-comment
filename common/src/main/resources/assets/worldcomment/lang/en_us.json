@@ -12,6 +12,7 @@
   "gui.worldcomment.comment_type.6": "Warn",
   "gui.worldcomment.comment_type.7": "Tip",
   "gui.worldcomment.comment_type.8": "Memo",
+  "gui.worldcomment.comment_type.65472": "Tip",
 
   "gui.worldcomment.message": "Enter feedback here (Optional)",
   "gui.worldcomment.message.placeholder": "(Example) Amazing Chest Ahead",
@@ -59,6 +60,14 @@
   "gui.worldcomment.detail.click_to_view": "Click to view full image",
   "gui.worldcomment.imageview.hints": "Scroll: Zoom | Drag: Pan | Esc: Back",
   "gui.worldcomment.anonymous": "Anonymous",
+
+  "gui.worldcomment.instruction.title": "How to Use",
+  "gui.worldcomment.instruction.send_header": "### Sending Comment",
+  "gui.worldcomment.instruction.send_content": "Press %s at §lany time§r\nNo need to hold this tool",
+  "gui.worldcomment.instruction.hide_header": "### Hiding Comment",
+  "gui.worldcomment.instruction.hide_content": "Use the button on inventory screen or pause menu",
+  "gui.worldcomment.instruction.list_header": "### Viewing Comment List",
+  "gui.worldcomment.instruction.list_content": "Use the command '/wc list'",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down!",
   "gui.worldcomment.send_upload_incomplete": "§bYour image is still being uploaded. Please wait.",

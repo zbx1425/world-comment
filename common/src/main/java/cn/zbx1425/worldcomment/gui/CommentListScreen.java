@@ -358,12 +358,14 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
         if (ClientRayPicking.pickedComments.isEmpty()) return false;
 
+        CommentEntry targetEntry = ClientRayPicking.pickedComments.get(ClientRayPicking.overlayOffset);
+//        if (targetEntry.initiator.equals(CommentEntry.SYSTEM_MESSAGE_MAGIC_INITIATOR)) return false;
+
         minecraft.execute(() -> {
             if (minecraft.screen instanceof CommentListScreen) {
                 minecraft.screen.onClose();
             } else if (minecraft.screen == null) {
-                minecraft.setScreen(
-                        new CommentListScreen(ClientRayPicking.pickedComments.get(ClientRayPicking.overlayOffset)));
+                minecraft.setScreen(new CommentListScreen(targetEntry));
             }
         });
         return true;
@@ -608,8 +610,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             guiParam.pose().popMatrix();
             guiGraphics.disableBlend();
             Component typeName = Component.translatable("gui.worldcomment.comment_type." + comment.messageType)
-                    .setStyle(Style.EMPTY.withBold(true).withColor(
-                            CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF));
+                    .setStyle(Style.EMPTY.withBold(true) /* .withColor(
+                            CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF) */);
             guiGraphics.drawString(font, typeName, contentLeft + 18, y + 3, 0xFFFFFFFF, true);
             y += 25;
 
@@ -641,11 +643,15 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
             // --- Comment text ---
             if (!comment.message.isEmpty()) {
-                List<FormattedCharSequence> lines = Language.getInstance().getVisualOrder(
-                        font.getSplitter().splitLines(comment.message, contentWidth, Style.EMPTY));
-                for (FormattedCharSequence line : lines) {
-                    guiGraphics.drawString(font, line, contentLeft, y, 0xFFEEEEEE, true);
-                    y += font.lineHeight + 1;
+                List<SizedFormattedText> lines = SizedFormattedText.splitLines(comment.message, font, contentWidth, Style.EMPTY,
+                    comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID);
+                for (SizedFormattedText line : lines) {
+                    guiGraphics.pushPose();
+                    guiGraphics.translate(contentLeft, y, 0);
+                    guiGraphics.scale(line.sizeModifier, line.sizeModifier);
+                    guiGraphics.drawString(font, line.ordered, 0, 0, 0xFFEEEEEE, true);
+                    guiGraphics.popPose();
+                    y += (int)(font.lineHeight * line.sizeModifier) + 1;
                 }
                 y += 6;
             }

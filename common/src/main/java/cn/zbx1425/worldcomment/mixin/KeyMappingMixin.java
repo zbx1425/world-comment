@@ -36,7 +36,7 @@ public class KeyMappingMixin {
     private void matches(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
-        if ((Object)this == options.keyScreenshot) {
+        if ((Object)this == options.keyScreenshot && options.keySprint.isDown()) {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player == null) return;
 
