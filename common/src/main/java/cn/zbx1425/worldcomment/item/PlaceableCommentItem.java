@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.item;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.network.PacketRequestPlacementC2S;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.ChatFormatting;
@@ -37,19 +38,27 @@ public class PlaceableCommentItem extends Item implements GroupedItem {
             .setId(ResourceKey.create(Registries.ITEM, Main.id("placeable_comment"))));
     }
 
-    public static ItemStack unboxStack(ItemStack self) {
+    public static Either<Integer, ItemStack> unboxStack(ItemStack self) {
         if (!self.is(Main.ITEM_PLACEABLE_COMMENT.get())) {
-            return self;
+            return Either.right(self);
         } else {
             MetaComponent meta = self.get(Main.DATA_COMPONENT_TYPE_PLACEABLE_COMMENT_META.get());
-            if (meta == null) return ItemStack.EMPTY;
+            if (meta == null) return Either.left(-1);
+            if (meta.encapsulatedStack.isEmpty()) return Either.left(meta.swappedSlotId);
             return unboxStack(meta.encapsulatedStack());
         }
     }
 
+    public static ItemStack createStack(long clientJobId, int swappedSlotId) {
+        ItemStack result = new ItemStack(Main.ITEM_PLACEABLE_COMMENT.get());
+        MetaComponent meta = new MetaComponent(clientJobId, swappedSlotId, ItemStack.EMPTY);
+        result.set(Main.DATA_COMPONENT_TYPE_PLACEABLE_COMMENT_META.get(), meta);
+        return result;
+    }
+
     public static ItemStack createStack(long clientJobId, ItemStack encapsulatedStack) {
         ItemStack result = new ItemStack(Main.ITEM_PLACEABLE_COMMENT.get());
-        MetaComponent meta = new MetaComponent(clientJobId, encapsulatedStack);
+        MetaComponent meta = new MetaComponent(clientJobId, -1, encapsulatedStack);
         result.set(Main.DATA_COMPONENT_TYPE_PLACEABLE_COMMENT_META.get(), meta);
         return result;
     }
@@ -114,15 +123,17 @@ public class PlaceableCommentItem extends Item implements GroupedItem {
         return null;
     }
 
-    public record MetaComponent(long clientJobId, ItemStack encapsulatedStack) {
+    public record MetaComponent(long clientJobId, int swappedSlotId, ItemStack encapsulatedStack) {
         public static final Codec<MetaComponent> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                 Codec.LONG.fieldOf("client_job_id").forGetter(MetaComponent::clientJobId),
+                Codec.INT.fieldOf("swapped_slot_id").forGetter(MetaComponent::swappedSlotId),
                 ItemStack.OPTIONAL_CODEC.fieldOf("encapsulated_stack").forGetter(MetaComponent::encapsulatedStack)
             ).apply(instance, MetaComponent::new)
         );
         public static final StreamCodec<RegistryFriendlyByteBuf, MetaComponent> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.LONG, MetaComponent::clientJobId,
+            ByteBufCodecs.INT, MetaComponent::swappedSlotId,
             ItemStack.OPTIONAL_STREAM_CODEC, MetaComponent::encapsulatedStack,
             MetaComponent::new
         );

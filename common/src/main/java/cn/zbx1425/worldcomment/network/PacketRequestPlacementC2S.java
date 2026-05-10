@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.network;
 import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
+import com.mojang.datafixers.util.Either;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,9 +41,25 @@ public class PacketRequestPlacementC2S {
         ItemStack previousStack = initiator.getMainHandItem();
         ItemStack newStack;
         if (isBeginningPlacement) {
-            newStack = PlaceableCommentItem.createStack(uploadJobId, previousStack);
+            int freeSlot = initiator.getInventory().getFreeSlot();
+            if (freeSlot >= 0) {
+                // Swap main hand item into a free slot
+                initiator.getInventory().setItem(freeSlot, previousStack);
+                newStack = PlaceableCommentItem.createStack(uploadJobId, freeSlot);
+            } else {
+                // Inventory is full, encapsulate the previous item
+                newStack = PlaceableCommentItem.createStack(uploadJobId, previousStack);
+            }
         } else {
-            newStack = PlaceableCommentItem.unboxStack(previousStack);
+            Either<Integer, ItemStack> swapInstructionOrEncapsulation = PlaceableCommentItem.unboxStack(previousStack);
+            if (swapInstructionOrEncapsulation.left().isPresent()) {
+                // Swap the item previously put into free slot back
+                newStack = initiator.getInventory().getItem(swapInstructionOrEncapsulation.left().get());
+                initiator.getInventory().setItem(swapInstructionOrEncapsulation.left().get(), ItemStack.EMPTY);
+            } else {
+                // Unbox
+                newStack = swapInstructionOrEncapsulation.right().orElseThrow();
+            }
         }
         initiator.setItemSlot(EquipmentSlot.MAINHAND, newStack);
     }
