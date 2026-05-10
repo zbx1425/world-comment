@@ -41,7 +41,8 @@ public class PacketRequestPlacementC2S {
         ItemStack previousStack = initiator.getMainHandItem();
         ItemStack newStack;
         if (isBeginningPlacement) {
-            int freeSlot = initiator.getInventory().getFreeSlot();
+            // If main hand is empty, then no need for swapping
+            int freeSlot = initiator.getMainHandItem().isEmpty() ? -1 : initiator.getInventory().getFreeSlot();
             if (freeSlot >= 0) {
                 // Swap main hand item into a free slot
                 initiator.getInventory().setItem(freeSlot, previousStack);
@@ -54,8 +55,13 @@ public class PacketRequestPlacementC2S {
             Either<Integer, ItemStack> swapInstructionOrEncapsulation = PlaceableCommentItem.unboxStack(previousStack);
             if (swapInstructionOrEncapsulation.left().isPresent()) {
                 // Swap the item previously put into free slot back
-                newStack = initiator.getInventory().getItem(swapInstructionOrEncapsulation.left().get());
-                initiator.getInventory().setItem(swapInstructionOrEncapsulation.left().get(), ItemStack.EMPTY);
+                // -1: No need to swap
+                if (swapInstructionOrEncapsulation.left().get() >= 0) {
+                    newStack = initiator.getInventory().getItem(swapInstructionOrEncapsulation.left().get());
+                    initiator.getInventory().setItem(swapInstructionOrEncapsulation.left().get(), ItemStack.EMPTY);
+                } else {
+                    newStack = ItemStack.EMPTY;
+                }
             } else {
                 // Unbox
                 newStack = swapInstructionOrEncapsulation.right().orElseThrow();

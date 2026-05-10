@@ -85,7 +85,19 @@ public class PlaceableCommentItem extends Item implements GroupedItem {
                 if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                     BlockHitResult blockHitResult = (BlockHitResult) hitResult;
                     BlockPos facePos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
-                    boolean hasSupport = level.getBlockState(facePos.below()).isSolid();
+
+                    // Snap down
+                    BlockPos groundPos = facePos.below();
+                    boolean hasSupport = false;
+                    for (int i = 0; i <= 5; i++) {
+                        if (level.getBlockState(groundPos).isSolid()) {
+                            facePos = groundPos.above();
+                            hasSupport = true;
+                            break;
+                        }
+                        groundPos = groundPos.below();
+                    }
+
                     if (!hasSupport) {
                         player.sendSystemMessage(
                             Component.translatable("gui.worldcomment.send_in_air"));
