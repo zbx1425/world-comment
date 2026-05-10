@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
@@ -209,6 +210,9 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                         if (job == null) {
                             player.sendSystemMessage(
                                     Component.translatable("gui.worldcomment.send_finish"));
+                            if (!MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference) {
+                                player.sendSystemMessage(Component.translatable("gui.worldcomment.send_finish_but_hidden"));
+                            }
                         } else {
                             if (ex != null) {
                                 player.sendSystemMessage(
