@@ -83,12 +83,16 @@ public class CommentToolItem extends Item implements GroupedItem {
             return HOTKEY_DESCRIPTION_SUPPLIER.apply(((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey());
         }
 
-        private static final BiFunction<InputConstants.Key, String, CommentEntry> USAGE_HELP_MESSAGE_SUPPLIER = Util.memoize((_, _) -> {
+        public static CommentEntry getUsageHelpMessage() {
             String usageHelpContent = Component.translatable("gui.worldcomment.instruction.send_header").getString() + "\n"
                 + Component.translatable("gui.worldcomment.instruction.send_content",
                 getSendHotkeyDescription().copy()
             ).getString() + "\n\n"
-                + Component.translatable("gui.worldcomment.instruction.hide_header").getString() + "\n"
+                + Component.translatable(
+                MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference
+                    ? "gui.worldcomment.instruction.hide_header"
+                    : "gui.worldcomment.instruction.hide_header_cta"
+            ).getString() + "\n"
                 + Component.translatable("gui.worldcomment.instruction.hide_content").getString() + "\n\n"
                 + Component.translatable("gui.worldcomment.instruction.list_header").getString() + "\n"
                 + Component.translatable("gui.worldcomment.instruction.list_content").getString();
@@ -96,12 +100,6 @@ public class CommentToolItem extends Item implements GroupedItem {
                 EmojiRegistry.HIGH_EMOJI_BASE_ID,
                 usageHelpContent,
                 Component.translatable("gui.worldcomment.instruction.title").getString()
-            );
-        });
-        public static CommentEntry getUsageHelpMessage() {
-            return USAGE_HELP_MESSAGE_SUPPLIER.apply(
-                ((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey(),
-                Minecraft.getInstance().options.languageCode
             );
         }
 

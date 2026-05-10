@@ -62,11 +62,12 @@
   "gui.worldcomment.anonymous": "Anonymous",
 
   "gui.worldcomment.instruction.title": "How to Use WorldComment",
-  "gui.worldcomment.instruction.send_header": "#### Sending Comments",
+  "gui.worldcomment.instruction.send_header": "###### §lSending Comments",
   "gui.worldcomment.instruction.send_content": "Press %s (rebindable) at §lany time§r\nNo need to hold this tool",
-  "gui.worldcomment.instruction.hide_header": "#### Hiding Comments",
-  "gui.worldcomment.instruction.hide_content": "Use the button on inventory screen or pause menu",
-  "gui.worldcomment.instruction.list_header": "#### Viewing Comment List",
+  "gui.worldcomment.instruction.hide_header": "###### §lHiding Comments",
+  "gui.worldcomment.instruction.hide_header_cta": "###### §c§lShowing Comments\n§cYour current setting keeps comments hidden!",
+  "gui.worldcomment.instruction.hide_content": "Use the toggle button on inventory screen or pause menu",
+  "gui.worldcomment.instruction.list_header": "###### §lViewing Comment List",
   "gui.worldcomment.instruction.list_content": "Use the command '/wc list'",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down!",

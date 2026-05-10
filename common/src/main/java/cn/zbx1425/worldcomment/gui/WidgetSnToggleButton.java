@@ -18,9 +18,11 @@ import java.util.Optional;
 public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
 
     public static final int BTN_SIZE = 20;
+    public boolean textOnTheLeft;
 
-    public WidgetSnToggleButton(int x, int y) {
+    public WidgetSnToggleButton(int x, int y, boolean textOnTheLeft) {
         super(x, y, BTN_SIZE, BTN_SIZE, Component.empty());
+        this.textOnTheLeft = textOnTheLeft;
     }
 
     @Override
@@ -55,11 +57,11 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
             ), Optional.empty(), mouseX, mouseY);
         }
 
-        Component countComponent = Component.literal(String.format("%dx", ClientRayPicking.nearbyCommentsCount));
+        Component countComponent = Component.literal(String.format("x%d", ClientRayPicking.nearbyCommentsCount));
         int countWidth = Minecraft.getInstance().font.width(countComponent);
         int yOffset = (BTN_SIZE - Minecraft.getInstance().font.lineHeight) / 2;
         guiGraphics.drawString(Minecraft.getInstance().font, countComponent,
-                getX() - BTN_SIZE / 3 - countWidth, getY() + yOffset,
+            textOnTheLeft ? getX() - BTN_SIZE / 3 - countWidth : getX() + BTN_SIZE + BTN_SIZE / 3, getY() + yOffset,
                 0xFFFFFFFF, true);
     }
 

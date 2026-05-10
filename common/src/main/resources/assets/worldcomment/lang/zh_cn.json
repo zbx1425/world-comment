@@ -65,7 +65,8 @@
   "gui.worldcomment.instruction.send_header": "#### 发送评论",
   "gui.worldcomment.instruction.send_content": "在§l任何时候§r按下 %s (可换绑) 即可\n不必手持此工具",
   "gui.worldcomment.instruction.hide_header": "#### 隐藏评论",
-  "gui.worldcomment.instruction.hide_content": "使用物品栏界面或暂停菜单上的按钮",
+  "gui.worldcomment.instruction.hide_header_cta": "#### §c§l显示评论\n§c您当前的设置隐藏了全部评论！",
+  "gui.worldcomment.instruction.hide_content": "使用物品栏界面或暂停菜单上的切换按钮",
   "gui.worldcomment.instruction.list_header": "#### 查看评论列表",
   "gui.worldcomment.instruction.list_content": "使用 /wc list 指令",
 
