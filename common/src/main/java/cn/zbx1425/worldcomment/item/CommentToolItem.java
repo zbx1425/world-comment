@@ -112,9 +112,7 @@ public class CommentToolItem extends Item implements GroupedItem {
             minecraft.player.playSound(shutterSoundEvent);
 
             Screenshot.grabScreenshot(imageBytes -> {
-                FrameTask.enqueue(() -> {
-                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
-                }, 1);
+                Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
             });
             return true;
         }

@@ -11,6 +11,7 @@ import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import cn.zbx1425.worldcomment.util.FrameTask;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -327,7 +328,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     @Override
     public boolean isInGameUi() {
-        return false; // For the blurred background
+        return true; // For the blurred background
     }
 
     // ---- Public API ----
@@ -451,8 +452,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 if (itemScreenY < viewportTop) continue;
 
                 CommentEntry comment = commentList.get(i);
-                int iconX = xAsideRightL + 5;
-                guiGraphics.fill(xAsideRightL, itemScreenY + 4, xAsideLeftL + 16 + 5, itemScreenY + 4 + 16, 0xBF000000);
+                int iconX = xAsideRightL + 4;
                 renderIcon(guiGraphics, iconX, itemScreenY + 4, 16, 196, 60, mouseX, mouseY);
 
                 if (canDelete(comment)) {
@@ -501,11 +501,13 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
                 if (hitTest(mouseX, mouseY, iconX, itemScreenY + 4, 16)) {
                     commentForDetail = comment;
+                    AbstractWidget.playButtonClickSound(Minecraft.getInstance().getSoundManager());
                     switchTo(Tab.DETAIL);
                     return true;
                 }
 
                 if (canDelete(comment) && hitTest(mouseX, mouseY, iconX, itemScreenY + 4 + 16, 16)) {
+                    AbstractWidget.playButtonClickSound(Minecraft.getInstance().getSoundManager());
                     tryDelete(comment);
                     return true;
                 }
@@ -723,12 +725,14 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
             if (hasImage && mouseX >= cachedImgX && mouseX < cachedImgX + cachedImgW
                     && mouseY >= cachedImgY && mouseY < cachedImgY + cachedImgH) {
+                AbstractWidget.playButtonClickSound(Minecraft.getInstance().getSoundManager());
                 Minecraft.getInstance().setScreen(
                         new ImageViewScreen(CommentListScreen.this, comment.image));
                 return true;
             }
 
             if (hasDeleteBtn && hitTest(mouseX, mouseY, cachedDeleteBtnX, cachedDeleteBtnY, 20)) {
+                AbstractWidget.playButtonClickSound(Minecraft.getInstance().getSoundManager());
                 if (tryDelete(comment)) {
                     onClose();
                 }
