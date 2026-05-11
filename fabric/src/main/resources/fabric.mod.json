@@ -2,8 +2,8 @@
 	"schemaVersion": 1,
 	"id": "worldcomment",
 	"version": "${version}",
-	"name": "Subnoteica World Comment",
-	"description": "Subnoteica World Comment",
+	"name": "WorldComment",
+	"description": "Post comments right into the game world, associated with certain locations.",
 	"authors": [
 		"Zbx1425"
 	],

@@ -6,11 +6,11 @@ issueTrackerURL="https://github.com/zbx1425/world-comment/issues"
 [[mods]]
 modId = "worldcomment"
 version = "${version}"
-displayName = "Subnoteica World Comment"
+displayName = "WorldComment"
 displayURL = "https://github.com/zbx1425/world-comment/"
 
 authors = "Zbx1425"
-description = "Subnoteica World Comment"
+description = "Post comments right into the game world, associated with certain locations."
 logoFile = "icon.png"
 
 displayTest = "IGNORE_ALL_VERSION"
