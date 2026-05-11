@@ -6,15 +6,17 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
+import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.mixin.KeyMappingAccessor;
+import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.Options;
-import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.core.registries.Registries; #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 #if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
@@ -23,9 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class CommentToolItem extends Item implements GroupedItem {
 
@@ -103,16 +103,24 @@ public class CommentToolItem extends Item implements GroupedItem {
             );
         }
 
-        public static boolean handleScreenshotKey() {
+        public static boolean triggerCommentSend(boolean withPlacingDown) {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player == null) return false;
+            if (minecraft.screen != null && !(minecraft.screen instanceof ChatScreen)) return false;
+            if (PlaceableCommentItem.Client.getHolding() != null) return false;
+            if (Screenshot.isGrabbing) return false;
+            minecraft.player.playSound(shutterSoundEvent);
 
-            ItemStack item = PlaceableCommentItem.Client.getHolding();
-            if (item == null) {
-                Screenshot.triggerCommentSend(true);
-                return true;
-            }
-            return false;
+            Screenshot.grabScreenshot(imageBytes -> {
+                FrameTask.enqueue(() -> {
+                    Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
+                }, 1);
+            });
+            return true;
         }
+
+        private static final SoundEvent shutterSoundEvent = #if MC_VERSION >= "11903" SoundEvent.createFixedRangeEvent #else new SoundEvent #endif (
+            Main.id("shutter"), 16
+        );
     }
 }

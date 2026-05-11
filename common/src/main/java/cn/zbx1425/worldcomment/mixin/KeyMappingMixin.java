@@ -32,6 +32,10 @@ public class KeyMappingMixin {
                 cir.setReturnValue(false);
             }
         }
+        if (Screenshot.isGrabbing && MainClient.KEY_SEND_COMMENT_MODIFIER.get().same((KeyMapping)(Object) this)) {
+            // Axiom compatibility: Trick it into thinking player has released LALT
+            cir.setReturnValue(false);
+        }
     }
 
     @Inject(method = "matches", at = @At("RETURN"), cancellable = true)
@@ -42,12 +46,22 @@ public class KeyMappingMixin {
             ? (options.keyScreenshot.same((KeyMapping)(Object)this) && MainClient.KEY_SEND_COMMENT_MODIFIER.get().isDown())
             : (MainClient.KEY_SEND_COMMENT_MODIFIER.get().same((KeyMapping)(Object)this));
         if (isScreenshotHotkey) {
-            if (CommentToolItem.Client.handleScreenshotKey()) {
+            if (CommentToolItem.Client.triggerCommentSend(true)) {
                 cir.setReturnValue(false);
             }
         }
         if (options.keyScreenshot.same((KeyMapping)(Object)this) && Minecraft.getInstance().screen instanceof KeyBindsScreen) {
+            // Vanilla compatibility: Prevent screenshot triggering in KeyBindsScreen
             cir.setReturnValue(false);
         }
     }
+
+    @Inject(method = "isDown", at = @At("HEAD"), cancellable = true)
+    private void isDown(CallbackInfoReturnable<Boolean> cir) {
+        if (Screenshot.isGrabbing && MainClient.KEY_SEND_COMMENT_MODIFIER.get().same((KeyMapping)(Object) this)) {
+            // Axiom compatibility: Trick it into thinking player has released LALT
+            cir.setReturnValue(false);
+        }
+    }
+
 }

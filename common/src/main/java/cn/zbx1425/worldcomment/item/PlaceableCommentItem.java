@@ -67,7 +67,8 @@ public class PlaceableCommentItem extends Item implements GroupedItem {
     public @NotNull #if MC_VERSION < "12108" InteractionResultHolder<ItemStack> #else InteractionResult #endif use(Level level, Player player, InteractionHand usedHand) {
         ItemStack item = player.getItemInHand(usedHand);
         if (!level.isClientSide()) return #if MC_VERSION < "12108" InteractionResultHolder.pass(item) #else InteractionResult.PASS #endif;
-        if (!item.is(Main.ITEM_PLACEABLE_COMMENT.get())) return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
+        if (usedHand != InteractionHand.MAIN_HAND
+            || !item.is(Main.ITEM_PLACEABLE_COMMENT.get())) return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
 
         if (Client.placeUploadJob(level, player, item)) {
             return #if MC_VERSION < "12108" InteractionResultHolder.success(item) #else InteractionResult.SUCCESS #endif;

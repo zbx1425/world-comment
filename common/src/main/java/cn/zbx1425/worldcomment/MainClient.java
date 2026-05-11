@@ -48,7 +48,7 @@ public class MainClient {
 
 		ClientPlatform.registerTickEvent(ignored -> {
 			if (!CommentToolItem.Client.getSendHotkeyIsModifier() && KEY_SEND_COMMENT_MODIFIER.get().consumeClick()) {
-				CommentToolItem.Client.handleScreenshotKey();
+				CommentToolItem.Client.triggerCommentSend(true);
 			}
 		});
 

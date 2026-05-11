@@ -10,6 +10,7 @@ import cn.zbx1425.worldcomment.network.PacketRequestPlacementC2S;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
@@ -251,7 +252,10 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             screenshotSaved = true;
             btnSaveScreenshot.active = false;
 
-            onClose();
+            if (minecraft.options.keyScreenshot.same(MainClient.KEY_SEND_COMMENT_MODIFIER.get())) {
+                // User has bound comment sending to F2, they probably want fast exit
+                onClose();
+            }
         } catch (IOException e) {
             Main.LOGGER.error("Copy image", e);
         }

@@ -249,8 +249,9 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         guiGraphics.pushPose();
         guiGraphics.translate(0, 0, 1);
 
+        int titleWidth = minecraft.font.width(Component.translatable("gui.worldcomment.list.title"));
         guiGraphics.drawString(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
-                xAsideLeftL + 10, 15, 0xFFFFE6C0, true);
+                xAsideLeftL + (ASIDE_L_WIDTH - titleWidth) / 2, 15, 0xFFFFE6C0, true);
         for (net.minecraft.client.gui.components.Button button : pageButtons) {
             button #if MC_VERSION >= "11903" .setX #else .x = #endif (xAsideLeftL + 10);
         }
@@ -451,6 +452,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
                 CommentEntry comment = commentList.get(i);
                 int iconX = xAsideRightL + 5;
+                guiGraphics.fill(xAsideRightL, itemScreenY + 4, xAsideLeftL + 16 + 5, itemScreenY + 4 + 16, 0xBF000000);
                 renderIcon(guiGraphics, iconX, itemScreenY + 4, 16, 196, 60, mouseX, mouseY);
 
                 if (canDelete(comment)) {

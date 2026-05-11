@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
+import cn.zbx1425.worldcomment.item.CommentToolItem;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -18,12 +19,12 @@ public class ClientCommand {
                                     BiFunction<String, ArgumentType<?>, RequiredArgumentBuilder<T, ?>> argument) {
         dispatcher.register(literal.apply("wc")
                 .executes(context -> {
-                    Screenshot.triggerCommentSend(true);
+                    CommentToolItem.Client.triggerCommentSend(true);
                     return 1;
                 })
                 .then(literal.apply("send")
                         .executes(context -> {
-                            Screenshot.triggerCommentSend(true);
+                            CommentToolItem.Client.triggerCommentSend(true);
                             return 1;
                         }))
 //                .then(literal.apply("visible")

@@ -6,11 +6,7 @@ import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.mixin.NativeImageAccessor;
 import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Util;
 import org.lwjgl.stb.STBImage;
 
@@ -25,7 +21,7 @@ public class Screenshot {
     public static boolean isGrabbing = false;
 
 #if MC_VERSION >= "12106"
-    public static void grabScreenshot(Consumer<byte[]> callback) {
+    public static void grabScreenshotInternal(Consumer<byte[]> callback) {
         RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
         net.minecraft.client.Screenshot.takeScreenshot(frameBuf, nativeImage -> {
             try (nativeImage) {
@@ -54,6 +50,22 @@ public class Screenshot {
     }
 #endif
 
+    public static void grabScreenshot(Consumer<byte[]> callback) {
+        if (isGrabbing) return;
+        Minecraft minecraft = Minecraft.getInstance();
+        boolean prevHideGui = minecraft.options.hideGui;
+        Screenshot.applyClientConfigForScreenshot();
+        // This is a workaround for the issue that the screenshot will be taken before CommentWorldRenderer is hidden
+        FrameTask.enqueue(() -> {
+            Screenshot.grabScreenshotInternal(imageBytes -> minecraft.execute(() -> {
+                callback.accept(imageBytes);
+            }));
+            minecraft.options.hideGui = prevHideGui;
+            MainClient.CLIENT_CONFIG.transientPreference.commentVisibilityMask = true;
+            Screenshot.isGrabbing = false;
+        }, 2);
+    }
+
     public static File getAvailableFile() {
         File screenShotDirectory = new File(Minecraft.getInstance().gameDirectory,"screenshots");
         String s = "WorldComment-" + Util.getFilenameFormattedDateTime();
@@ -63,33 +75,6 @@ public class Screenshot {
             ++i;
         }
         return file1;
-    }
-
-    private static final SoundEvent shutterSoundEvent = #if MC_VERSION >= "11903" SoundEvent.createFixedRangeEvent #else new SoundEvent #endif (
-            Main.id("shutter"), 16
-    );
-
-    public static void triggerCommentSend(boolean withPlacingDown) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.screen == null || minecraft.screen instanceof ChatScreen) {
-            boolean prevHideGui = minecraft.options.hideGui;
-            applyClientConfigForScreenshot();
-            // This is a workaround for the issue that the screenshot will be taken before CommentWorldRenderer is hidden
-            FrameTask.enqueue(() -> {
-                grabScreenshot(imageBytes -> minecraft.execute(() -> {
-                    boolean onGround = #if MC_VERSION >= "12000" minecraft.player.onGround() #else minecraft.player.isOnGround() #endif;
-//                    boolean canSend = withPlacingDown || onGround;
-                    boolean canSend = true;
-                    if (minecraft.player != null && canSend) {
-                        minecraft.player.playSound(shutterSoundEvent);
-                        Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
-                    }
-                }));
-                minecraft.options.hideGui = prevHideGui;
-                MainClient.CLIENT_CONFIG.transientPreference.commentVisibilityMask = true;
-                isGrabbing = false;
-            }, 2);
-        }
     }
 
     public static void applyClientConfigForScreenshot() {
