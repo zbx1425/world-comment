@@ -70,7 +70,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
             }
             if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX
                 && cellY <= logicMouseY && cellY + ITEM_SIZE >= logicMouseY
-                && 0 <= logicMouseY && getHeight() >= logicMouseY) {
+                && 0 <= mouseY - getY() && getHeight() >= mouseY - getY()) {
                 if (selectedId != id) {
                     graphics.fill(cellX - ITEM_PADDING, cellY - ITEM_PADDING,
                         cellX + ITEM_SIZE + ITEM_PADDING, cellY + ITEM_SIZE + ITEM_PADDING,
@@ -118,7 +118,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
             int cellY = (row * (ITEM_SIZE + ITEM_SPACING_Y)) + PADDING_Y;
             if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX
                 && cellY <= logicMouseY && cellY + ITEM_SIZE >= logicMouseY
-                && 0 <= logicMouseY && getHeight() >= logicMouseY) {
+                && 0 <= event.y() - getY() && getHeight() >= event.y() - getY()) {
                 if (selectedId != id) {
                     selectedId = id;
                     onSelectionChange.accept(id);
