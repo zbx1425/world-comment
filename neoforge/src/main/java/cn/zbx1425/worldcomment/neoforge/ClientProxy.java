@@ -6,6 +6,7 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
@@ -18,15 +19,13 @@ import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.wo
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 #if MC_VERSION < "12002" import net.minecraft.client.gui.LayeredDraw; #endif
-#if MC_VERSION >= "12002" import net.neoforged.neoforge.client.gui.GuiLayer; #endif
+#if MC_VERSION >= "12002"import net.minecraft.client.resources.model.sprite.AtlasManager;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.gui.GuiLayer; #endif
 import net.minecraft.commands.Commands;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 #if MC_VERSION >= "12102" import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent; #endif
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
@@ -87,6 +86,16 @@ public class ClientProxy {
             MainForge.PACKET_REGISTRY.commitClient(event);
         }
 #endif
+
+        @SubscribeEvent
+        private static void onRegisterClientResourceReloadListeners(AddClientReloadListenersEvent event) {
+            event.addListener(Main.id("emoji_atlas"), EmojiRegistry.INSTANCE);
+        }
+
+        @SubscribeEvent
+        private static void onRegisterTextureAtlases(RegisterTextureAtlasesEvent event) {
+            event.register(new AtlasManager.AtlasConfig(EmojiRegistry.ATLAS_TEXTURE_ID, EmojiRegistry.ATLAS_ID, true));
+        }
     }
 
     public static class ForgeEventBusListener {
