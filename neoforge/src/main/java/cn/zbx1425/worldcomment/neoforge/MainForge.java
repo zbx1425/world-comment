@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment.neoforge;
 
 import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.ServerCommand;
 import net.minecraft.commands.Commands;
 #if MC_VERSION >= "12100"
@@ -51,6 +52,7 @@ public class MainForge {
 #else
 		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
 #endif
+			MainClient.init();
 			eventBus.register(ClientProxy.ModEventBusListener.class);
 #if MC_VERSION >= "12100"
 			NeoForge.EVENT_BUS.register(ClientProxy.ForgeEventBusListener.class);

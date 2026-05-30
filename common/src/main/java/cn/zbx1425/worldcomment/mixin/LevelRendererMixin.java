@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
+import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -31,7 +32,7 @@ public class LevelRendererMixin {
 
     @Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=blockentities", ordinal = 0))
     private void afterEntities(PoseStack matrices, float partialTick, long finishNanoTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f projectionMatrix, CallbackInfo ci) {
-        if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
+        if (KeyMappingUtil.isKeyDown(Minecraft.getInstance().options.keyPlayerList)) {
             if (!world_comment$lastFrameKeyPlayerListDown) {
                 CommentListScreen.handleKeyTab();
             }

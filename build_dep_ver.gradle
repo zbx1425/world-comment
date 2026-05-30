@@ -101,7 +101,7 @@ if (minecraft_version_int < 12100) {
     rootProject.ext.forge_version = [
             "1.21.1": "21.1.35",
             "1.21.8": "21.8.29",
-            "26.1": "26.1.0.4-beta"
+            "26.1": "26.1.0.8-beta"
     ][minecraft_version]
 }
 rootProject.ext.architectury_version = [

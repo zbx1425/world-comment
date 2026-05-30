@@ -4,6 +4,7 @@ import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 #if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -47,7 +48,7 @@ public class MainFabricClient implements ClientModInitializer {
 #if MC_VERSION >= "12100"
 		// TODO: Correct timing?
 		LevelRenderEvents.AFTER_TRANSLUCENT_FEATURES.register((context) -> {
-			if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
+			if (KeyMappingUtil.isKeyDown(Minecraft.getInstance().options.keyPlayerList)) {
 				if (!world_comment$lastFrameKeyPlayerListDown) {
 					CommentListScreen.handleKeyTab();
 				}

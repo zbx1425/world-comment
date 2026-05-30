@@ -11,6 +11,7 @@ import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
+import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 #if MC_VERSION >= "12000"
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.client.DeltaTracker;
@@ -77,7 +78,7 @@ public class ClientProxy {
 
         @SubscribeEvent
         public static void onClientSetupEvent(FMLClientSetupEvent event) {
-            MainClient.init();
+
         }
 
 #if MC_VERSION >= "12102"
@@ -110,7 +111,7 @@ public class ClientProxy {
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
 #endif
-                if (Minecraft.getInstance().options.keyPlayerList.isDown()) {
+                if (KeyMappingUtil.isKeyDown(Minecraft.getInstance().options.keyPlayerList)) {
                     if (!world_comment$lastFrameKeyPlayerListDown) {
                         CommentListScreen.handleKeyTab();
                     }

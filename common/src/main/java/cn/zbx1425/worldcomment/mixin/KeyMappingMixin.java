@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
+import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -43,7 +44,7 @@ public class KeyMappingMixin {
         if (!cir.getReturnValue()) return;
         Options options = Minecraft.getInstance().options;
         boolean isScreenshotHotkey = CommentToolItem.Client.getSendHotkeyIsModifier()
-            ? (options.keyScreenshot.same((KeyMapping)(Object)this) && MainClient.KEY_SEND_COMMENT_MODIFIER.get().isDown())
+            ? (options.keyScreenshot.same((KeyMapping)(Object)this) && KeyMappingUtil.isKeyDown(MainClient.KEY_SEND_COMMENT_MODIFIER.get()))
             : (MainClient.KEY_SEND_COMMENT_MODIFIER.get().same((KeyMapping)(Object)this));
         if (isScreenshotHotkey) {
             if (CommentToolItem.Client.triggerCommentSend(true)) {
