@@ -60,8 +60,13 @@ shadowJar {
 	exclude "*.bmp"
 
 	configurations = [project.configurations.shadowCommon]
-	archiveBaseName = "WorldComment-fabric"
-	archiveClassifier = null
+
+	archiveBaseName = "WorldComment"
+	if (rootProject.minecraft_version_int < 260000) {
+		archiveClassifier = "dev-shadow"
+	} else {
+		archiveClassifier = null
+	}
 
 	dependencies {
 		it.exclude it.dependency('io.netty:.*')
@@ -75,7 +80,13 @@ if (rootProject.minecraft_version_int < 260000) {
 	remapJar {
 		input.set shadowJar.archiveFile
 		dependsOn shadowJar
+		archiveBaseName = "WorldComment"
 		archiveClassifier = null
+	}
+} else {
+	jar {
+		archiveBaseName = "WorldComment"
+		archiveClassifier = "dev"
 	}
 }
 

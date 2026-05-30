@@ -56,7 +56,7 @@ tasks.register('setupLibrary') {
 allprojects {
 	apply plugin: "architectury-plugin"
 
-	version = project.mod_version + "+" + minecraft_version
+	version = project.mod_version + "+" + minecraft_version + "-" + project.name
 	group = project.maven_group
 
 	repositories {
