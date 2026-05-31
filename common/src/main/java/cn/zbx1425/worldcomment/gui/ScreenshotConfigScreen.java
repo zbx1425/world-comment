@@ -50,7 +50,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
 
         containerWidth = 200;
         btnOk = new WidgetColorButton(
-                containerWidth - CommentTypeButton.BTN_WIDTH * 2, baseY, CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+                containerWidth - 80, baseY, 80, SQ_SIZE,
                 Component.translatable("gui.ok"), 0xFFC5E1A5,
                 sender -> onClose()
         );

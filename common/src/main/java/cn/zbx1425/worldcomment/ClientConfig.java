@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import com.google.gson.GsonBuilder;
@@ -183,7 +184,7 @@ public class ClientConfig {
             // Show a newly placed comment to its owner for 30 seconds.
             return true;
         }
-        ServerConfig.Visibility criteriaToUse = ((comment.messageType - 1) >= 4) ? serverIssuedConfig.markerVisibilityCriteria : serverIssuedConfig.commentVisibilityCriteria;
+        ServerConfig.Visibility criteriaToUse = (comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID) ? serverIssuedConfig.markerVisibilityCriteria : serverIssuedConfig.commentVisibilityCriteria;
         return switch (criteriaToUse) {
             case ALWAYS -> true;
             case NEVER -> false;

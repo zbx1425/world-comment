@@ -88,7 +88,7 @@ public class ClientRayPicking {
 
         public NeighborSituation(BlockPos anchorPos, Level level) {
             isDying = level.getBlockState(anchorPos.below()).isAir()
-                || !level.getBlockState(anchorPos).isAir();
+                || level.getBlockState(anchorPos).isSuffocating(level, anchorPos);
             if (isDying) {
                 isConfined = false; // Just init
                 return;

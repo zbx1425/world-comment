@@ -80,7 +80,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         textBoxMessage.setValue("");
         textBoxMessage.setValueListener(ignored -> updateBtnSendFeedback());
         this.btnSendFeedback = new WidgetColorButton(
-            CommentTypeButton.BTN_WIDTH * 2, SQ_SIZE,
+            80, SQ_SIZE,
             Component.translatable("gui.worldcomment.submit"), 0xFFC5E1A5,
             sender -> sendReport()
         );
@@ -118,7 +118,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
 
         emojiPanel.setPosition(rootOffX + MAIN_XOFF, rootOffY + 14);
         textBoxMessage.setPosition(rootOffX + MAIN_XOFF, rootOffY + 14 + (ROOT_HEIGHT - 14 - 26) / 2);
-        btnSendFeedback.setPosition(rootOffX + ROOT_WIDTH - CommentTypeButton.BTN_WIDTH * 2 - 5, rootOffY + ROOT_HEIGHT - 3 - 20);
+        btnSendFeedback.setPosition(rootOffX + ROOT_WIDTH - 80 - 5, rootOffY + ROOT_HEIGHT - 3 - 20);
         addRenderableWidget(emojiPanel);
         addRenderableWidget(textBoxMessage);
         addRenderableWidget(btnSendFeedback);
