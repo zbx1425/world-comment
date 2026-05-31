@@ -30,7 +30,6 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 #if MC_VERSION >= "12102" import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent; #endif
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 public class ClientProxy {
 
@@ -135,7 +134,7 @@ public class ClientProxy {
         }
 
         @SubscribeEvent
-        public static void onRegisterClientCommand(RegisterCommandsEvent event) {
+        public static void onRegisterClientCommand(RegisterClientCommandsEvent event) {
             ClientCommand.register(event.getDispatcher(), Commands::literal, Commands::argument);
         }
 
