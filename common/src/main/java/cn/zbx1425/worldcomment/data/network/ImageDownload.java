@@ -32,29 +32,31 @@ public class ImageDownload {
 
     private static final Map<String, ImageState> images = new HashMap<>();
 
-    public static ImageState getTexture(ThumbImage image, boolean thumb) {
-        if (image.url.isEmpty() || MainClient.CLIENT_CONFIG.serverIssuedConfig.imageGlobalKill) return ImageState.BLANK;
-        String targetUrl = (thumb && !image.thumbUrl.isEmpty()) ? image.thumbUrl : image.url;
+    public static ImageState getTexture(String resolvedUrl) {
+        if (resolvedUrl == null || resolvedUrl.isEmpty()
+                || MainClient.CLIENT_CONFIG.serverIssuedConfig.imageGlobalKill) {
+            return ImageState.BLANK;
+        }
         synchronized (images) {
-            if (images.containsKey(targetUrl)) return queryTexture(targetUrl);
-            images.put(targetUrl, new ImageState());
+            if (images.containsKey(resolvedUrl)) return queryTexture(resolvedUrl);
+            images.put(resolvedUrl, new ImageState());
         }
 
         Main.IO_EXECUTOR.execute(() -> {
             try {
-                byte[] localImageData = getLocalImageData(image.url);
+                byte[] localImageData = getLocalImageData(resolvedUrl);
                 if (localImageData != null) {
-                    applyImageData(targetUrl, localImageData);
+                    applyImageData(resolvedUrl, localImageData);
                     return;
                 }
             } catch (IOException ex) {
-                Main.LOGGER.warn("Cannot read local image {}", image.url, ex);
+                Main.LOGGER.warn("Cannot read local image {}", resolvedUrl, ex);
             }
 
-            downloadImage(targetUrl);
+            downloadImage(resolvedUrl);
         });
 
-        return queryTexture(targetUrl);
+        return queryTexture(resolvedUrl);
     }
 
     private static void downloadImage(String url) {
@@ -102,10 +104,12 @@ public class ImageDownload {
         return null;
     }
 
-    private static void applyImageData(String url, byte[] pngOrJpgImageData) {
-        byte[] imageData = pngOrJpgImageData;
-        if (url.toLowerCase(Locale.ROOT).endsWith(".jpg")) {
-            // Actually maybe directly construct NativeImage from jpg
+    private static void applyImageData(String url, byte[] rawImageData) {
+        byte[] imageData = rawImageData;
+        String lower = url.toLowerCase(Locale.ROOT);
+        if (lower.endsWith(".webp") || isWebpMagicBytes(rawImageData)) {
+            imageData = ImageConvertClient.webpToPng(imageData);
+        } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
             imageData = ImageConvertClient.toPng(imageData);
         }
         ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
@@ -136,6 +140,12 @@ public class ImageDownload {
                 OffHeapAllocator.free(buffer);
             }
         });
+    }
+
+    private static boolean isWebpMagicBytes(byte[] data) {
+        return data.length > 12
+                && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'
+                && data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P';
     }
 
     private static ImageState queryTexture(String url) {
@@ -199,8 +209,15 @@ public class ImageDownload {
     public static String getCacheFileName(String url) {
         byte[] urlBytes = url.getBytes(StandardCharsets.UTF_8);
         String hash = DigestUtils.sha1Hex(urlBytes);
-        String extension = url.toLowerCase().endsWith(".jpg") ? ".jpg" : ".png";
+        String lower = url.toLowerCase(Locale.ROOT);
+        String extension;
+        if (lower.endsWith(".webp")) {
+            extension = ".webp";
+        } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+            extension = ".jpg";
+        } else {
+            extension = ".png";
+        }
         return String.format("url-sha1-%s%s", hash, extension);
     }
-
 }

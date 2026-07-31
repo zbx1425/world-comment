@@ -1,8 +1,10 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -12,22 +14,16 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.server.permissions.Permissions;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
@@ -55,7 +51,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     }
 
     private void calculateHeight() {
-        int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
+        int picWidth = (comment.image.sourceUrl.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
         int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
         wrappedText = SizedFormattedText.splitLines(comment.message, font, textWidth, Style.EMPTY,
             comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID, false);
@@ -66,7 +62,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         int textAreaHeight = 28
                 + (comment.message.isEmpty() ? 0 : textHeight)
                 + 4;
-        int picHeight = 20 + ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4 + 4;
+        int picHeight = 20 + ((comment.image.sourceUrl.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4 + 4;
         height = Math.max(Math.max(textAreaHeight, picHeight), 28 + 4);
     }
 
@@ -80,8 +76,8 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
                 24, 4, 4, 28
         );
 
-        int picWidth = (comment.image.url.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
-        int picHeight = ((comment.image.url.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4;
+        int picWidth = (comment.image.sourceUrl.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
+        int picHeight = ((comment.image.sourceUrl.isEmpty() || !showImage) ? 0 : (picWidth * 9 / 16)) + 4;
 
         if (!comment.message.isEmpty()) {
             int lineY = getY() + 28;
@@ -95,8 +91,11 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
             }
         }
 
-        if (!comment.image.url.isEmpty() && showImage) {
-            ImageDownload.ImageState imageToDraw = ImageDownload.getTexture(comment.image, true);
+        if (!comment.image.sourceUrl.isEmpty() && showImage) {
+            String thumbUrl = ImageUrlResolver.resolve(comment.image, ImageUrlResolver.ImageUsagePurpose.THUMBNAIL,
+                    MainClient.CLIENT_CONFIG.serverIssuedConfig.imageVariants,
+                    MainClient.CLIENT_CONFIG.serverIssuedConfig.uploaderCdnConfigs);
+            ImageDownload.ImageState imageToDraw = ImageDownload.getTexture(thumbUrl);
             int x1 = getX() + width - 4 - picWidth, x2 = getX() + width - 4;
             int y1 = getY() + 20, y2 = getY() + 20 + picHeight;
             guiGraphics.blit(imageToDraw.getFriendlyTexture(Minecraft.getInstance().getTextureManager()), x1, y1, x2, y2);

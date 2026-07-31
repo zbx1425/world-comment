@@ -2,13 +2,15 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerPlatform;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
-import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.S3PreSignedUploader;
+import cn.zbx1425.worldcomment.data.network.upload.ImageFilePurpose;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PacketPreSignResponseS2C {
 
@@ -18,10 +20,12 @@ public class PacketPreSignResponseS2C {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeLong(jobId);
         buffer.writeBoolean(true);
-        buffer.writeUtf(preSignResponse.upload().url);
-        buffer.writeUtf(preSignResponse.upload().thumbUrl);
-        buffer.writeUtf(preSignResponse.access().url);
-        buffer.writeUtf(preSignResponse.access().thumbUrl);
+        buffer.writeInt(preSignResponse.slots().size());
+        for (S3PreSignedUploader.PreSignedSlot slot : preSignResponse.slots()) {
+            buffer.writeEnum(slot.purpose());
+            buffer.writeUtf(slot.uploadUrl());
+            buffer.writeUtf(slot.accessUrl());
+        }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
     }
 
@@ -42,15 +46,15 @@ public class PacketPreSignResponseS2C {
                 S3PreSignedUploader.completePreSignExceptionally(jobId, new Exception(error));
                 return;
             }
-            String url = buffer.readUtf();
-            String thumbUrl = buffer.readUtf();
-            String accessUrl = buffer.readUtf();
-            String accessThumbUrl = buffer.readUtf();
-            S3PreSignedUploader.PreSignResponse response = new S3PreSignedUploader.PreSignResponse(
-                    new ThumbImage(url, thumbUrl),
-                    new ThumbImage(accessUrl, accessThumbUrl)
-            );
-            S3PreSignedUploader.completePreSign(jobId, response);
+            int slotCount = buffer.readInt();
+            List<S3PreSignedUploader.PreSignedSlot> slots = new ArrayList<>(slotCount);
+            for (int i = 0; i < slotCount; i++) {
+                ImageFilePurpose purpose = buffer.readEnum(ImageFilePurpose.class);
+                String uploadUrl = buffer.readUtf();
+                String accessUrl = buffer.readUtf();
+                slots.add(new S3PreSignedUploader.PreSignedSlot(purpose, uploadUrl, accessUrl));
+            }
+            S3PreSignedUploader.completePreSign(jobId, new S3PreSignedUploader.PreSignResponse(slots));
         }
     }
 }

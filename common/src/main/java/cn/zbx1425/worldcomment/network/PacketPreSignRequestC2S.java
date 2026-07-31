@@ -2,7 +2,6 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.upload.CommentAffinityInfo;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.S3PreSignedUploader;
@@ -11,8 +10,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.UUID;
 
 public class PacketPreSignRequestC2S {
 
@@ -23,7 +20,7 @@ public class PacketPreSignRequestC2S {
         public static void send(long jobId, CommentAffinityInfo comment, S3PreSignedUploader uploader) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeLong(jobId);
-            buffer.writeUUID(uploader.instanceId);
+            buffer.writeUtf(uploader.id);
             buffer.writeUtf(comment.initiatorName);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
@@ -31,20 +28,21 @@ public class PacketPreSignRequestC2S {
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         long jobId = buffer.readLong();
-        UUID instanceId = buffer.readUUID();
+        String uploaderId = buffer.readUtf();
         String initiatorName = buffer.readUtf();
         CommentAffinityInfo comment = new CommentAffinityInfo(initiator.getGameProfile().id(), initiatorName);
 
         ImageUploader uploader = Main.SERVER_CONFIG.imageUploaders.value.stream()
-                .filter(i -> i.instanceId.equals(instanceId)).findFirst().orElse(null);
+                .filter(i -> i.id.equals(uploaderId)).findFirst().orElse(null);
         if (!(uploader instanceof S3PreSignedUploader preSignUploader)) {
-            Main.LOGGER.warn("Received invalid presign request from {}, instanceId: {}",
-                    initiator.getGameProfile().name(), instanceId);
-            PacketPreSignResponseS2C.sendException(initiator, jobId, new Exception("Invalid uploader instanceId"));
+            Main.LOGGER.warn("Received invalid presign request from {}, uploaderId: {}",
+                    initiator.getGameProfile().name(), uploaderId);
+            PacketPreSignResponseS2C.sendException(initiator, jobId, new Exception("Invalid uploader id"));
             return;
         }
         try {
-            PacketPreSignResponseS2C.send(initiator, jobId, preSignUploader.performPreSign(comment));
+            PacketPreSignResponseS2C.send(initiator, jobId,
+                    preSignUploader.performPreSign(jobId, comment, Main.SERVER_CONFIG.imageVariants.value));
         } catch (Exception ex) {
             PacketPreSignResponseS2C.sendException(initiator, jobId, ex);
         }

@@ -1,10 +1,12 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
@@ -20,8 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.Mth;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Style;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
@@ -662,8 +662,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
             // --- Image ---
             hasImage = false;
-            if (!comment.image.url.isEmpty()) {
-                ImageDownload.ImageState imageState = ImageDownload.getTexture(comment.image, false);
+            if (!comment.image.sourceUrl.isEmpty()) {
+                String detailUrl = ImageUrlResolver.resolve(comment.image, ImageUrlResolver.ImageUsagePurpose.DETAIL,
+                        MainClient.CLIENT_CONFIG.serverIssuedConfig.imageVariants,
+                        MainClient.CLIENT_CONFIG.serverIssuedConfig.uploaderCdnConfigs);
+                ImageDownload.ImageState imageState = ImageDownload.getTexture(detailUrl);
                 int maxImgW = (int) (contentWidth * 0.8);
                 int maxImgH = height / 2;
                 int imgW, imgH;

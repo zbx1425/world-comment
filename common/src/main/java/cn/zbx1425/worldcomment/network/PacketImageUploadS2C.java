@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerPlatform;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import cn.zbx1425.worldcomment.data.network.CommentImage;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,12 +13,11 @@ public class PacketImageUploadS2C {
 
     public static final Identifier IDENTIFIER = Main.id("image_upload");
 
-    public static void send(ServerPlayer target, long jobId, ThumbImage image) {
+    public static void send(ServerPlayer target, long jobId, CommentImage image) {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeLong(jobId);
         buffer.writeBoolean(true);
-        buffer.writeUtf(image.url);
-        buffer.writeUtf(image.thumbUrl);
+        image.writePacket(buffer);
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
     }
 
@@ -39,10 +38,8 @@ public class PacketImageUploadS2C {
                 LocalStorageUploader.completeUploadExceptionally(jobId, new Exception(error));
                 return;
             }
-            String url = buffer.readUtf();
-            String thumbUrl = buffer.readUtf();
-            ThumbImage image = new ThumbImage(url, thumbUrl);
+            CommentImage image = CommentImage.readPacket(buffer);
             LocalStorageUploader.completeUpload(jobId, image);
         }
     }
-} 
+}

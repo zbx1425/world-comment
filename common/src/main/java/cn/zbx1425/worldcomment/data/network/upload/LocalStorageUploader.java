@@ -1,10 +1,10 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import cn.zbx1425.worldcomment.data.network.CommentImage;
 import cn.zbx1425.worldcomment.network.PacketImageDownloadC2S;
 import cn.zbx1425.worldcomment.network.PacketImageUploadC2S;
 import com.google.gson.JsonObject;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -14,7 +14,7 @@ public class LocalStorageUploader extends ImageUploader {
 
     private static final LocalStorageUploader INSTANCE = new LocalStorageUploader();
     public static final String URL_PREFIX = "file://worldcomment/";
-    private static final Map<Long, CompletableFuture<ThumbImage>> pendingUploads = new HashMap<>();
+    private static final Map<Long, CompletableFuture<CommentImage>> pendingUploads = new HashMap<>();
     private static final Map<String, CompletableFuture<byte[]>> pendingDownloads = new HashMap<>();
     private static final long TIMEOUT_SECONDS = 30;
 
@@ -22,7 +22,7 @@ public class LocalStorageUploader extends ImageUploader {
     public static final int IMAGE_CHUNK_SIZE = 28 * 1024; // 28KB chunks
 
     private LocalStorageUploader() {
-        super("local", null);
+        super("local", "local", null);
     }
 
     public static LocalStorageUploader getInstance() {
@@ -30,30 +30,34 @@ public class LocalStorageUploader extends ImageUploader {
     }
 
     @Override
-    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
-        CompletableFuture<ThumbImage> future = new CompletableFuture<>();
+    public CompletableFuture<UploadResult> uploadImage(byte[] imageData, String filename, CommentAffinityInfo info) {
+        throw new UnsupportedOperationException("LocalStorageUploader uses uploadForCommentImage instead");
+    }
+
+    public CompletableFuture<CommentImage> uploadForCommentImage(long jobId, byte[] imageData) {
+        CompletableFuture<CommentImage> future = new CompletableFuture<>();
         synchronized (pendingUploads) {
-            CompletableFuture<ThumbImage> existing = pendingUploads.get(comment.id);
+            CompletableFuture<CommentImage> existing = pendingUploads.get(jobId);
             if (existing != null && !existing.isDone()) {
                 return existing;
             }
             if (existing != null) {
-                pendingUploads.remove(comment.id);
+                pendingUploads.remove(jobId);
             }
-            pendingUploads.put(comment.id, future);
+            pendingUploads.put(jobId, future);
         }
 
-        PacketImageUploadC2S.ClientLogics.send(comment, imageBytes);
+        PacketImageUploadC2S.ClientLogics.send(jobId, imageData);
         return future.orTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .whenComplete((result, ex) -> {
                     synchronized (pendingUploads) {
-                        pendingUploads.remove(comment.id);
+                        pendingUploads.remove(jobId);
                     }
                 });
     }
 
-    public static void completeUpload(long jobId, ThumbImage image) {
-        CompletableFuture<ThumbImage> future;
+    public static void completeUpload(long jobId, CommentImage image) {
+        CompletableFuture<CommentImage> future;
         synchronized (pendingUploads) {
             future = pendingUploads.remove(jobId);
         }
@@ -63,7 +67,7 @@ public class LocalStorageUploader extends ImageUploader {
     }
 
     public static void completeUploadExceptionally(long jobId, Throwable ex) {
-        CompletableFuture<ThumbImage> future;
+        CompletableFuture<CommentImage> future;
         synchronized (pendingUploads) {
             future = pendingUploads.remove(jobId);
         }
@@ -118,4 +122,4 @@ public class LocalStorageUploader extends ImageUploader {
             future.completeExceptionally(ex);
         }
     }
-} 
+}

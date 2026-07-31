@@ -30,6 +30,9 @@ subprojects {
 
 		implementation 'io.lettuce:lettuce-core:6.2.3.RELEASE'
 		shadowCommon 'io.lettuce:lettuce-core:6.2.3.RELEASE'
+
+		implementation 'dev.matrixlab.webp4j:webp4j-core:2.5.0'
+		shadowCommon 'dev.matrixlab.webp4j:webp4j-core:2.5.0'
 	}
 
 	tasks.withType(JavaCompile) {

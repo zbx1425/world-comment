@@ -29,7 +29,7 @@ public class PacketImageDownloadC2S {
         
         try {
             Path imageDir = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
-                    .resolve("world-comment").resolve("image")
+                    .resolve("worldcomment").resolve("image")
                     .normalize();
 
             Path imagePath = imageDir.resolve(fileName).normalize();

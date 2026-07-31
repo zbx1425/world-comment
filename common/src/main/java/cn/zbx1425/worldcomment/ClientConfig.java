@@ -5,7 +5,9 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
+import cn.zbx1425.worldcomment.data.network.upload.CdnTransformConfig;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.data.network.upload.ImageVariantConfig;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,14 +18,14 @@ import net.minecraft.world.level.GameType;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ClientConfig {
 
     public static class ServerIssuedConfig {
         public List<ImageUploader> imageUploaders;
+        public ImageVariantConfig imageVariants;
+        public Map<String, CdnTransformConfig> uploaderCdnConfigs;
         public ServerConfig.MarkerUsage allowMarkerUsage;
         public ServerConfig.Visibility commentVisibilityCriteria;
         public ServerConfig.Visibility markerVisibilityCriteria;
@@ -33,6 +35,8 @@ public class ClientConfig {
 
         public ServerIssuedConfig() {
             imageUploaders = ImageUploader.parseUploaderList(List.of());
+            imageVariants = ImageVariantConfig.defaults();
+            uploaderCdnConfigs = new HashMap<>();
             allowMarkerUsage = ServerConfig.MarkerUsage.OP;
             commentVisibilityCriteria = ServerConfig.Visibility.PREFERENCE;
             markerVisibilityCriteria = ServerConfig.Visibility.ALWAYS;
@@ -48,6 +52,17 @@ public class ClientConfig {
                 uploaderConfigs.add(JsonParser.parseString(packet.readUtf()).getAsJsonObject());
             }
             imageUploaders = ImageUploader.parseUploaderList(uploaderConfigs);
+
+            imageVariants = ImageVariantConfig.readPacket(packet);
+
+            int cdnCount = packet.readInt();
+            uploaderCdnConfigs = new HashMap<>(cdnCount);
+            for (int i = 0; i < cdnCount; i++) {
+                String uploaderId = packet.readUtf();
+                CdnTransformConfig cdnConfig = CdnTransformConfig.readPacket(packet);
+                uploaderCdnConfigs.put(uploaderId, cdnConfig);
+            }
+
             allowMarkerUsage = packet.readEnum(ServerConfig.MarkerUsage.class);
             commentVisibilityCriteria = packet.readEnum(ServerConfig.Visibility.class);
             markerVisibilityCriteria = packet.readEnum(ServerConfig.Visibility.class);
@@ -58,6 +73,13 @@ public class ClientConfig {
 
         public ServerIssuedConfig(ServerConfig serverConfig) {
             imageUploaders = serverConfig.imageUploaders.value;
+            imageVariants = serverConfig.imageVariants.value;
+            uploaderCdnConfigs = new HashMap<>();
+            for (ImageUploader uploader : imageUploaders) {
+                if (uploader.hasCdnTransform()) {
+                    uploaderCdnConfigs.put(uploader.id, uploader.cdnConfig);
+                }
+            }
             allowMarkerUsage = serverConfig.allowMarkerUsage.value;
             commentVisibilityCriteria = serverConfig.commentVisibilityCriteria.value;
             markerVisibilityCriteria = serverConfig.markerVisibilityCriteria.value;
@@ -71,6 +93,15 @@ public class ClientConfig {
             for (ImageUploader uploader : imageUploaders) {
                 packet.writeUtf(uploader.serializeForClient().toString());
             }
+
+            imageVariants.writePacket(packet);
+
+            packet.writeInt(uploaderCdnConfigs.size());
+            for (var entry : uploaderCdnConfigs.entrySet()) {
+                packet.writeUtf(entry.getKey());
+                entry.getValue().writePacket(packet);
+            }
+
             packet.writeEnum(allowMarkerUsage);
             packet.writeEnum(commentVisibilityCriteria);
             packet.writeEnum(markerVisibilityCriteria);
@@ -181,7 +212,6 @@ public class ClientConfig {
         if (!transientPreference.commentVisibilityMask) return false;
         if (comment.initiator.equals(minecraft.player.getGameProfile().id())
             && (System.currentTimeMillis() - comment.timestamp) < 30000) {
-            // Show a newly placed comment to its owner for 30 seconds.
             return true;
         }
         ServerConfig.Visibility criteriaToUse = (comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID) ? serverIssuedConfig.markerVisibilityCriteria : serverIssuedConfig.commentVisibilityCriteria;

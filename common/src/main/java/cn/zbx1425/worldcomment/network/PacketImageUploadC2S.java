@@ -2,57 +2,49 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.ImageConvertClient;
+import cn.zbx1425.worldcomment.data.network.CommentImage;
 import cn.zbx1425.worldcomment.data.network.ImageConvertServer;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
-import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
-import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
+import cn.zbx1425.worldcomment.data.network.upload.*;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 public class PacketImageUploadC2S {
 
     public static final Identifier IDENTIFIER = Main.id("image_upload");
-    private static final DateTimeFormatter FILE_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     public static class ClientLogics {
-        public static void send(CommentEntry comment, byte[] imageBytes) {
-            // Convert to JPEG before uploading to avoid hitting vanilla 2MB packet size limit
-            byte[] jpgData = ImageConvertClient.toJpegScaled(imageBytes, ImageUploader.IMAGE_MAX_WIDTH);
-            if (jpgData.length > LocalStorageUploader.IMAGE_MAX_SIZE) {
-                Main.LOGGER.warn("Image too large: {}B", jpgData.length);
+        public static void send(long jobId, byte[] imageBytes) {
+            if (imageBytes.length > LocalStorageUploader.IMAGE_MAX_SIZE) {
+                Main.LOGGER.warn("Image too large: {}B", imageBytes.length);
                 return;
             }
 
-            int totalChunks = (jpgData.length + LocalStorageUploader.IMAGE_CHUNK_SIZE - 1) / LocalStorageUploader.IMAGE_CHUNK_SIZE;
-            
+            int totalChunks = (imageBytes.length + LocalStorageUploader.IMAGE_CHUNK_SIZE - 1) / LocalStorageUploader.IMAGE_CHUNK_SIZE;
+
             for (int i = 0; i < totalChunks; i++) {
                 int start = i * LocalStorageUploader.IMAGE_CHUNK_SIZE;
-                int end = Math.min(start + LocalStorageUploader.IMAGE_CHUNK_SIZE, jpgData.length);
-                byte[] chunk = Arrays.copyOfRange(jpgData, start, end);
-                
+                int end = Math.min(start + LocalStorageUploader.IMAGE_CHUNK_SIZE, imageBytes.length);
+                byte[] chunk = Arrays.copyOfRange(imageBytes, start, end);
+
                 FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-                buffer.writeLong(comment.id);
-                buffer.writeInt(jpgData.length); // Total size
-                buffer.writeLong(comment.timestamp);
-                buffer.writeInt(i); // Chunk index
-                buffer.writeInt(totalChunks); // Total chunks
-                buffer.writeInt(chunk.length); // This chunk size
+                buffer.writeLong(jobId);
+                buffer.writeInt(imageBytes.length);
+                buffer.writeLong(System.currentTimeMillis());
+                buffer.writeInt(i);
+                buffer.writeInt(totalChunks);
+                buffer.writeInt(chunk.length);
                 buffer.writeBytes(chunk);
-                
+
                 ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
             }
         }
@@ -96,7 +88,7 @@ public class PacketImageUploadC2S {
         int chunkIndex = buffer.readInt();
         int totalChunks = buffer.readInt();
         int chunkSize = buffer.readInt();
-        
+
         byte[] chunkData = new byte[chunkSize];
         buffer.readBytes(chunkData);
 
@@ -116,29 +108,48 @@ public class PacketImageUploadC2S {
 
             try {
                 byte[] completeImageData = collector.getCompleteData();
-                String baseFileName = Instant.ofEpochMilli(collector.getTimestamp())
-                        .atOffset(ZoneOffset.UTC).format(FILE_DATE_FORMAT)
-                        + "-" + String.format("%016x", jobId) + "-" + initiator.getGameProfile().name();
+                CommentAffinityInfo info = new CommentAffinityInfo(
+                        initiator.getGameProfile().id(), initiator.getGameProfile().name());
+
+                LocalDateTime now = LocalDateTime.now();
+                String subDir = now.format(DateTimeFormatter.ofPattern("yyMM"))
+                        + "/" + now.format(DateTimeFormatter.ofPattern("dd"));
 
                 Path serverImagePath = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
-                        .resolve("world-comment").resolve("image");
+                        .resolve("worldcomment").resolve("image").resolve(subDir);
                 if (!Files.exists(serverImagePath)) {
                     Files.createDirectories(serverImagePath);
                 }
 
-                String fullFileName = baseFileName + ".jpg";
-                Path fullFile = serverImagePath.resolve(fullFileName);
-                Files.write(fullFile, completeImageData);
+                ImageVariantConfig variantConfig = Main.SERVER_CONFIG.imageVariants.value;
+                String baseName = UrlTemplate.transform(
+                        ImageUploader.DEFAULT_FILENAME_FORMAT, jobId, info, ImageFilePurpose.SOURCE);
 
-                byte[] thumbData = ImageConvertServer.toJpegScaled(completeImageData, ImageUploader.THUMBNAIL_MAX_WIDTH);
-                String thumbFileName = baseFileName + ".thumb.jpg";
-                Path jpgFile = serverImagePath.resolve(thumbFileName);
-                Files.write(jpgFile, thumbData);
+                String sourceFileName = subDir + "/" + baseName + ".webp";
+                Files.write(serverImagePath.resolve(baseName + ".webp"), completeImageData);
+                String sourceUrl = LocalStorageUploader.URL_PREFIX + sourceFileName;
 
-                ThumbImage image = new ThumbImage(
-                    LocalStorageUploader.URL_PREFIX + fullFileName,
-                    LocalStorageUploader.URL_PREFIX + thumbFileName
-                );
+                String detailUrl = "";
+                if (variantConfig.hasArchive()) {
+                    byte[] detailWebp = ImageConvertServer.toWebp(completeImageData, variantConfig.detail());
+                    String mediumBase = UrlTemplate.transform(
+                            ImageUploader.DEFAULT_FILENAME_FORMAT, jobId, info, ImageFilePurpose.MEDIUM);
+                    String mediumFileName = subDir + "/" + mediumBase + ".webp";
+                    Files.write(serverImagePath.resolve(mediumBase + ".webp"), detailWebp);
+                    detailUrl = LocalStorageUploader.URL_PREFIX + mediumFileName;
+                }
+
+                String thumbUrl = "";
+                if (variantConfig.hasThumbnail()) {
+                    byte[] thumbWebp = ImageConvertServer.toWebp(completeImageData, variantConfig.thumbnail());
+                    String thumbBase = UrlTemplate.transform(
+                            ImageUploader.DEFAULT_FILENAME_FORMAT, jobId, info, ImageFilePurpose.THUMBNAIL);
+                    String thumbFileName = subDir + "/" + thumbBase + ".webp";
+                    Files.write(serverImagePath.resolve(thumbBase + ".webp"), thumbWebp);
+                    thumbUrl = LocalStorageUploader.URL_PREFIX + thumbFileName;
+                }
+
+                CommentImage image = new CommentImage("local", sourceUrl, detailUrl, thumbUrl);
                 PacketImageUploadS2C.send(initiator, jobId, image);
             } catch (IOException e) {
                 PacketImageUploadS2C.sendException(initiator, jobId, e);
@@ -146,4 +157,4 @@ public class PacketImageUploadC2S {
             }
         }
     }
-} 
+}

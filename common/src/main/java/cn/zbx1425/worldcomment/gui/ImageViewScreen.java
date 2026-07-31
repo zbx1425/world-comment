@@ -1,7 +1,9 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.MainClient;
+import cn.zbx1425.worldcomment.data.network.CommentImage;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -13,7 +15,8 @@ import net.minecraft.util.Mth;
 public class ImageViewScreen extends Screen {
 
     private final Screen parent;
-    private final ThumbImage image;
+    private final CommentImage image;
+    private final String resolvedUrl;
 
     private double zoom = 1.0;
     private double panX = 0;
@@ -24,10 +27,13 @@ public class ImageViewScreen extends Screen {
     private double fitZoom = 1.0;
     private boolean initialized = false;
 
-    protected ImageViewScreen(Screen parent, ThumbImage image) {
+    protected ImageViewScreen(Screen parent, CommentImage image) {
         super(Component.literal(""));
         this.parent = parent;
         this.image = image;
+        this.resolvedUrl = ImageUrlResolver.resolve(image, ImageUrlResolver.ImageUsagePurpose.DETAIL,
+                MainClient.CLIENT_CONFIG.serverIssuedConfig.imageVariants,
+                MainClient.CLIENT_CONFIG.serverIssuedConfig.uploaderCdnConfigs);
     }
 
     private void recalculateFit() {
@@ -39,7 +45,7 @@ public class ImageViewScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        ImageDownload.ImageState state = ImageDownload.getTexture(image, false);
+        ImageDownload.ImageState state = ImageDownload.getTexture(resolvedUrl);
         imgNativeW = state.width;
         imgNativeH = state.height;
         recalculateFit();
@@ -65,7 +71,7 @@ public class ImageViewScreen extends Screen {
 
         super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
 
-        ImageDownload.ImageState state = ImageDownload.getTexture(image, false);
+        ImageDownload.ImageState state = ImageDownload.getTexture(resolvedUrl);
         if (state.width != imgNativeW || state.height != imgNativeH) {
             imgNativeW = state.width;
             imgNativeH = state.height;

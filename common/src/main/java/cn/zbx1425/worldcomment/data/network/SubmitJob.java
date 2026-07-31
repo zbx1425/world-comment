@@ -2,15 +2,12 @@ package cn.zbx1425.worldcomment.data.network;
 
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.upload.ImageUploadConfig;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import net.minecraft.core.BlockPos;
 
-import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class SubmitJob {
 
@@ -24,14 +21,14 @@ public class SubmitJob {
         this.comment = comment;
         this.imageBytes = imageBytes;
         if (imageBytes == null) {
-            comment.image = ThumbImage.NONE;
+            comment.image = CommentImage.NONE;
             imageReady = true;
         }
         this.callback = callback;
         this.uploaderToUse = new LinkedList<>(config.serverIssuedConfig.imageUploaders);
     }
 
-    public void setImage(ThumbImage image) {
+    public void setImage(CommentImage image) {
         comment.image = image;
         imageReady = true;
     }
@@ -44,5 +41,4 @@ public class SubmitJob {
     public boolean isReady() {
         return imageReady && blockPosReady;
     }
-
 }

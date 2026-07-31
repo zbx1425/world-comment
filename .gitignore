@@ -20,6 +20,7 @@ classes/
 
 .settings/
 .vscode/
+.cursor/
 bin/
 .classpath
 .project
@@ -34,10 +35,6 @@ run/
 mappings
 checkouts
 .architectury-transformer
-
-# OpenBVE images
-*.bmp
-/test.sqlite
 
 # manifold
 build.properties

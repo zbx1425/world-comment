@@ -49,7 +49,7 @@ public class ImageDump {
                     }
                 });
                 CommentEntry comment = comments.get(i);
-                String targetUrl = comment.image.url;
+                String targetUrl = comment.image.sourceUrl;
                 if (targetUrl.isEmpty()) continue;
                 Path filePath = storeDir.resolve(ImageDownload.getCacheFileName(targetUrl));
                 if (!Files.exists(filePath)) {

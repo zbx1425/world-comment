@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.data.network.upload.ImageVariantConfig;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -90,6 +91,7 @@ public class ServerConfig {
     public ConfigItem<String> redisUrl;
     public ConfigItem<String> uplinkUrl;
     public ConfigItem<String> uplinkAuthKey;
+    public ConfigItem<ImageVariantConfig> imageVariants;
     public ConfigItem<List<ImageUploader>> imageUploaders;
     public ConfigItem<MarkerUsage> allowMarkerUsage;
     public ConfigItem<Visibility> commentVisibilityCriteria;
@@ -114,6 +116,9 @@ public class ServerConfig {
         syncRole = new ConfigItem<>(json, "syncRole", SyncRole.HOST, str -> parseEnum(str, SyncRole.class));
         uplinkUrl = new ConfigItem<>(json, "uplinkUrl", "", value -> value);
         uplinkAuthKey = new ConfigItem<>(json, "uplinkAuthKey", "", value -> value);
+        imageVariants = new ConfigItem<>(json, "imageVariants",
+                ImageVariantConfig.defaults(),
+                str -> ImageVariantConfig.fromJson(JsonParser.parseString(str).getAsJsonObject()));
         imageUploaders = new ConfigItem<List<ImageUploader>>(json, "imageUploadConfig", () -> ImageUploader.parseUploaderList(List.of()), str -> {
             List<JsonObject> uploaderConfigs = new ArrayList<>();
             try {
@@ -146,6 +151,7 @@ public class ServerConfig {
         syncRole.writeJson(json);
         uplinkUrl.writeJson(json);
         uplinkAuthKey.writeJson(json);
+        imageVariants.writeJson(json);
         imageUploaders.writeJson(json);
         allowMarkerUsage.writeJson(json);
         commentVisibilityCriteria.writeJson(json);

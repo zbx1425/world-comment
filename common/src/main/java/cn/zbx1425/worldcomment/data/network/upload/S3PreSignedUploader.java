@@ -1,10 +1,6 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.ImageConvertClient;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
-import cn.zbx1425.worldcomment.network.PacketImageUploadC2S;
 import cn.zbx1425.worldcomment.network.PacketPreSignRequestC2S;
 import com.google.gson.JsonObject;
 
@@ -20,16 +16,16 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 
 public class S3PreSignedUploader extends ImageUploader {
 
-    private static class ServerConfig {
+    public static final String DEFAULT_PATH_FORMAT = "{y}{m}/{d}/{id}-{initiatorName}{.variant}";
+
+    public static class ServerConfig {
         public final String s3Endpoint;
         public final String s3Bucket;
         public final String s3Region;
@@ -45,76 +41,95 @@ public class S3PreSignedUploader extends ImageUploader {
             this.s3AccessKeyId = config.get("s3AccessKeyId").getAsString();
             this.s3SecretAccessKey = config.get("s3SecretAccessKey").getAsString();
             this.cdnBaseUrl = config.get("cdnBaseUrl").getAsString();
-            this.pathFormat = config.get("pathFormat").getAsString();
+            this.pathFormat = config.has("pathFormat")
+                    ? config.get("pathFormat").getAsString() : DEFAULT_PATH_FORMAT;
         }
     }
 
     private final ServerConfig serverConfig;
-    private final String cdnImageTransform;
 
-    public S3PreSignedUploader(JsonObject serializedOrConfig) {
-        super("s3PreSigned", serializedOrConfig);
+    public S3PreSignedUploader(String id, JsonObject serializedOrConfig) {
+        super(id, "s3PreSigned", serializedOrConfig);
         if (serializedOrConfig.has("s3AccessKeyId")) {
             this.serverConfig = new ServerConfig(serializedOrConfig);
         } else {
             this.serverConfig = null;
         }
-        this.cdnImageTransform = serializedOrConfig.has("cdnImageTransform") ? serializedOrConfig.get("cdnImageTransform").getAsString() : null;
     }
 
     private static final Map<Long, CompletableFuture<PreSignResponse>> pendingPreSign = new HashMap<>();
     private static final long TIMEOUT_SECONDS = 30;
 
     @Override
-    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
-        CompletableFuture<PreSignResponse> future = new CompletableFuture<PreSignResponse>().orTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    public CompletableFuture<UploadResult> uploadImage(byte[] imageData, String filename, CommentAffinityInfo info) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder(URI.create("about:blank"))
+                        .build();
+                throw new UnsupportedOperationException("S3 upload must go through PreSign flow via Orchestrator");
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<PreSignResponse> requestPreSign(long jobId, CommentAffinityInfo info) {
+        CompletableFuture<PreSignResponse> future = new CompletableFuture<PreSignResponse>()
+                .orTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS);
         synchronized (pendingPreSign) {
-            CompletableFuture<PreSignResponse> existing = pendingPreSign.get(comment.id);
+            CompletableFuture<PreSignResponse> existing = pendingPreSign.get(jobId);
             if (existing != null && !existing.isDone()) {
-                throw new IllegalStateException("Another upload is in progress for this comment.");
+                throw new IllegalStateException("Another presign is in progress for this job.");
             }
             if (existing != null) {
-                pendingPreSign.remove(comment.id);
+                pendingPreSign.remove(jobId);
             }
-            pendingPreSign.put(comment.id, future);
+            pendingPreSign.put(jobId, future);
         }
-        PacketPreSignRequestC2S.ClientLogics.send(comment.id, new CommentAffinityInfo(comment), this);
-        return future
-                .thenCompose(preSign -> {
-                    if (cdnImageTransform == null) {
-                        CompletableFuture<Void> fullSizeUpload = uploadToS3(preSign.upload.url, imageBytes, IMAGE_MAX_WIDTH);
-                        CompletableFuture<Void> thumbUpload = uploadToS3(preSign.upload.thumbUrl, imageBytes, THUMBNAIL_MAX_WIDTH);
-                        return CompletableFuture.allOf(fullSizeUpload, thumbUpload)
-                                .thenApply(v -> new ThumbImage(preSign.access.url, preSign.access.thumbUrl));
-                    } else {
-                        return uploadToS3(preSign.upload.url, imageBytes, IMAGE_MAX_WIDTH)
-                                .thenApply(v -> {
-                                    String publicUrl = preSign.access.url;
-                                    String thumbUrl = transformUrl(comment, publicUrl);
-                                    return new ThumbImage(publicUrl, thumbUrl);
-                                });
+        PacketPreSignRequestC2S.ClientLogics.send(jobId, info, this);
+        return future;
+    }
+
+    public CompletableFuture<Void> uploadToS3(String presignedUrl, byte[] webpData) {
+        return CompletableFuture.supplyAsync(() ->
+                ImageUploader.requestBuilder(URI.create(presignedUrl))
+                        .header("Content-Type", "image/webp")
+                        .PUT(HttpRequest.BodyPublishers.ofByteArray(webpData))
+                        .build(), Main.IO_EXECUTOR)
+                .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
+                .thenAccept(response -> {
+                    if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                        throw new CompletionException(new IOException(
+                                "S3 upload failed: " + response.statusCode() + " " + response.body()));
                     }
                 });
     }
 
-    public PreSignResponse performPreSign(CommentAffinityInfo comment) throws Exception {
-        String targetPathBase = UrlTemplate.transform(serverConfig.pathFormat, comment, "");
-        String targetPathFull = targetPathBase + ".jpg";
-        String targetPathThumb = targetPathBase + ".thumb.jpg";
+    public PreSignResponse performPreSign(long commentId, CommentAffinityInfo comment, ImageVariantConfig variantConfig) throws Exception {
+        List<PreSignedSlot> slots = new ArrayList<>();
 
-        String preSignedUrlFull = generatePreSignedUrl(
-                "PUT", serverConfig.s3Endpoint, serverConfig.s3Bucket, targetPathFull, serverConfig.s3Region,
-                serverConfig.s3AccessKeyId, serverConfig.s3SecretAccessKey, 900 // 15 minutes
-        );
-        String preSignedUrlThumb = generatePreSignedUrl(
-                "PUT", serverConfig.s3Endpoint, serverConfig.s3Bucket, targetPathThumb, serverConfig.s3Region,
-                serverConfig.s3AccessKeyId, serverConfig.s3SecretAccessKey, 900 // 15 minutes
-        );
+        String sourcePath = UrlTemplate.transform(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.SOURCE) + ".webp";
+        slots.add(makeSlot(ImageFilePurpose.SOURCE, sourcePath));
 
-        return new PreSignResponse(
-                new ThumbImage(preSignedUrlFull, preSignedUrlThumb),
-                new ThumbImage(serverConfig.cdnBaseUrl + "/" + targetPathFull, serverConfig.cdnBaseUrl + "/" + targetPathThumb)
+        if (variantConfig.hasArchive() && !hasCdnTransform()) {
+            String mediumPath = UrlTemplate.transform(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.MEDIUM) + ".webp";
+            slots.add(makeSlot(ImageFilePurpose.MEDIUM, mediumPath));
+        }
+        if (variantConfig.hasThumbnail() && !hasCdnTransform()) {
+            String thumbPath = UrlTemplate.transform(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.THUMBNAIL) + ".webp";
+            slots.add(makeSlot(ImageFilePurpose.THUMBNAIL, thumbPath));
+        }
+
+        return new PreSignResponse(slots);
+    }
+
+    private PreSignedSlot makeSlot(ImageFilePurpose purpose, String objectKey) throws Exception {
+        String uploadUrl = generatePreSignedUrl(
+                "PUT", serverConfig.s3Endpoint, serverConfig.s3Bucket, objectKey,
+                serverConfig.s3Region, serverConfig.s3AccessKeyId, serverConfig.s3SecretAccessKey, 900
         );
+        String accessUrl = serverConfig.cdnBaseUrl + "/" + objectKey;
+        return new PreSignedSlot(purpose, uploadUrl, accessUrl);
     }
 
     public static void completePreSign(long jobId, PreSignResponse response) {
@@ -137,8 +152,23 @@ public class S3PreSignedUploader extends ImageUploader {
         }
     }
 
-    private static String generatePreSignedUrl(String httpMethod, String endpoint, String bucketName, String objectKey, String region, String accessKey, String secretKey, long expirationSeconds) throws Exception {
-        // 1. Create timestamp and datestamp for the signature
+    @Override
+    public JsonObject serializeForClient() {
+        JsonObject json = super.serializeForClient();
+        return json;
+    }
+
+    // --- PreSign data structures ---
+
+    public record PreSignedSlot(ImageFilePurpose purpose, String uploadUrl, String accessUrl) {}
+
+    public record PreSignResponse(List<PreSignedSlot> slots) {}
+
+    // --- S3 signing utilities ---
+
+    private static String generatePreSignedUrl(String httpMethod, String endpoint, String bucketName,
+            String objectKey, String region, String accessKey, String secretKey,
+            long expirationSeconds) throws Exception {
         Instant now = Instant.now();
         DateTimeFormatter amzFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
         String amzDate = amzFormatter.format(now);
@@ -157,7 +187,6 @@ public class S3PreSignedUploader extends ImageUploader {
         }
         String credentialScope = dateStamp + "/" + region + "/s3/aws4_request";
 
-        // 2. Create canonical query string
         Map<String, String> queryParams = new TreeMap<>();
         queryParams.put("X-Amz-Algorithm", "AWS4-HMAC-SHA256");
         queryParams.put("X-Amz-Credential", accessKey + "/" + credentialScope);
@@ -175,7 +204,6 @@ public class S3PreSignedUploader extends ImageUploader {
                     .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
         }
 
-        // 3. Create canonical request
         String canonicalURI = "/" + uriEncode(objectKey, false);
         String hashedPayload = "UNSIGNED-PAYLOAD";
         String canonicalHeaders = "host:" + host + "\n";
@@ -188,7 +216,6 @@ public class S3PreSignedUploader extends ImageUploader {
                 + signedHeaders + "\n"
                 + hashedPayload;
 
-        // 4. Create string to sign
         String algorithm = "AWS4-HMAC-SHA256";
         String hashedCanonicalRequest = toHex(sha256(canonicalRequest));
         String stringToSign = algorithm + "\n"
@@ -196,14 +223,10 @@ public class S3PreSignedUploader extends ImageUploader {
                 + credentialScope + "\n"
                 + hashedCanonicalRequest;
 
-        // 5. Derive signing key
         byte[] signingKey = getSignatureKey(secretKey, dateStamp, region, "s3");
-
-        // 6. Calculate signature
         byte[] signatureBytes = hmacSha256(signingKey, stringToSign);
         String signature = toHex(signatureBytes);
 
-        // 7. Assemble the final URL
         return baseUrl + canonicalURI + "?" + canonicalQueryString + "&X-Amz-Signature=" + signature;
     }
 
@@ -219,7 +242,8 @@ public class S3PreSignedUploader extends ImageUploader {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
-            if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == '~' || ch == '.') {
+            if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')
+                    || ch == '_' || ch == '-' || ch == '~' || ch == '.') {
                 result.append(ch);
             } else if (ch == '/') {
                 result.append(encodeSlash ? "%2F" : ch);
@@ -250,44 +274,4 @@ public class S3PreSignedUploader extends ImageUploader {
         }
         return sb.toString();
     }
-
-    private CompletableFuture<Void> uploadToS3(String presignedUrl, byte[] imageBytes, int maxWidth) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                byte[] scaledImage = ImageConvertClient.toJpegScaled(imageBytes, maxWidth);
-                return HttpRequest.newBuilder(URI.create(presignedUrl))
-                        .header("Content-Type", "image/jpeg")
-                        .PUT(HttpRequest.BodyPublishers.ofByteArray(scaledImage))
-                        .build();
-            } catch (IllegalStateException e) {
-                throw new CompletionException(e);
-            }
-        }, Main.IO_EXECUTOR)
-                .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
-                .thenAccept(response -> {
-                    if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                        throw new CompletionException(new IOException("S3 upload failed: " + response.statusCode() + " " + response.body()));
-                    }
-                });
-    }
-
-    private String transformUrl(CommentEntry comment, String originalUrl) {
-        try {
-            URI uri = URI.create(originalUrl);
-            String path = uri.getPath();
-            return originalUrl.replace(path, UrlTemplate.transform(cdnImageTransform, new CommentAffinityInfo(comment), path));
-        } catch (Exception e) {
-            Main.LOGGER.error("Error transforming thumbnail URL", e);
-            return originalUrl;
-        }
-    }
-
-    @Override
-    public JsonObject serializeForClient() {
-        JsonObject json = super.serializeForClient();
-        if (cdnImageTransform != null) json.addProperty("cdnImageTransform", cdnImageTransform);
-        return json;
-    }
-
-    public record PreSignResponse(ThumbImage upload, ThumbImage access) {}
 }

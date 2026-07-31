@@ -32,7 +32,7 @@ public class ServerWorldData {
 
     public ServerWorldData(MinecraftServer server, boolean isHost) {
         this.server = server;
-        this.basePath = Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "world-comment");
+        this.basePath = Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "worldcomment");
         fileSerializer = new FileSerializer(basePath);
         this.isHost = isHost;
         this.peerChannel = Synchronizer.NOOP;

@@ -1,10 +1,7 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.network.ImageConvertClient;
 import cn.zbx1425.worldcomment.data.network.MimeMultipartData;
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -20,8 +17,8 @@ public class SmmsUploader extends ImageUploader {
     private final String apiUrl;
     private final String apiToken;
 
-    public SmmsUploader(JsonObject serializedOrConfig) {
-        super("smms", serializedOrConfig);
+    public SmmsUploader(String id, JsonObject serializedOrConfig) {
+        super(id, "smms", serializedOrConfig);
         if (serializedOrConfig.has("apiUrl")) {
             this.apiUrl = serializedOrConfig.get("apiUrl").getAsString();
         } else {
@@ -30,22 +27,13 @@ public class SmmsUploader extends ImageUploader {
         this.apiToken = serializedOrConfig.get("apiToken").getAsString();
     }
 
-    public CompletableFuture<ThumbImage> uploadImage(byte[] imageBytes, CommentEntry comment) {
-        String initiatorName = comment.initiatorName.isBlank() ? "anonymous" : comment.initiatorName;
-        CompletableFuture<String> fullSizeUrlFuture = uploadImage(imageBytes, IMAGE_MAX_WIDTH,
-                "sender-" + initiatorName + ".jpg");
-        CompletableFuture<String> thumbnailFuture = uploadImage(imageBytes, THUMBNAIL_MAX_WIDTH,
-                "sender-" + initiatorName + ".thumb.jpg");
-        return CompletableFuture.allOf(fullSizeUrlFuture, thumbnailFuture).thenApply(ignored ->
-                new ThumbImage(fullSizeUrlFuture.join(), thumbnailFuture.join()));
-    }
-
-    private CompletableFuture<String> uploadImage(byte[] imageBytes, int maxWidth, String fileName) {
+    @Override
+    public CompletableFuture<UploadResult> uploadImage(byte[] imageData, String filename, CommentAffinityInfo info) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MimeMultipartData body = MimeMultipartData.newBuilder()
                         .withCharset(StandardCharsets.UTF_8)
-                        .addFile("smfile", fileName, ImageConvertClient.toJpegScaled(imageBytes, maxWidth), "image/jpg")
+                        .addFile("smfile", filename, imageData, "image/webp")
                         .build();
                 return ImageUploader.requestBuilder(URI.create(apiUrl))
                         .header("Content-Type", body.getContentType())
@@ -59,17 +47,18 @@ public class SmmsUploader extends ImageUploader {
                 .thenCompose(reqUpload -> Main.HTTP_CLIENT.sendAsync(reqUpload, HttpResponse.BodyHandlers.ofString()))
                 .thenApply(response -> {
                     if (response.statusCode() != 200) {
-                        throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode() + "\n" + response.body()));
+                        throw new CompletionException(new IOException(
+                                "HTTP Error Code " + response.statusCode() + "\n" + response.body()));
                     }
                     JsonObject respObj = JsonParser.parseString(response.body()).getAsJsonObject();
                     if (!respObj.get("success").getAsBoolean()) {
                         if (respObj.get("code").getAsString().equals("image_repeated")) {
-                            return respObj.get("images").getAsString();
+                            return new UploadResult(respObj.get("images").getAsString());
                         } else {
                             throw new CompletionException(new IOException("Upload Fail " + response.body()));
                         }
                     } else {
-                        return respObj.get("data").getAsJsonObject().get("url").getAsString();
+                        return new UploadResult(respObj.get("data").getAsJsonObject().get("url").getAsString());
                     }
                 });
     }

@@ -3,7 +3,8 @@ package cn.zbx1425.worldcomment.data.network;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.network.upload.CommentAffinityInfo;
+import cn.zbx1425.worldcomment.data.network.upload.ImageUploadOrchestrator;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.network.PacketEntryCreateC2S;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -11,13 +12,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class SubmitDispatcher {
 
@@ -36,9 +31,14 @@ public class SubmitDispatcher {
         if (job.imageBytes != null) {
             ImageUploader uploader = job.uploaderToUse.poll();
             if (uploader == null) throw new IllegalStateException("All uploads failed");
-            uploader.uploadImage(job.imageBytes, job.comment)
-                    .thenAccept(thumbImage -> {
-                        job.setImage(thumbImage);
+            ImageUploadOrchestrator.upload(
+                    job.imageBytes, uploader,
+                    MainClient.CLIENT_CONFIG.serverIssuedConfig.imageVariants,
+                    new CommentAffinityInfo(job.comment),
+                    jobId
+            )
+                    .thenAccept(commentImage -> {
+                        job.setImage(commentImage);
                         trySendPackage(jobId);
                     })
                     .exceptionally(ex -> {

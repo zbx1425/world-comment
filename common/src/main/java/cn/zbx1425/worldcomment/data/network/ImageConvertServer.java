@@ -1,63 +1,69 @@
 package cn.zbx1425.worldcomment.data.network;
 
-import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
+import cn.zbx1425.worldcomment.data.network.upload.ImageVariantConfig;
+import dev.matrixlab.webp4j.WebPCodec;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Locale;
 
 public class ImageConvertServer {
 
-    public static byte[] toJpegScaled(byte[] pngImageBytes, int maxWidth) throws IOException {
-        BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(pngImageBytes));
+    public static byte[] toWebp(byte[] sourceImageData, ImageVariantConfig.VariantSpec spec) throws IOException {
+        BufferedImage originalImage = decodeImage(sourceImageData);
         if (originalImage == null) {
             throw new IOException("Failed to read image");
         }
 
         int originalWidth = originalImage.getWidth();
         int originalHeight = originalImage.getHeight();
-        int thumbWidth = Math.min(originalWidth, maxWidth);
-        int thumbHeight = (int) ((float) originalHeight * thumbWidth / originalWidth);
+        int targetWidth = (spec.maxWidth() > 0 && originalWidth > spec.maxWidth()) ? spec.maxWidth() : originalWidth;
+        int targetHeight = (targetWidth == originalWidth) ? originalHeight
+                : (int) ((float) originalHeight * targetWidth / originalWidth);
 
-        BufferedImage thumbImage = new BufferedImage(thumbWidth, thumbHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = thumbImage.createGraphics();
+        BufferedImage targetImage;
+        if (targetWidth != originalWidth) {
+            targetImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = targetImage.createGraphics();
+            try {
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.drawImage(originalImage, 0, 0, targetWidth, targetHeight, null);
+            } finally {
+                g2d.dispose();
+            }
+        } else {
+            targetImage = originalImage;
+        }
+
         try {
-            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-            g2d.setColor(Color.BLACK);
-            g2d.fillRect(0, 0, thumbWidth, thumbHeight);
-
-            g2d.drawImage(originalImage, 0, 0, thumbWidth, thumbHeight, null);
-        } finally {
-            g2d.dispose();
+            if (spec.lossless()) {
+                return WebPCodec.encodeLosslessImage(targetImage);
+            } else {
+                return WebPCodec.encodeImage(targetImage, spec.quality());
+            }
+        } catch (Exception e) {
+            throw new IOException("WebP encoding failed", e);
         }
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
-
-        JPEGImageWriteParam writeParam = new JPEGImageWriteParam(Locale.getDefault());
-        writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        writeParam.setCompressionQuality(ImageUploader.THUMBNAIL_QUALITY / 100f);
-        writeParam.setOptimizeHuffmanTables(true);
-        
-        try (MemoryCacheImageOutputStream output = new MemoryCacheImageOutputStream(outputStream)) {
-            writer.setOutput(output);
-            writer.write(null, new IIOImage(thumbImage, null, null), writeParam);
-        } finally {
-            writer.dispose();
-        }
-
-        return outputStream.toByteArray();
     }
-} 
+
+    private static BufferedImage decodeImage(byte[] data) throws IOException {
+        if (isWebpData(data)) {
+            try {
+                return WebPCodec.decodeImage(data);
+            } catch (Exception e) {
+                throw new IOException("Failed to decode WebP image", e);
+            }
+        }
+        return ImageIO.read(new ByteArrayInputStream(data));
+    }
+
+    private static boolean isWebpData(byte[] data) {
+        return data.length > 12
+                && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'
+                && data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P';
+    }
+}

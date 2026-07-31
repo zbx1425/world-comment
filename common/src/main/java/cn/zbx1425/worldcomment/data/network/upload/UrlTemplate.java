@@ -1,22 +1,17 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
-import cn.zbx1425.worldcomment.data.CommentEntry;
-
-import java.nio.file.InvalidPathException;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Pattern;
 
 public class UrlTemplate {
 
-    private static final Pattern PATTERN = Pattern.compile("\\{([^{}]+)\\}");
+    private static final Pattern PATTERN = Pattern.compile("\\{([^{}]+)}");
     private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final Random RANDOM = new Random();
 
-    public static String transform(String template, CommentAffinityInfo comment, String path) {
+    public static String transform(String template, long commentId, CommentAffinityInfo comment, ImageFilePurpose variant) {
         LocalDateTime now = LocalDateTime.now();
 
         return PATTERN.matcher(template).replaceAll(match -> {
@@ -31,41 +26,23 @@ public class UrlTemplate {
                 }
             }
 
-            switch (key.toLowerCase(Locale.ROOT)) {
-                case "initiator":
-                    return comment.initiator.toString();
-                case "initiatorname":
+            return switch (key) {
+                case "id" -> String.format("%016x", commentId);
+                case "variant" -> variant.fileTag();
+                case ".variant" -> variant.dotFileTag();
+                case "initiator" -> comment.initiator.toString();
+                case "initiatorName" -> {
                     String sanitized = comment.initiatorName.replaceAll("[^a-zA-Z0-9_\\-]", "_");
-                    return sanitized.isEmpty() ? "anonymous" : sanitized;
-                case "thumbwidth":
-                    return Integer.toString(ImageUploader.THUMBNAIL_MAX_WIDTH);
-                case "quality100":
-                    return Integer.toString(ImageUploader.THUMBNAIL_QUALITY);
-                case "quality1":
-                    return String.format("%.2f", ImageUploader.THUMBNAIL_QUALITY / 100f);
-                case "path":
-                    return path.startsWith("/") ? path.substring(1) : path;
-                case "Y":
-                    return now.format(DateTimeFormatter.ofPattern("yyyy"));
-                case "y":
-                    return now.format(DateTimeFormatter.ofPattern("yy"));
-                case "m":
-                    return now.format(DateTimeFormatter.ofPattern("MM"));
-                case "d":
-                    return now.format(DateTimeFormatter.ofPattern("dd"));
-                case "timestamp":
-                    return Long.toString(System.currentTimeMillis() / 1000);
-                case "filename":
-                    try {
-                        return Paths.get(path).getFileName().toString();
-                    } catch (InvalidPathException | NullPointerException e) {
-                        return "";
-                    }
-                case "uniqid":
-                    return generateUniqid();
-                default:
-                    return match.group(0);
-            }
+                    yield sanitized.isEmpty() ? "anonymous" : sanitized;
+                }
+                case "Y" -> now.format(DateTimeFormatter.ofPattern("yyyy"));
+                case "y" -> now.format(DateTimeFormatter.ofPattern("yy"));
+                case "m" -> now.format(DateTimeFormatter.ofPattern("MM"));
+                case "d" -> now.format(DateTimeFormatter.ofPattern("dd"));
+                case "timestamp" -> Long.toString(System.currentTimeMillis() / 1000);
+                case "uniqid" -> generateUniqid();
+                default -> match.group(0);
+            };
         });
     }
 
@@ -81,7 +58,7 @@ public class UrlTemplate {
     private static String generateUniqid() {
         long m = System.currentTimeMillis();
         long sec = m / 1000;
-        long usec = (m % 1000) * 1000; // Emulate microseconds
+        long usec = (m % 1000) * 1000;
         return String.format("%08x%05x", sec, usec);
     }
 }

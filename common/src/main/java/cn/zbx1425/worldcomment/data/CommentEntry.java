@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.data;
 
-import cn.zbx1425.worldcomment.data.network.ThumbImage;
+import cn.zbx1425.worldcomment.data.network.CommentImage;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
@@ -34,7 +34,7 @@ public class CommentEntry {
     public String initiatorName;
     public int messageType;
     public String message;
-    public ThumbImage image;
+    public CommentImage image;
 
     public boolean deleted;
     public boolean uplinkSent;
@@ -75,7 +75,7 @@ public class CommentEntry {
         initiatorName = src.readUtf();
         messageType = src.readInt();
         message = src.readUtf();
-        image = new ThumbImage(src.readUtf(), src.readUtf());
+        image = new CommentImage(src.readUtf(), src.readUtf(), src.readUtf(), src.readUtf());
 
         if (fromFile) src.skipBytes(16 - (src.readerIndex() % 16));
     }
@@ -89,7 +89,7 @@ public class CommentEntry {
         this.messageType = messageType;
         this.message = message;
         deleted = false;
-        this.image = ThumbImage.NONE;
+        this.image = CommentImage.NONE;
         this.setLocation(BlockPos.ZERO);
     }
 
@@ -121,7 +121,9 @@ public class CommentEntry {
         dst.writeUtf(initiatorName);
         dst.writeInt(messageType);
         dst.writeUtf(message);
-        dst.writeUtf(image.url);
+        dst.writeUtf(image.uploaderId);
+        dst.writeUtf(image.sourceUrl);
+        dst.writeUtf(image.mediumUrl);
         dst.writeUtf(image.thumbUrl);
 
         if (toFile) dst.writeZero(16 - (dst.writerIndex() % 16));

@@ -22,6 +22,7 @@ public class ServerWorldMeta {
 
     public JsonObject serialize() {
         JsonObject obj = new JsonObject();
+        obj.addProperty("version", 1);
         obj.addProperty("worldId", worldId.toString());
         return obj;
     }
