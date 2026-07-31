@@ -203,7 +203,8 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             Player player = Minecraft.getInstance().player;
             CommentEntry comment = new CommentEntry(
                     player, checkBoxAnonymous.selected(),
-                    emojiPanel.getSelectedId(), textBoxMessage.getValue()
+                    emojiPanel.getSelectedId(), textBoxMessage.getValue(),
+                    player.blockPosition()
             );
             long jobId = SubmitDispatcher.addJob(
                     comment, checkBoxNoImage.selected() ? null : imageBytes,

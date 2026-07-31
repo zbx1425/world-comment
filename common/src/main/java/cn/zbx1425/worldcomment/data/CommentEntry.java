@@ -10,6 +10,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -24,19 +26,20 @@ public class CommentEntry {
 
     public long id;
     public long timestamp;
-    public Identifier level;
-    public ChunkPos region;
-    public BlockPos location;
-    public UUID initiator;
-    public String initiatorName;
+    public @NonNull Identifier level;
+    public @Nullable ChunkPos region;
+    public @Nullable BlockPos location;
+    public @Nullable BlockPos imageLocation;
+    public @NonNull UUID initiator;
+    public @NonNull String initiatorName;
     public int messageType;
-    public String message;
-    public CommentImage image;
+    public @NonNull String message;
+    public @NonNull CommentImage image;
 
     public boolean deleted;
     public int like;
 
-    public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message) {
+    public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message, BlockPos imageLocation) {
         id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
         level = initiator #if MC_VERSION >= "12000" .level() #else .level #endif .dimension().identifier();
@@ -49,19 +52,21 @@ public class CommentEntry {
         this.messageType = messageType;
         this.message = message;
         deleted = false;
+        this.imageLocation = imageLocation;
     }
 
+    // From packet
     public CommentEntry(Identifier level, FriendlyByteBuf src) {
         deleted = src.readBoolean();
-        src.skipBytes(3);
         like = src.readInt();
-        src.skipBytes(8);
-
         id = src.readLong();
         timestamp = src.readLong();
         this.level = level;
-        location = src.readBlockPos();
-        region = new ChunkPos(location.getX() >> (4 + REGION_SHIFT), location.getZ() >> (4 + REGION_SHIFT));
+        location = src.readBoolean() ? src.readBlockPos() : null;
+        imageLocation = src.readBoolean() ? src.readBlockPos() : null;
+        region = location != null
+            ? new ChunkPos(location.getX() >> (4 + REGION_SHIFT), location.getZ() >> (4 + REGION_SHIFT))
+            : null;
         initiator = src.readUUID();
         initiatorName = src.readUtf();
         messageType = src.readInt();
@@ -69,9 +74,37 @@ public class CommentEntry {
         image = new CommentImage(src.readUtf(), src.readUtf(), src.readUtf(), src.readUtf());
     }
 
-    private CommentEntry() {
+    // From JSON
+    public CommentEntry(JsonObject json) {
+        id = json.get("id").getAsLong();
+        timestamp = json.get("timestamp").getAsLong();
+#if MC_VERSION >= "12100"
+        level = Identifier.parse(json.get("level").getAsString());
+#else
+        level = new Identifier(json.get("level").getAsString());
+#endif
+        if (json.has("location")) {
+            JsonArray loc = json.getAsJsonArray("location");
+            setLocation(new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt()));
+        }
+        if (json.has("imageLocation")) {
+            JsonArray loc = json.getAsJsonArray("imageLocation");
+            imageLocation = new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt());
+        }
+        initiator = UUID.fromString(json.get("initiator").getAsString());
+        initiatorName = json.get("initiatorName").getAsString();
+        messageType = json.get("messageType").getAsInt();
+        message = json.get("message").getAsString();
+        if (json.has("image")) {
+            image = new CommentImage(json.getAsJsonObject("image"));
+        } else {
+            image = CommentImage.NONE;
+        }
+        deleted = json.has("deleted") && json.get("deleted").getAsBoolean();
+        like = json.has("like") ? json.get("like").getAsInt() : 0;
     }
 
+    // For creating a system message
     private CommentEntry(int messageType, String message, String title) {
         id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
@@ -83,6 +116,7 @@ public class CommentEntry {
         deleted = false;
         this.image = CommentImage.NONE;
         this.setLocation(BlockPos.ZERO);
+        this.imageLocation = BlockPos.ZERO;
     }
 
     public void setLocation(BlockPos location) {
@@ -100,13 +134,13 @@ public class CommentEntry {
 
     public void writeBuffer(FriendlyByteBuf dst) {
         dst.writeBoolean(deleted);
-        dst.writeZero(3);
         dst.writeInt(like);
-        dst.writeBytes("====ZBX=".getBytes(StandardCharsets.UTF_8));
-
         dst.writeLong(id);
         dst.writeLong(timestamp);
-        dst.writeBlockPos(location);
+        dst.writeBoolean(location != null);
+        if (location != null) dst.writeBlockPos(location);
+        dst.writeBoolean(imageLocation != null);
+        if (imageLocation != null) dst.writeBlockPos(imageLocation);
         dst.writeUUID(initiator);
         dst.writeUtf(initiatorName);
         dst.writeInt(messageType);
@@ -129,6 +163,13 @@ public class CommentEntry {
             blockPosArr.add(location.getZ());
             json.add("location", blockPosArr);
         }
+        if (imageLocation != null) {
+            JsonArray blockPosArr = new JsonArray();
+            blockPosArr.add(imageLocation.getX());
+            blockPosArr.add(imageLocation.getY());
+            blockPosArr.add(imageLocation.getZ());
+            json.add("imageLocation", blockPosArr);
+        }
         json.addProperty("initiator", initiator.toString());
         json.addProperty("initiatorName", initiatorName);
         json.addProperty("messageType", messageType);
@@ -139,31 +180,6 @@ public class CommentEntry {
         json.addProperty("deleted", deleted);
         json.addProperty("like", like);
         return json;
-    }
-
-    public static CommentEntry fromJson(JsonObject json) {
-        CommentEntry entry = new CommentEntry();
-        entry.id = json.get("id").getAsLong();
-        entry.timestamp = json.get("timestamp").getAsLong();
-#if MC_VERSION >= "12100"
-        entry.level = Identifier.parse(json.get("level").getAsString());
-#else
-        entry.level = new Identifier(json.get("level").getAsString());
-#endif
-        JsonArray loc = json.getAsJsonArray("location");
-        entry.setLocation(new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt()));
-        entry.initiator = UUID.fromString(json.get("initiator").getAsString());
-        entry.initiatorName = json.get("initiatorName").getAsString();
-        entry.messageType = json.get("messageType").getAsInt();
-        entry.message = json.get("message").getAsString();
-        if (json.has("image")) {
-            entry.image = new CommentImage(json.getAsJsonObject("image"));
-        } else {
-            entry.image = CommentImage.NONE;
-        }
-        entry.deleted = json.has("deleted") && json.get("deleted").getAsBoolean();
-        entry.like = json.has("like") ? json.get("like").getAsInt() : 0;
-        return entry;
     }
 
     public ByteBuf toBinaryBuffer() {

@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.data;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.network.uplink.UplinkDispatcher;
-import cn.zbx1425.worldcomment.data.persist.FileSerializer;
+import cn.zbx1425.worldcomment.data.persist.CommentRepository;
 import cn.zbx1425.worldcomment.data.sync.Synchronizer;
 import cn.zbx1425.worldcomment.network.PacketEntryUpdateS2C;
 import net.minecraft.server.MinecraftServer;
@@ -24,14 +24,14 @@ public class ServerWorldData {
 
     public final CommentStore comments = new CommentStore();
 
-    public final FileSerializer fileSerializer;
+    public final CommentRepository repository;
     public final UplinkDispatcher uplinkDispatcher;
     public Synchronizer peerChannel;
 
     public ServerWorldData(MinecraftServer server, boolean isHost) {
         this.server = server;
         this.basePath = Path.of(server.getWorldPath(LevelResource.ROOT).toString(), "worldcomment");
-        fileSerializer = new FileSerializer(basePath);
+        repository = new CommentRepository(basePath);
         this.isHost = isHost;
         this.peerChannel = Synchronizer.NOOP;
         uplinkDispatcher = new UplinkDispatcher(Main.SERVER_CONFIG.uplinkUrl.value);
@@ -39,7 +39,7 @@ public class ServerWorldData {
 
     public void load() throws IOException {
         if (isHost) {
-            metadata = fileSerializer.loadInto(comments);
+            metadata = repository.loadInto(comments);
             peerChannel.kvWriteAll(comments.timeIndex, metadata);
         } else {
             metadata = peerChannel.kvReadAllInto(comments);
@@ -48,7 +48,7 @@ public class ServerWorldData {
 
     public void save() {
         if (isHost) {
-            fileSerializer.saveDirtyChunks(comments);
+            repository.saveDirtyChunks(comments, metadata);
         }
     }
 
