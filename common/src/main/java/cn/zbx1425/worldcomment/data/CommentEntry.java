@@ -11,9 +11,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
@@ -37,10 +34,7 @@ public class CommentEntry {
     public CommentImage image;
 
     public boolean deleted;
-    public boolean uplinkSent;
     public int like;
-
-    public long fileOffset;
 
     public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message) {
         id = ServerWorldData.SNOWFLAKE.nextId();
@@ -57,12 +51,9 @@ public class CommentEntry {
         deleted = false;
     }
 
-    public CommentEntry(Identifier level, FriendlyByteBuf src, boolean fromFile) {
-        fileOffset = src.readerIndex();
-
+    public CommentEntry(Identifier level, FriendlyByteBuf src) {
         deleted = src.readBoolean();
-        uplinkSent = src.readBoolean();
-        src.skipBytes(2);
+        src.skipBytes(3);
         like = src.readInt();
         src.skipBytes(8);
 
@@ -76,8 +67,9 @@ public class CommentEntry {
         messageType = src.readInt();
         message = src.readUtf();
         image = new CommentImage(src.readUtf(), src.readUtf(), src.readUtf(), src.readUtf());
+    }
 
-        if (fromFile) src.skipBytes(16 - (src.readerIndex() % 16));
+    private CommentEntry() {
     }
 
     private CommentEntry(int messageType, String message, String title) {
@@ -103,14 +95,12 @@ public class CommentEntry {
         this.message = other.message;
         this.image = other.image;
         this.deleted = other.deleted;
-        this.uplinkSent = other.uplinkSent;
         this.like = other.like;
     }
 
-    public void writeBuffer(FriendlyByteBuf dst, boolean toFile) {
+    public void writeBuffer(FriendlyByteBuf dst) {
         dst.writeBoolean(deleted);
-        dst.writeBoolean(uplinkSent);
-        dst.writeZero(2);
+        dst.writeZero(3);
         dst.writeInt(like);
         dst.writeBytes("====ZBX=".getBytes(StandardCharsets.UTF_8));
 
@@ -125,23 +115,6 @@ public class CommentEntry {
         dst.writeUtf(image.sourceUrl);
         dst.writeUtf(image.mediumUrl);
         dst.writeUtf(image.thumbUrl);
-
-        if (toFile) dst.writeZero(16 - (dst.writerIndex() % 16));
-    }
-
-    public void writeFileStream(FileOutputStream oStream) throws IOException {
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer(512));
-        writeBuffer(buf, true);
-        fileOffset = oStream.getChannel().position();
-        oStream.write(buf.array(), 0, buf.writerIndex());
-    }
-
-    public void updateInFile(RandomAccessFile oFile) throws IOException {
-        oFile.seek(fileOffset);
-        oFile.writeBoolean(deleted);
-        oFile.writeBoolean(uplinkSent);
-        oFile.write(new byte[2]);
-        oFile.writeInt(like);
     }
 
     public JsonObject toJson() {
@@ -168,17 +141,42 @@ public class CommentEntry {
         return json;
     }
 
+    public static CommentEntry fromJson(JsonObject json) {
+        CommentEntry entry = new CommentEntry();
+        entry.id = json.get("id").getAsLong();
+        entry.timestamp = json.get("timestamp").getAsLong();
+#if MC_VERSION >= "12100"
+        entry.level = Identifier.parse(json.get("level").getAsString());
+#else
+        entry.level = new Identifier(json.get("level").getAsString());
+#endif
+        JsonArray loc = json.getAsJsonArray("location");
+        entry.setLocation(new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt()));
+        entry.initiator = UUID.fromString(json.get("initiator").getAsString());
+        entry.initiatorName = json.get("initiatorName").getAsString();
+        entry.messageType = json.get("messageType").getAsInt();
+        entry.message = json.get("message").getAsString();
+        if (json.has("image")) {
+            entry.image = new CommentImage(json.getAsJsonObject("image"));
+        } else {
+            entry.image = CommentImage.NONE;
+        }
+        entry.deleted = json.has("deleted") && json.get("deleted").getAsBoolean();
+        entry.like = json.has("like") ? json.get("like").getAsInt() : 0;
+        return entry;
+    }
+
     public ByteBuf toBinaryBuffer() {
         FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer(512));
         dest.writeIdentifier(level);
-        writeBuffer(dest, false);
+        writeBuffer(dest);
         return dest;
     }
 
     public static CommentEntry fromBinaryBuffer(ByteBuf buf) {
         FriendlyByteBuf src = new FriendlyByteBuf(buf);
         Identifier level = src.readIdentifier();
-        return new CommentEntry(level, src, false);
+        return new CommentEntry(level, src);
     }
 
     public static CommentEntry createSystemMessage(int messageType, String message, String title) {

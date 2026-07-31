@@ -73,11 +73,7 @@ public class CommentCommand {
                             })
                             .thenAccept(uploadResult -> {
                                 commentEntry.image = new CommentImage(uploader.id, uploadResult.url(), "", "");
-                                try {
-                                    Main.DATABASE.updateAllFields(commentEntry, false);
-                                } catch (Exception ex) {
-                                    throw new CompletionException(ex);
-                                }
+                                Main.DATABASE.updateAllFields(commentEntry, false);
                             })
                             .exceptionally(ex -> {
                                 Main.LOGGER.error("Migrating hosting of {}", commentEntry.image.sourceUrl, ex);

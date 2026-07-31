@@ -46,6 +46,10 @@ public class ServerPlatformImpl {
         RegistryUtilities.registerServerStoppingEvent(consumer);
     }
 
+    public static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
+        RegistryUtilities.registerWorldSaveEvent(consumer);
+    }
+
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
         RegistryUtilities.registerTickEvent(consumer);
     }

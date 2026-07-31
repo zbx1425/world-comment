@@ -58,6 +58,11 @@ public class ServerPlatform {
     }
 
     @ExpectPlatform
+    public static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
         throw new AssertionError();
     }

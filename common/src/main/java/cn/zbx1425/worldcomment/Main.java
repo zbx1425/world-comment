@@ -93,11 +93,19 @@ public class Main {
 				throw new RuntimeException(e);
 			}
 		});
+		ServerPlatform.registerWorldSaveEvent(server -> {
+			if (DATABASE != null) {
+				DATABASE.save();
+			}
+		});
 		ServerPlatform.registerServerStoppingEvent(server -> {
-			try {
-				DATABASE.peerChannel.close();
-			} catch (Exception ex) {
-				LOGGER.error("Failed to close database peerChannel", ex);
+			if (DATABASE != null) {
+				DATABASE.save();
+				try {
+					DATABASE.peerChannel.close();
+				} catch (Exception ex) {
+					LOGGER.error("Failed to close database peerChannel", ex);
+				}
 			}
 		});
 

@@ -9,9 +9,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -61,6 +63,11 @@ public class ServerPlatformImpl {
         SERVER_STOPPING_EVENT.add(consumer);
     }
 
+    public static List<Consumer<MinecraftServer>> WORLD_SAVE_EVENT = new ObjectArrayList<>();
+    public static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
+        WORLD_SAVE_EVENT.add(consumer);
+    }
+
     public static List<Consumer<MinecraftServer>> TICK_EVENT = new ObjectArrayList<>();
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
         TICK_EVENT.add(consumer);
@@ -104,6 +111,16 @@ public class ServerPlatformImpl {
         public static void onServerStopping(ServerStoppingEvent event) {
             for (Consumer<MinecraftServer> consumer : SERVER_STOPPING_EVENT) {
                 consumer.accept(event.getServer());
+            }
+        }
+
+        @SubscribeEvent
+        public static void onLevelSave(LevelEvent.Save event) {
+            if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel serverLevel
+                    && serverLevel.dimension() == Level.OVERWORLD) {
+                for (Consumer<MinecraftServer> consumer : WORLD_SAVE_EVENT) {
+                    consumer.accept(serverLevel.getServer());
+                }
             }
         }
 

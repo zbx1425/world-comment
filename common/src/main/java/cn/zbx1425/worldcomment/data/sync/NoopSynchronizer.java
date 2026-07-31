@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.data.sync;
 
-import cn.zbx1425.worldcomment.data.CommentCache;
+import cn.zbx1425.worldcomment.data.CommentStore;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.ServerWorldMeta;
 import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
@@ -32,7 +32,7 @@ public class NoopSynchronizer implements Synchronizer {
     }
 
     @Override
-    public ServerWorldMeta kvReadAllInto(CommentCache comments) {
+    public ServerWorldMeta kvReadAllInto(CommentStore comments) {
         return new ServerWorldMeta();
     }
 

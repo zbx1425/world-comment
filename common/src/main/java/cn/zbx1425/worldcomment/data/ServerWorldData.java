@@ -11,8 +11,6 @@ import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.UUID;
 
 public class ServerWorldData {
 
@@ -24,7 +22,7 @@ public class ServerWorldData {
     public boolean isHost;
     public ServerWorldMeta metadata;
 
-    public final CommentCache comments = new CommentCache();
+    public final CommentStore comments = new CommentStore();
 
     public final FileSerializer fileSerializer;
     public final UplinkDispatcher uplinkDispatcher;
@@ -48,7 +46,13 @@ public class ServerWorldData {
         }
     }
 
-    public void insert(CommentEntry newEntry, boolean fromPeer) throws IOException {
+    public void save() {
+        if (isHost) {
+            fileSerializer.saveDirtyChunks(comments);
+        }
+    }
+
+    public void insert(CommentEntry newEntry, boolean fromPeer) {
         if (CommentCommand.isCommand(newEntry)) {
             if (isHost) {
                 CommentCommand.executeCommandServer(newEntry, this);
@@ -57,7 +61,6 @@ public class ServerWorldData {
         }
         comments.insert(newEntry);
         if (isHost) {
-            fileSerializer.insert(newEntry);
             uplinkDispatcher.insert(newEntry);
             peerChannel.kvWriteEntry(newEntry);
         }
@@ -69,11 +72,10 @@ public class ServerWorldData {
         }
     }
 
-    // Update only the patch-able fields
-    public void update(CommentEntry newEntry, boolean fromPeer) throws IOException {
+    public void update(CommentEntry newEntry, boolean fromPeer) {
         CommentEntry trustedEntry = comments.update(newEntry);
+        if (trustedEntry == null) return;
         if (isHost) {
-            fileSerializer.update(trustedEntry);
             uplinkDispatcher.update(trustedEntry);
             peerChannel.kvWriteEntry(trustedEntry);
         }
@@ -85,10 +87,9 @@ public class ServerWorldData {
         }
     }
 
-    public void updateAllFields(CommentEntry newEntry, boolean fromPeer) throws IOException {
-        List<CommentEntry> regionEntries = comments.updateAllFields(newEntry);
+    public void updateAllFields(CommentEntry newEntry, boolean fromPeer) {
+        comments.updateAllFields(newEntry);
         if (isHost) {
-            fileSerializer.updateRegion(regionEntries);
             uplinkDispatcher.update(newEntry);
             peerChannel.kvWriteEntry(newEntry);
         }

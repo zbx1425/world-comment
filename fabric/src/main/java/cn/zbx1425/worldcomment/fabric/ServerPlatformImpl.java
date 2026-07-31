@@ -53,6 +53,14 @@ public class ServerPlatformImpl {
         ServerLifecycleEvents.SERVER_STOPPING.register(consumer::accept);
     }
 
+    public static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
+#if MC_VERSION >= "12001"
+        ServerLifecycleEvents.BEFORE_SAVE.register((server, flush, force) -> consumer.accept(server));
+#else
+        ServerLifecycleEvents.SERVER_STOPPING.register(consumer::accept);
+#endif
+    }
+
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
         ServerTickEvents.START_SERVER_TICK.register(consumer::accept);
     }

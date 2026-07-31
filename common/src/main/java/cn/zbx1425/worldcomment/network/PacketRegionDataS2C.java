@@ -28,7 +28,7 @@ public class PacketRegionDataS2C {
             buffer.writeChunkPos(entry.getKey());
             buffer.writeInt(entry.getValue().size());
             for (CommentEntry comment : entry.getValue()) {
-                comment.writeBuffer(buffer, false);
+                comment.writeBuffer(buffer);
             }
         }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
@@ -45,7 +45,7 @@ public class PacketRegionDataS2C {
                 int commentSize = buffer.readInt();
                 ArrayList<CommentEntry> comments = new ArrayList<>(commentSize);
                 for (int j = 0; j < commentSize; j++) {
-                    CommentEntry comment = new CommentEntry(level, buffer, false);
+                    CommentEntry comment = new CommentEntry(level, buffer);
                     if (comment.deleted) continue;
                     comments.add(comment);
                 }

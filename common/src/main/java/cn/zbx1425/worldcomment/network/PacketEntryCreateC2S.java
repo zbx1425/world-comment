@@ -11,8 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 
-import java.io.IOException;
-
 public class PacketEntryCreateC2S {
 
     public static final Identifier IDENTIFIER = Main.id("entry_create");
@@ -22,7 +20,7 @@ public class PacketEntryCreateC2S {
         public static void send(CommentEntry comment) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeIdentifier(comment.level);
-            comment.writeBuffer(buffer, false);
+            comment.writeBuffer(buffer);
             if (CommentCommand.isCommand(comment)) {
                 CommentCommand.executeCommandClient(comment);
             }
@@ -32,14 +30,10 @@ public class PacketEntryCreateC2S {
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         Identifier level = buffer.readIdentifier();
-        CommentEntry comment = new CommentEntry(level, buffer, false);
+        CommentEntry comment = new CommentEntry(level, buffer);
         if (!comment.initiator.equals(initiator.getGameProfile().id())) return;
         if (comment.message.length() > CommentEntry.MESSAGE_MAX_LENGTH) return;
         if (CommentCommand.isCommand(comment) && !initiator.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) return;
-        try {
-            Main.DATABASE.insert(comment, false);
-        } catch (IOException e) {
-            Main.LOGGER.error("Failed to create comment", e);
-        }
+        Main.DATABASE.insert(comment, false);
     }
 }

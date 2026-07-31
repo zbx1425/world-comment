@@ -10,8 +10,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 
-import java.io.IOException;
-
 public class PacketEntryActionC2S {
 
     public static final Identifier IDENTIFIER = Main.id("entry_action");
@@ -32,22 +30,18 @@ public class PacketEntryActionC2S {
                     comment.like++;
                 }
             }
-            comment.writeBuffer(buffer, false);
+            comment.writeBuffer(buffer);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
     }
 
     public static void handle(MinecraftServer server, ServerPlayer initiator, FriendlyByteBuf buffer) {
         Identifier level = buffer.readIdentifier();
-        CommentEntry comment = new CommentEntry(level, buffer, false);
+        CommentEntry comment = new CommentEntry(level, buffer);
         if (!initiator.permissions().hasPermission(Permissions.COMMANDS_ADMIN)
                 && !comment.initiator.equals(initiator.getGameProfile().id())) {
             return;
         }
-        try {
-            Main.DATABASE.update(comment, false);
-        } catch (IOException e) {
-            Main.LOGGER.error("Failed to create comment", e);
-        }
+        Main.DATABASE.update(comment, false);
     }
 }

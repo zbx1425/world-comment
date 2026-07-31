@@ -24,7 +24,7 @@ public class PacketCollectionDataS2C {
         buffer.writeInt(data.size());
         for (CommentEntry comment : data) {
             buffer.writeIdentifier(comment.level);
-            comment.writeBuffer(buffer, false);
+            comment.writeBuffer(buffer);
         }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
     }
@@ -37,7 +37,7 @@ public class PacketCollectionDataS2C {
             ArrayList<CommentEntry> comments = new ArrayList<>(commentSize);
             for (int j = 0; j < commentSize; j++) {
                 Identifier level = buffer.readIdentifier();
-                CommentEntry comment = new CommentEntry(level, buffer, false);
+                CommentEntry comment = new CommentEntry(level, buffer);
                 if (comment.deleted) continue;
                 comments.add(comment);
             }

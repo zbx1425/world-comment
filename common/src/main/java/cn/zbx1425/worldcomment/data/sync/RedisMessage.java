@@ -7,8 +7,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.io.IOException;
-
 public class RedisMessage {
 
     public static final String COMMAND_CHANNEL = "WORLD_COMMENT_COMMAND_CHANNEL";
@@ -53,7 +51,7 @@ public class RedisMessage {
         connection.async().publish(COMMAND_CHANNEL, buffer);
     }
 
-    public void handle(RedisSynchronizer synchronizer) throws IOException {
+    public void handle(RedisSynchronizer synchronizer) {
         if (isFromSelf()) return;
         switch (action) {
             case INSERT:

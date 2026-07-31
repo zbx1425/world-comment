@@ -1,10 +1,6 @@
 package cn.zbx1425.worldcomment.data.sync;
 
-import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.data.CommentCache;
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.ServerWorldData;
-import cn.zbx1425.worldcomment.data.ServerWorldMeta;
+import cn.zbx1425.worldcomment.data.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.lettuce.core.RedisClient;
@@ -71,7 +67,7 @@ public class RedisSynchronizer implements Synchronizer {
         RedisMessage.insert(newEntry).publishAsync(redisConn);
     }
 
-    protected void handleInsert(CommentEntry peerEntry) throws IOException {
+    protected void handleInsert(CommentEntry peerEntry) {
         serverWorldData.insert(peerEntry, true);
     }
 
@@ -80,7 +76,7 @@ public class RedisSynchronizer implements Synchronizer {
         RedisMessage.update(newEntry).publishAsync(redisConn);
     }
 
-    protected void handleUpdate(CommentEntry peerEntry) throws IOException {
+    protected void handleUpdate(CommentEntry peerEntry) {
         serverWorldData.update(peerEntry, true);
     }
 
@@ -89,12 +85,12 @@ public class RedisSynchronizer implements Synchronizer {
         RedisMessage.updateAllFields(newEntry).publishAsync(redisConn);
     }
 
-    protected void handleUpdateAllFields(CommentEntry peerEntry) throws IOException {
+    protected void handleUpdateAllFields(CommentEntry peerEntry) {
         serverWorldData.updateAllFields(peerEntry, true);
     }
 
     @Override
-    public ServerWorldMeta kvReadAllInto(CommentCache comments) throws IOException {
+    public ServerWorldMeta kvReadAllInto(CommentStore comments) throws IOException {
         Map<String, ByteBuf> data = redisConn.sync().hgetall(HMAP_ALL_KEY);
         for (ByteBuf entry : data.values()) {
             comments.insert(CommentEntry.fromBinaryBuffer(entry));
@@ -115,11 +111,7 @@ public class RedisSynchronizer implements Synchronizer {
         @Override
         public void message(String channel, ByteBuf rawMessage) {
             RedisMessage message = new RedisMessage(rawMessage);
-            try {
-                message.handle(RedisSynchronizer.this);
-            } catch (IOException ex) {
-                Main.LOGGER.error("Redis handler", ex);
-            }
+            message.handle(RedisSynchronizer.this);
         }
 
         @Override

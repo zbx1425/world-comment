@@ -51,6 +51,11 @@ public interface RegistryUtilities {
         LifecycleEvent.SERVER_STOPPING.register(consumer::accept);
     }
 
+    static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
+        // TODO Make it actually work
+        LifecycleEvent.SERVER_STOPPING.register(consumer::accept);
+    }
+
     static void registerTickEvent(Consumer<MinecraftServer> consumer) {
         TickEvent.SERVER_PRE.register(consumer::accept);
     }

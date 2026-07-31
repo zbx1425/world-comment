@@ -1,20 +1,19 @@
 package cn.zbx1425.worldcomment.data.persist;
 
-import cn.zbx1425.worldcomment.data.CommentCache;
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.ServerWorldMeta;
-import com.google.gson.JsonObject;
+import cn.zbx1425.worldcomment.Main;
+import cn.zbx1425.worldcomment.data.*;
 import com.google.gson.JsonParser;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class FileSerializer {
@@ -25,8 +24,8 @@ public class FileSerializer {
         this.basePath = basePath;
     }
 
-    public ServerWorldMeta loadInto(CommentCache commentCache) throws IOException {
-        commentCache.clear();
+    public ServerWorldMeta loadInto(CommentStore commentStore) throws IOException {
+        commentStore.clear();
         try {
             Files.createDirectories(basePath.resolve("region"));
         } catch (FileAlreadyExistsException ignored) { }
@@ -40,10 +39,10 @@ public class FileSerializer {
                 try (Stream<Path> files = Files.list(levelPath)) {
                     for (Path file : files.toList()) {
                         String[] fileNameParts = file.getFileName().toString().split("\\.");
-                        if (fileNameParts.length != 4 || !fileNameParts[3].equals("bin")) continue;
+                        if (fileNameParts.length != 4 || !fileNameParts[3].equals("jsonl")) continue;
                         ChunkPos region = new ChunkPos(Integer.parseInt(fileNameParts[1]), Integer.parseInt(fileNameParts[2]));
-                        byte[] fileContent = Files.readAllBytes(file);
-                        commentCache.loadRegion(dimension, region.pack(), fileContent, true);
+                        CommentChunk chunk = CommentChunk.load(file);
+                        commentStore.acceptLoadedChunk(dimension, region.pack(), chunk);
                     }
                 }
             }
@@ -64,47 +63,29 @@ public class FileSerializer {
                 .resolve(dimension.getNamespace() + "+" + dimension.getPath());
     }
 
-    private Path getLevelRegionPath(Identifier dimension, ChunkPos region) {
+    private Path getChunkPath(Identifier dimension, ChunkPos region) {
         return basePath.resolve("region")
                 .resolve(dimension.getNamespace() + "+" + dimension.getPath())
-                .resolve("r." + region.x() + "." + region.z() + ".bin");
+                .resolve("r." + region.x() + "." + region.z() + ".jsonl");
     }
 
-    public void insert(CommentEntry newEntry) throws IOException {
-        synchronized (this) {
-            try {
-                Files.createDirectory(getLevelPath(newEntry.level));
-            } catch (FileAlreadyExistsException ignored) {
-            }
-            Path targetFile = getLevelRegionPath(newEntry.level, newEntry.region);
-            try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), true)) {
-                newEntry.writeFileStream(oStream);
-            }
-        }
-    }
+    public void saveDirtyChunks(CommentStore store) {
+        for (Map.Entry<Identifier, Long2ObjectMap<CommentChunk>> dimEntry : store.getRegions().entrySet()) {
+            Identifier dimension = dimEntry.getKey();
+            for (Long2ObjectMap.Entry<CommentChunk> regionEntry : dimEntry.getValue().long2ObjectEntrySet()) {
+                CommentChunk chunk = regionEntry.getValue();
+                if (!chunk.isDirty()) continue;
+                ChunkPos chunkPos = ChunkPos.unpack(regionEntry.getLongKey());
+                try {
+                    Path levelPath = getLevelPath(dimension);
+                    Files.createDirectories(levelPath);
 
-    public void update(CommentEntry existingEntry) throws IOException {
-        synchronized (this) {
-            assert existingEntry.fileOffset > 0;
-            Path targetFile = getLevelRegionPath(existingEntry.level, existingEntry.region);
-            try (RandomAccessFile oStream = new RandomAccessFile(targetFile.toFile(), "rw")) {
-                existingEntry.updateInFile(oStream);
-            }
-        }
-    }
-
-    public void updateRegion(List<CommentEntry> regionEntries) throws IOException {
-        synchronized (this) {
-            if (regionEntries.isEmpty()) return;
-            CommentEntry pivot = regionEntries.get(0);
-            try {
-                Files.createDirectory(getLevelPath(pivot.level));
-            } catch (FileAlreadyExistsException ignored) {
-            }
-            Path targetFile = getLevelRegionPath(pivot.level, pivot.region);
-            try (FileOutputStream oStream = new FileOutputStream(targetFile.toFile(), false)) {
-                for (CommentEntry entry : regionEntries) {
-                    entry.writeFileStream(oStream);
+                    Path targetFile = getChunkPath(dimension, chunkPos);
+                    Path tmpFile = targetFile.resolveSibling(targetFile.getFileName() + ".tmp");
+                    chunk.saveTo(tmpFile);
+                    Files.move(tmpFile, targetFile, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                } catch (IOException e) {
+                    Main.LOGGER.error("Failed to save chunk {}", chunkPos, e);
                 }
             }
         }
