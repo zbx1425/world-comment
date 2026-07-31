@@ -20,7 +20,7 @@ import java.nio.channels.WritableByteChannel;
 
 public class ImageConvertClient {
 
-    public static byte[] toWebp(byte[] pngImageBytes, ImageVariantConfig.VariantSpec spec) {
+    public static byte[] pngToWebp(byte[] pngImageBytes, ImageVariantConfig.VariantSpec spec) {
         ByteBuffer offHeapPngData = OffHeapAllocator.allocate(pngImageBytes.length);
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
             offHeapPngData.put(pngImageBytes);
@@ -130,7 +130,7 @@ public class ImageConvertClient {
         }
     }
 
-    public static byte[] toPng(byte[] jpegImageBytes) {
+    public static byte[] jpegToPng(byte[] jpegImageBytes) {
         ByteBuffer offHeapJpegData = OffHeapAllocator.allocate(jpegImageBytes.length);
         try (MemoryStack memoryStack = MemoryStack.stackPush()) {
             offHeapJpegData.put(jpegImageBytes);

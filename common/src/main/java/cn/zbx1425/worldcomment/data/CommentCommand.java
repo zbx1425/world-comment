@@ -95,8 +95,7 @@ public class CommentCommand {
         String[] args = commandContent.substring(command.length()).trim().split(" ");
         switch (command) {
             case "imagedumpall" -> {
-                if (args.length < 1) return;
-                ImageDump.requestDumpComments(args[0]);
+                ImageDump.requestDumpComments();
             }
         }
     }

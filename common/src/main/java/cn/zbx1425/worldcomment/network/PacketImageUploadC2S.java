@@ -131,7 +131,7 @@ public class PacketImageUploadC2S {
 
                 String detailUrl = "";
                 if (variantConfig.hasArchive()) {
-                    byte[] detailWebp = ImageConvertServer.toWebp(completeImageData, variantConfig.detail());
+                    byte[] detailWebp = ImageConvertServer.anyToWebp(completeImageData, variantConfig.detail());
                     String mediumBase = UrlTemplate.transform(
                             ImageUploader.DEFAULT_FILENAME_FORMAT, jobId, info, ImageFilePurpose.MEDIUM);
                     String mediumFileName = subDir + "/" + mediumBase + ".webp";
@@ -141,7 +141,7 @@ public class PacketImageUploadC2S {
 
                 String thumbUrl = "";
                 if (variantConfig.hasThumbnail()) {
-                    byte[] thumbWebp = ImageConvertServer.toWebp(completeImageData, variantConfig.thumbnail());
+                    byte[] thumbWebp = ImageConvertServer.anyToWebp(completeImageData, variantConfig.thumbnail());
                     String thumbBase = UrlTemplate.transform(
                             ImageUploader.DEFAULT_FILENAME_FORMAT, jobId, info, ImageFilePurpose.THUMBNAIL);
                     String thumbFileName = subDir + "/" + thumbBase + ".webp";

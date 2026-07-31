@@ -28,7 +28,7 @@ public class ImageUploadOrchestrator {
             byte[] rawPng, LocalStorageUploader uploader, ImageVariantConfig variantConfig, long jobId) {
         return CompletableFuture.supplyAsync(() -> {
             ImageVariantConfig.VariantSpec sourceSpec = variantConfig.getSourceSpec();
-            return ImageConvertClient.toWebp(rawPng, sourceSpec);
+            return ImageConvertClient.pngToWebp(rawPng, sourceSpec);
         }, Main.IO_EXECUTOR).thenCompose(sourceWebp -> uploader.uploadForCommentImage(jobId, sourceWebp));
     }
 
@@ -49,7 +49,7 @@ public class ImageUploadOrchestrator {
                         };
 
                         uploadFutures[i] = CompletableFuture.supplyAsync(
-                                () -> ImageConvertClient.toWebp(rawPng, spec), Main.IO_EXECUTOR
+                                () -> ImageConvertClient.pngToWebp(rawPng, spec), Main.IO_EXECUTOR
                         ).thenCompose(webpData -> s3Uploader.uploadToS3(slot.uploadUrl(), webpData))
                                 .thenRun(() -> {
                                     switch (slot.purpose()) {
@@ -79,7 +79,7 @@ public class ImageUploadOrchestrator {
         ImageVariantConfig.VariantSpec sourceSpec = variantConfig.getSourceSpec();
         String sourceFilename = uploader.resolveFilename(jobId, info, ImageFilePurpose.SOURCE);
         CompletableFuture<ImageUploader.UploadResult> sourceUpload = CompletableFuture.supplyAsync(
-                () -> ImageConvertClient.toWebp(rawPng, sourceSpec), Main.IO_EXECUTOR
+                () -> ImageConvertClient.pngToWebp(rawPng, sourceSpec), Main.IO_EXECUTOR
         ).thenCompose(webpData ->
                 uploader.uploadImage(webpData, sourceFilename, info));
 
@@ -93,7 +93,7 @@ public class ImageUploadOrchestrator {
             if (A && !C) {
                 String mediumFilename = uploader.resolveFilename(jobId, info, ImageFilePurpose.MEDIUM);
                 CompletableFuture<ImageUploader.UploadResult> detailUpload = CompletableFuture.supplyAsync(
-                        () -> ImageConvertClient.toWebp(rawPng, variantConfig.detail()), Main.IO_EXECUTOR
+                        () -> ImageConvertClient.pngToWebp(rawPng, variantConfig.detail()), Main.IO_EXECUTOR
                 ).thenCompose(webpData ->
                         uploader.uploadImage(webpData, mediumFilename, info));
                 detailUrlFuture = detailUpload.thenApply(ImageUploader.UploadResult::url);
@@ -111,7 +111,7 @@ public class ImageUploadOrchestrator {
                     } else {
                         String thumbFilename = uploader.resolveFilename(jobId, info, ImageFilePurpose.THUMBNAIL);
                         thumbUrlFuture = CompletableFuture.supplyAsync(
-                                () -> ImageConvertClient.toWebp(rawPng, variantConfig.thumbnail()), Main.IO_EXECUTOR
+                                () -> ImageConvertClient.pngToWebp(rawPng, variantConfig.thumbnail()), Main.IO_EXECUTOR
                         ).thenCompose(webpData ->
                                 uploader.uploadImage(webpData, thumbFilename, info)
                         ).thenApply(ImageUploader.UploadResult::url);

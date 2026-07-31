@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class ImageConvertServer {
 
-    public static byte[] toWebp(byte[] sourceImageData, ImageVariantConfig.VariantSpec spec) throws IOException {
+    public static byte[] anyToWebp(byte[] sourceImageData, ImageVariantConfig.VariantSpec spec) throws IOException {
         BufferedImage originalImage = decodeImage(sourceImageData);
         if (originalImage == null) {
             throw new IOException("Failed to read image");

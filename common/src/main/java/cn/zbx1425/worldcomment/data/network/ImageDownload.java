@@ -6,11 +6,11 @@ import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
+import net.jpountz.xxhash.XXHashFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -20,12 +20,14 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 public class ImageDownload {
@@ -44,13 +46,29 @@ public class ImageDownload {
 
         Main.IO_EXECUTOR.execute(() -> {
             try {
-                byte[] localImageData = getLocalImageData(resolvedUrl);
-                if (localImageData != null) {
-                    applyImageData(resolvedUrl, localImageData);
+                byte[] cachedData = readFromDiskCache(resolvedUrl);
+                if (cachedData != null) {
+                    applyImageData(resolvedUrl, cachedData, false)
+                            .exceptionally(ex -> {
+                                Main.LOGGER.warn("Failed to load image {} from disk", resolvedUrl, ex);
+
+                                // Cached image was corrupted. Reset it to loading state and try to download again.
+                                synchronized (images) {
+                                    ImageState state = images.get(resolvedUrl);
+                                    if (state != null) state.failed = false;
+                                }
+                                Main.IO_EXECUTOR.execute(() -> {
+                                    try {
+                                        Files.deleteIfExists(getCachePath(resolvedUrl));
+                                    } catch (IOException ignored) {}
+                                    downloadImage(resolvedUrl);
+                                });
+                                return null;
+                            });
                     return;
                 }
             } catch (IOException ex) {
-                Main.LOGGER.warn("Cannot read local image {}", resolvedUrl, ex);
+                Main.LOGGER.warn("Cannot read cached image {}", resolvedUrl, ex);
             }
 
             downloadImage(resolvedUrl);
@@ -59,12 +77,13 @@ public class ImageDownload {
         return queryTexture(resolvedUrl);
     }
 
-    private static void downloadImage(String url) {
+    @SuppressWarnings("UnusedReturnValue")
+    private static CompletableFuture<Void> downloadImage(String url) {
         if (url.startsWith(LocalStorageUploader.URL_PREFIX)) {
-            LocalStorageUploader.downloadImage(url)
-                    .thenAccept(imageData -> applyImageData(url, imageData))
+            return LocalStorageUploader.downloadImage(url)
+                    .thenCompose(imageData -> applyImageData(url, imageData, true))
                     .exceptionally(ex -> {
-                        Main.LOGGER.warn("Cannot download image {}", url, ex);
+                        Main.LOGGER.warn("Cannot load image {}", url, ex);
                         synchronized (images) {
                             if (!images.containsKey(url)) return null;
                             images.get(url).failed = true;
@@ -76,16 +95,15 @@ public class ImageDownload {
                     .timeout(Duration.of(10, ChronoUnit.SECONDS))
                     .GET()
                     .build();
-            Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
-                    .thenAccept(response -> {
+            return Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofByteArray())
+                    .thenCompose(response -> {
                         if (response.statusCode() != 200) {
                             throw new CompletionException(new IOException("HTTP Error Code " + response.statusCode()));
                         }
-                        byte[] imageData = response.body();
-                        applyImageData(url, imageData);
+                        return applyImageData(url, response.body(), true);
                     })
                     .exceptionally(ex -> {
-                        Main.LOGGER.warn("Cannot download image {}", url, ex);
+                        Main.LOGGER.warn("Cannot load image {}", url, ex);
                         synchronized (images) {
                             if (!images.containsKey(url)) return null;
                             images.get(url).failed = true;
@@ -95,57 +113,172 @@ public class ImageDownload {
         }
     }
 
-    private static byte[] getLocalImageData(String url) throws IOException {
-        Path imageBaseDir = Minecraft.getInstance().gameDirectory.toPath().resolve("worldcomment-images");
-        Path imagePath = imageBaseDir.resolve(getCacheFileName(url));
-        if (Files.exists(imagePath)) {
-            return Files.readAllBytes(imagePath);
+    // --- Disk cache ---
+
+    public static Path getCachePath(String url) {
+        Path baseDir = Minecraft.getInstance().gameDirectory.toPath()
+                .resolve("worldcomment").resolve("image");
+
+        String host;
+        String pathStr;
+
+        if (url.startsWith(LocalStorageUploader.URL_PREFIX)) {
+            host = MainClient.CLIENT_CONFIG.perServerPreference.serverKey + ".worldcomment";
+            pathStr = url.substring(LocalStorageUploader.URL_PREFIX.length());
+        } else {
+            URI uri = URI.create(url).normalize();
+            host = uri.getHost();
+            if (host == null) host = "unknown";
+            pathStr = uri.getPath();
+            if (pathStr == null || pathStr.isEmpty()) pathStr = "index";
+            if (pathStr.startsWith("/")) pathStr = pathStr.substring(1);
+
+            String query = uri.getQuery();
+            if (query != null && !query.isEmpty()) {
+                byte[] queryBytes = query.getBytes(StandardCharsets.UTF_8);
+                long hash = XXHashFactory.fastestInstance().hash64()
+                        .hash(queryBytes, 0, queryBytes.length, 0);
+                String hashHex = String.format("%016x", hash);
+                int dotIndex = pathStr.lastIndexOf('.');
+                int slashIndex = pathStr.lastIndexOf('/');
+                if (dotIndex > slashIndex && dotIndex > 0) {
+                    pathStr = pathStr.substring(0, dotIndex) + "@" + hashHex + pathStr.substring(dotIndex);
+                } else {
+                    pathStr = pathStr + "@" + hashHex;
+                }
+            }
+        }
+
+        host = sanitizePathComponent(host);
+        String[] parts = pathStr.split("/");
+        Path result = baseDir.resolve(host);
+        for (String part : parts) {
+            if (part.isEmpty() || part.equals("..") || part.equals(".")) continue;
+            result = result.resolve(sanitizePathComponent(part));
+        }
+
+        if (!result.normalize().startsWith(baseDir.normalize())) {
+            throw new IllegalArgumentException("Path traversal? " + url);
+        }
+
+        return result;
+    }
+
+    private static String sanitizePathComponent(String component) {
+        return component
+                .replace("*", "_")
+                .replace("\"", "_")
+                .replace("<", "_")
+                .replace(">", "_")
+                .replace("|", "_")
+                .replace(":", "_");
+    }
+
+    public static byte[] readFromDiskCache(String url) throws IOException {
+        Path cachePath = getCachePath(url);
+        if (Files.exists(cachePath)) {
+            return Files.readAllBytes(cachePath);
         }
         return null;
     }
 
-    private static void applyImageData(String url, byte[] rawImageData) {
-        byte[] imageData = rawImageData;
+    public static void writeToDiskCache(String url, byte[] rawImageData) {
+        try {
+            Path cachePath = getCachePath(url);
+            if (Files.exists(cachePath)) return;
+            Files.createDirectories(cachePath.getParent());
+            Path tmpFile = cachePath.resolveSibling(cachePath.getFileName() + ".tmp");
+            Files.write(tmpFile, rawImageData);
+            Files.move(tmpFile, cachePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException ex) {
+            Main.LOGGER.warn("Cannot write image to cache {}", url, ex);
+        }
+    }
+
+    // --- Image loading ---
+
+    private static CompletableFuture<Void> applyImageData(String url, byte[] rawImageData, boolean updateCache) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        try {
+            byte[] imageData = rawImageData;
+            String lower = url.toLowerCase(Locale.ROOT);
+            if (lower.endsWith(".webp") || isWebpMagicBytes(rawImageData)) {
+                imageData = ImageConvertClient.webpToPng(imageData);
+            } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+                imageData = ImageConvertClient.jpegToPng(imageData);
+            }
+            ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
+            buffer.put(imageData);
+            buffer.rewind();
+            Minecraft.getInstance().execute(() -> {
+                try {
+                    NativeImage pixels = NativeImage.read(buffer);
+#if MC_VERSION >= "12006"
+                    DynamicTexture dynamicTexture = new DynamicTexture(() -> url, pixels);
+#else
+                    DynamicTexture dynamicTexture = new DynamicTexture(pixels);
+#endif
+                    synchronized (images) {
+                        ImageState sink = images.get(url);
+                        if (sink == null) {
+                            future.complete(null);
+                            return;
+                        }
+                        sink.texture = dynamicTexture;
+                        sink.width = pixels.getWidth();
+                        sink.height = pixels.getHeight();
+                        sink.failed = false;
+                    }
+                    if (updateCache) {
+                        Main.IO_EXECUTOR.execute(() -> writeToDiskCache(url, rawImageData));
+                    }
+                    future.complete(null);
+                } catch (Throwable ex) {
+                    Main.LOGGER.warn("Cannot decode image " + url, ex);
+                    synchronized (images) {
+                        if (images.containsKey(url)) images.get(url).failed = true;
+                    }
+                    future.completeExceptionally(ex);
+                } finally {
+                    OffHeapAllocator.free(buffer);
+                }
+            });
+        } catch (Throwable ex) {
+            Main.LOGGER.warn("Cannot decode image " + url, ex);
+            synchronized (images) {
+                if (images.containsKey(url)) images.get(url).failed = true;
+            }
+            future.completeExceptionally(ex);
+        }
+        return future;
+    }
+
+    static boolean isWebpMagicBytes(byte[] data) {
+        return data.length > 12
+                && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'
+                && data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P';
+    }
+
+    static boolean verifyImageIntegrity(String url, byte[] rawBytes) {
+        byte[] imageData = rawBytes;
         String lower = url.toLowerCase(Locale.ROOT);
-        if (lower.endsWith(".webp") || isWebpMagicBytes(rawImageData)) {
+        if (lower.endsWith(".webp") || isWebpMagicBytes(rawBytes)) {
             imageData = ImageConvertClient.webpToPng(imageData);
         } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-            imageData = ImageConvertClient.toPng(imageData);
+            imageData = ImageConvertClient.jpegToPng(imageData);
         }
         ByteBuffer buffer = OffHeapAllocator.allocate(imageData.length);
         buffer.put(imageData);
         buffer.rewind();
-        Minecraft.getInstance().execute(() -> {
-            try {
-                NativeImage pixels = NativeImage.read(buffer);
-#if MC_VERSION >= "12006"
-                DynamicTexture dynamicTexture = new DynamicTexture(() -> url, pixels);
-#else
-                DynamicTexture dynamicTexture = new DynamicTexture(pixels);
-#endif
-                synchronized (images) {
-                    ImageState sink = images.get(url);
-                    if (sink == null) return;
-                    sink.texture = dynamicTexture;
-                    sink.width = pixels.getWidth();
-                    sink.height = pixels.getHeight();
-                }
-            } catch (Throwable ex) {
-                Main.LOGGER.warn("Cannot store image " + url, ex);
-                synchronized (images) {
-                    if (!images.containsKey(url)) return;
-                    images.get(url).failed = true;
-                }
-            } finally {
-                OffHeapAllocator.free(buffer);
-            }
-        });
-    }
-
-    private static boolean isWebpMagicBytes(byte[] data) {
-        return data.length > 12
-                && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'
-                && data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P';
+        try {
+            NativeImage pixels = NativeImage.read(buffer);
+            pixels.close();
+            return true;
+        } catch (Throwable ex) {
+            return false;
+        } finally {
+            OffHeapAllocator.free(buffer);
+        }
     }
 
     private static ImageState queryTexture(String url) {
@@ -204,20 +337,5 @@ public class ImageDownload {
         }
 
         public static final ImageState BLANK = new ImageState(true);
-    }
-
-    public static String getCacheFileName(String url) {
-        byte[] urlBytes = url.getBytes(StandardCharsets.UTF_8);
-        String hash = DigestUtils.sha1Hex(urlBytes);
-        String lower = url.toLowerCase(Locale.ROOT);
-        String extension;
-        if (lower.endsWith(".webp")) {
-            extension = ".webp";
-        } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-            extension = ".jpg";
-        } else {
-            extension = ".png";
-        }
-        return String.format("url-sha1-%s%s", hash, extension);
     }
 }

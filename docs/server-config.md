@@ -1,8 +1,8 @@
 # WorldComment 服务端配置
 
-配置文件位于世界存档目录下 `world-comment/config.json`。首次加载时自动创建。
+配置文件位于服务器目录下 `config/world-comment.json`。
 
-所有配置项均可通过环境变量覆盖，环境变量名为 `SUBNOTEICA_` + 字段名的 UPPER_SNAKE_CASE 形式（例如 `SUBNOTEICA_REDIS_URL`）。
+所有配置项也可通过环境变量配置，环境变量名为 `SUBNOTEICA_` + 字段名的 UPPER_SNAKE_CASE 形式（例如 `SUBNOTEICA_REDIS_URL`）。
 
 ---
 
@@ -104,13 +104,13 @@
 
 使用服务端本地文件系统存储。图片通过 Minecraft 网络协议传输。
 
-无需额外配置字段。文件存储在世界目录 `world-comment/image/` 下，自动按日期分桶（`YYMM/DD/`）。
+无需额外配置字段。文件存储在世界目录 `worldcomment/image/` 下，自动按日期分桶（`YYMM/DD/`）。
 
 ```json
 { "service": "local" }
 ```
 
-存储路径示例：`world-comment/image/2607/31/0001a2b3c4d5e6f7-Steve.webp`
+存储路径示例：`worldcomment/image/2607/31/0001a2b3c4d5e6f7-Steve.webp`
 
 ---
 
@@ -271,18 +271,11 @@
 配置了 CDN 变换后，客户端将不再预先单独上传 thumbnail 和 detail（如果单独配置了 archive 级别清晰度）变体，节省存储空间。
 ---
 
-## 完整配置示例
+## 配置示例
 
 ```json
 {
-  "syncRole": "host",
-  "redisUrl": "",
-  "allowMarkerUsage": "creative",
-  "commentVisibilityCriteria": "preference",
-  "markerVisibilityCriteria": "always",
-  "screenshotKeyTriggersComment": true,
-  "defaultCommentVisibilityPreference": false,
-  "imageGlobalKill": false,
+  "defaultCommentVisibilityPreference": true,
   "imageVariants": {
     "archive": { "maxWidth": 3840, "quality": 100, "lossless": true },
     "detail": { "maxWidth": 1920, "quality": 95 },
@@ -292,20 +285,14 @@
     {
       "service": "s3PreSigned",
       "id": "r2",
-      "s3Endpoint": "https://account-id.r2.cloudflarestorage.com",
+      "s3Endpoint": "https://example.r2.cloudflarestorage.com",
       "s3Bucket": "worldcomment-images",
       "s3Region": "auto",
       "s3AccessKeyId": "ACCESS_KEY",
       "s3SecretAccessKey": "SECRET_KEY",
       "cdnBaseUrl": "https://img.example.com",
-      "pathFormat": "{Y}/{m}/{d}/{id}-{initiatorName}{.variant}",
       "cdnImageTransform": "/cdn-cgi/image/width={width},quality={quality}/{path}"
     }
   ]
 }
 ```
-
-此配置表示：
-1. 原图以 lossless WebP 归档上传到 R2
-2. 浏览时由 Cloudflare 动态缩放到 1920px/q95（大图）或 256px/q80（缩略图）
-3. 无需额外存储 medium/thumbnail 文件
