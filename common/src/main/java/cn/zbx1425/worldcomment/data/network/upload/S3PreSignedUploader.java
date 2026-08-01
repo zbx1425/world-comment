@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.network.upload;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.network.PacketPreSignRequestC2S;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -101,6 +102,26 @@ public class S3PreSignedUploader extends ImageUploader {
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
                         throw new CompletionException(new IOException(
                                 "S3 upload failed: " + response.statusCode() + " " + response.body()));
+                    }
+
+                    // "S3ish" reverse proxy support
+                    Optional<String> s3ishStatus = response.headers().firstValue("x-s3ish-status");
+                    if (s3ishStatus.isPresent() && s3ishStatus.get().equals("rejected")) {
+                        try {
+                            JsonObject errorJsonObj = JsonParser.parseString(response.body()).getAsJsonObject();
+                            switch (errorJsonObj.get("code").getAsString().toUpperCase(Locale.ROOT)) {
+                                case "MODERATION_ERROR" -> throw new CompletionException(
+                                    new ModerationException(ModerationException.Code.MODERATION_ERROR,
+                                        errorJsonObj.get("message").getAsString()
+                                    ));
+                                case "MODERATION_REJECTED" -> throw new CompletionException(
+                                    new ModerationException(ModerationException.Code.MODERATION_REJECTED,
+                                        errorJsonObj.get("message").getAsString()
+                                    ));
+                            }
+                        } catch (Exception ex) {
+                            throw new CompletionException(new ModerationException(ModerationException.Code.MODERATION_ERROR, ex.toString()));
+                        }
                     }
                 });
     }

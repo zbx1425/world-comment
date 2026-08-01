@@ -112,8 +112,7 @@ public class PacketImageUploadC2S {
                         initiator.getGameProfile().id(), initiator.getGameProfile().name());
 
                 LocalDateTime now = LocalDateTime.now();
-                String subDir = now.format(DateTimeFormatter.ofPattern("yyMM"))
-                        + "/" + now.format(DateTimeFormatter.ofPattern("dd"));
+                String subDir = now.format(DateTimeFormatter.ofPattern("yyMM"));
 
                 Path serverImagePath = server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
                         .resolve("worldcomment").resolve("image").resolve(subDir);

@@ -26,6 +26,10 @@ public class CommentRepository {
     public ServerWorldMeta loadInto(CommentStore commentStore) throws IOException {
         commentStore.clear();
 
+        try {
+            Files.createDirectories(basePath.resolve("region"));
+        } catch (FileAlreadyExistsException ignored) { }
+
         ServerWorldMeta worldMeta;
         if (Files.exists(basePath.resolve("metadata.json"))) {
             String metaContent = Files.readString(basePath.resolve("metadata.json"));
@@ -35,9 +39,6 @@ public class CommentRepository {
             Files.writeString(basePath.resolve("metadata.json"), worldMeta.serialize().toString());
         }
 
-        try {
-            Files.createDirectories(basePath.resolve("region"));
-        } catch (FileAlreadyExistsException ignored) { }
         try (Stream<Path> levelFiles = Files.list(basePath.resolve("region"))) {
             for (Path levelPath : levelFiles.toList()) {
 #if MC_VERSION >= "12100"

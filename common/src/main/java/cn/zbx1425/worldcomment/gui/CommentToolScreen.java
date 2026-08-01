@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
+import cn.zbx1425.worldcomment.data.network.upload.ModerationException;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
 import cn.zbx1425.worldcomment.network.PacketRequestPlacementC2S;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CompletionException;
 
 public class CommentToolScreen extends Screen implements IGuiCommon {
 
@@ -208,7 +210,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             );
             long jobId = SubmitDispatcher.addJob(
                     comment, checkBoxNoImage.selected() ? null : imageBytes,
-                    (job, ex) -> Minecraft.getInstance().execute(() -> {
+                    (job, exOut) -> Minecraft.getInstance().execute(() -> {
                         if (job == null) {
                             player.sendSystemMessage(
                                     Component.translatable("gui.worldcomment.send_finish"));
@@ -216,10 +218,21 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
                                 player.sendSystemMessage(Component.translatable("gui.worldcomment.send_finish_but_hidden"));
                             }
                         } else {
+                            Throwable ex = exOut;
                             if (ex != null) {
-                                player.sendSystemMessage(
+                                if (ex instanceof CompletionException cex) ex = cex.getCause();
+                                if (ex instanceof ModerationException mex) {
+                                    switch (mex.code()) {
+                                        case MODERATION_ERROR -> player.sendSystemMessage(
+                                            Component.translatable("gui.worldcomment.send_fail.moderation_error", mex.getMessage()));
+                                        case MODERATION_REJECTED -> player.sendSystemMessage(
+                                            Component.translatable("gui.worldcomment.send_fail.moderation_rejected", mex.getMessage()));
+                                    }
+                                } else {
+                                    player.sendSystemMessage(
                                         Component.translatable("gui.worldcomment.send_fail",
-                                                ex.getClass().getName() + ": " + ex.getMessage()));
+                                            ex.getClass().getName() + ": " + ex.getMessage()));
+                                }
                             } else {
                                 player.sendSystemMessage(
                                         Component.translatable("gui.worldcomment.send_upload_incomplete"));

@@ -76,7 +76,9 @@
   "gui.worldcomment.send_in_air": "§c§lNote: Comments placed in midair are invisible in-world, but they'll still appear in the comment list screen.",
   "gui.worldcomment.send_finish": "§aYour message is sent successfully.",
   "gui.worldcomment.send_finish_but_hidden": "§c§lBut: §r§cYou won't see it after a few seconds because your settings hide all comments.\nWe're showing it briefly now so you know it went through.\nYou can change this in your settings.",
-  "gui.worldcomment.send_fail": "§c§lError occurred when processing your message: %s\n  §c§lError occurred when processing your message.",
+  "gui.worldcomment.send_fail": "§c§lError occurred while processing your message: %s\n  §c§lError occurred while processing your message.",
+  "gui.worldcomment.send_fail.moderation_error": "§c§lAn error occurred while processing your message: An internal error occurred during automatic moderation by the cloud storage service provider.\nTechnical information: %s",
+  "gui.worldcomment.send_fail.moderation_rejected": "§c§lThe automatic moderation by the cloud storage service provider has rejected your image, possibly because it was deemed to contain sensitive text or visual content.\nTechnical information: %s",
   "gui.worldcomment.image_global_kill_feedback": "Image global kill switch has been set to %s.",
 
   "key.worldcomment.send_comment_modifier": "WorldComment: Send / Modifier"
