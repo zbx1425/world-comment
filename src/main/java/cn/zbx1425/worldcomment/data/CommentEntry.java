@@ -42,7 +42,11 @@ public class CommentEntry {
     public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message, BlockPos imageLocation) {
         id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
-        level = initiator #if MC_VERSION >= "12000" .level() #else .level #endif .dimension().identifier();
+        //? if >=1.20 {
+        level = initiator.level().dimension().identifier();
+        //?} else {
+        /*level = initiator.level.dimension().identifier();
+        *///?}
         this.initiator = initiator.getGameProfile().id();
         if (isAnonymous) {
             initiatorName = "";

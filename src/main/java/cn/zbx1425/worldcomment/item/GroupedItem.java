@@ -11,18 +11,30 @@ import java.util.function.Supplier;
 
 public interface GroupedItem {
 
-    #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTab();
+    //? if >=1.20 {
+    ResourceKey<CreativeModeTab> getTab();
+    //?} else {
+    /*CreativeModeTab getTab();
+    *///?}
 
+    //? if >=1.20 {
     static Item.Properties createProperties(Function<Item.Properties, Item.Properties> properties,
                 Identifier id,
-                Supplier<#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif> getTab) {
+                Supplier<ResourceKey<CreativeModeTab>> getTab) {
+    //?} else {
+    /*static Item.Properties createProperties(Function<Item.Properties, Item.Properties> properties,
+                Identifier id,
+                Supplier<CreativeModeTab> getTab) {
+    *///?}
+        //? if >=1.21.2 {
         return properties.apply(new Item.Properties()
-        #if MC_VERSION < "12000"
-                        .tab(getTab.get()));
-        #endif
-//? if >=1.21.2 {
                         .setId(ResourceKey.create(Registries.ITEM, id))
-//? }
         );
+        //?} else if >=1.20 {
+        /*return properties.apply(new Item.Properties());
+        *///?} else {
+        /*return properties.apply(new Item.Properties()
+                        .tab(getTab.get()));
+        *///?}
     }
 }

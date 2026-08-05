@@ -23,26 +23,50 @@ public interface RegistryUtilities {
     }
 
     static DefaultedRegistry<Item> registryGetItem() {
-        return #if MC_VERSION >= "12000" BuiltInRegistries.ITEM #else Registry.ITEM #endif;
+        //? if >=1.20 {
+        return BuiltInRegistries.ITEM;
+        //?} else {
+        /*return Registry.ITEM;
+        *///?}
     }
 
     static DefaultedRegistry<Block> registryGetBlock() {
-        return #if MC_VERSION >= "12000" BuiltInRegistries.BLOCK #else Registry.BLOCK #endif;
+        //? if >=1.20 {
+        return BuiltInRegistries.BLOCK;
+        //?} else {
+        /*return Registry.BLOCK;
+        *///?}
     }
 
     static Registry<BlockEntityType<?>> registryGetBlockEntityType() {
-        return #if MC_VERSION >= "12000" BuiltInRegistries.BLOCK_ENTITY_TYPE #else Registry.BLOCK_ENTITY_TYPE #endif;
+        //? if >=1.20 {
+        return BuiltInRegistries.BLOCK_ENTITY_TYPE;
+        //?} else {
+        /*return Registry.BLOCK_ENTITY_TYPE;
+        *///?}
     }
 
     static DefaultedRegistry<EntityType<?>> registryGetEntityType() {
-        return #if MC_VERSION >= "12000" BuiltInRegistries.ENTITY_TYPE #else Registry.ENTITY_TYPE #endif;
+        //? if >=1.20 {
+        return BuiltInRegistries.ENTITY_TYPE;
+        //?} else {
+        /*return Registry.ENTITY_TYPE;
+        *///?}
     }
 
     static Registry<SoundEvent> registryGetSoundEvent() {
-        return #if MC_VERSION >= "12000" BuiltInRegistries.SOUND_EVENT #else Registry.SOUND_EVENT #endif;
+        //? if >=1.20 {
+        return BuiltInRegistries.SOUND_EVENT;
+        //?} else {
+        /*return Registry.SOUND_EVENT;
+        *///?}
     }
 
     static Registry<ParticleType<?>> registryGetParticleType() {
-        return #if MC_VERSION >= "12000" BuiltInRegistries.PARTICLE_TYPE #else Registry.PARTICLE_TYPE #endif;
+        //? if >=1.20 {
+        return BuiltInRegistries.PARTICLE_TYPE;
+        //?} else {
+        /*return Registry.PARTICLE_TYPE;
+        *///?}
     }
 }

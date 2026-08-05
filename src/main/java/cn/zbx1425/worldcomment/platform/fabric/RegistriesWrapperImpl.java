@@ -1,16 +1,17 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
+//? if fabric {
 
-import cn.zbx1425.worldcomment.Main;
+/*import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 //? if >=1.20 {
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 //? } else {
-/*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+/^import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-*///? }
+^///? }
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -35,13 +36,17 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     }
 
     @Override
-    public void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab) {
+    //? if >=1.20 {
+    public void registerBlockAndItem(String id, RegistryObject<Block> block, ResourceKey<CreativeModeTab> tab) {
+    //?} else {
+    /^public void registerBlockAndItem(String id, RegistryObject<Block> block, CreativeModeTab tab) {
+    ^///?}
         Registry.register(RegistryUtilities.registryGetBlock(), Main.id(id), block.get());
 //? if >=1.20 {
         final BlockItem blockItem = new BlockItem(block.get(), new Item.Properties());
 //? } else {
-        /*final BlockItem blockItem = new BlockItem(block.get(), new FabricItemSettings().group(tab));
-*///? }
+        /^final BlockItem blockItem = new BlockItem(block.get(), new FabricItemSettings().group(tab));
+^///? }
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), blockItem);
 //? if >=1.20 {
         CreativeModeTabEvents.modifyOutputEvent(tab).register(consumer -> consumer.accept(blockItem));
@@ -77,3 +82,5 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Main.id(id), componentType.get());
     }
 }
+
+*///? }

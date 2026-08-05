@@ -24,12 +24,20 @@ public class WidgetColorButton extends Button implements IGuiCommon {
     int iconU = -1, iconV = -1;
 
     public WidgetColorButton(int i, int j, int k, int l, Component component, int color, OnPress onPress) {
-        super(i, j, k, l, component, onPress #if MC_VERSION >= "12000" , Supplier::get #endif);
+        //? if >=1.20 {
+        super(i, j, k, l, component, onPress, Supplier::get);
+        //?} else {
+        /*super(i, j, k, l, component, onPress);
+        *///?}
         this.color = color;
     }
 
     public WidgetColorButton(int k, int l, Component component, int color, OnPress onPress) {
-        super(0, 0, k, l, component, onPress #if MC_VERSION >= "12000" , Supplier::get #endif);
+        //? if >=1.20 {
+        super(0, 0, k, l, component, onPress, Supplier::get);
+        //?} else {
+        /*super(0, 0, k, l, component, onPress);
+        *///?}
         this.color = color;
     }
 
@@ -55,8 +63,10 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
                 this.active ? color : -1);
 //? } else if >=1.20.2 {
         /*guiGraphics.getGuiParam().blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+*///? } else if >=1.19.3 {
+        /*guiGraphics.blitNineSliced(WIDGETS_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
 *///? } else {
-        /*guiGraphics.blitNineSliced(WIDGETS_LOCATION, this #if MC_VERSION >= "11903" .getX() #else .x #endif, this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+        /*guiGraphics.blitNineSliced(WIDGETS_LOCATION, this.x, this.y, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
 *///? }
         guiGraphics.disableBlend();
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);

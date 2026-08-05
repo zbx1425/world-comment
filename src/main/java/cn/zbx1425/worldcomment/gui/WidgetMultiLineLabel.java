@@ -99,7 +99,11 @@ public class WidgetMultiLineLabel extends AbstractWidget {
 
 
     private int padX() {
-        return this #if MC_VERSION >= "11903" .getX() #else .x #endif + padding;
+        //? if >=1.19.3 {
+        return this.getX() + padding;
+        //?} else {
+        /*return this.x + padding;
+        *///?}
     }
 
     private int padWidth() {

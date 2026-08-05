@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
-//? if >=1.21 {
+//? if fabric {
+
+/*//? if >=1.21 {
 import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -70,8 +72,10 @@ public class CompatPacketRegistry {
 }
 
 //? } else {
-/*public class CompatPacketRegistry {
+/^public class CompatPacketRegistry {
 
 }
+
+^///? }
 
 *///? }

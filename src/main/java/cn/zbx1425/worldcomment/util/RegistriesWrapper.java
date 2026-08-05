@@ -19,7 +19,11 @@ public interface RegistriesWrapper {
 
     <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item);
 
-    void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab);
+    //? if >=1.20 {
+    void registerBlockAndItem(String id, RegistryObject<Block> block, ResourceKey<CreativeModeTab> tab);
+    //?} else {
+    /*void registerBlockAndItem(String id, RegistryObject<Block> block, CreativeModeTab tab);
+    *///?}
 
     void registerBlockEntityType(String id, RegistryObject<? extends BlockEntityType<? extends BlockEntity>> blockEntityType);
 

@@ -23,7 +23,7 @@ public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
 //? if >=1.20 {
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
 //? } else {
-    /*public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+    /*public void render(GuiGraphics guiParam, int mouseX, int mouseY, float partialTick) {
 *///? }
         ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
         guiGraphics.setColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,

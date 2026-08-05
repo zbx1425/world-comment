@@ -60,20 +60,32 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
         );
         addRenderableWidget(btnOk);
 
-        containerHeight = btnOk #if MC_VERSION >= "11903" .getY() #else .y #endif + btnOk.getHeight();
+        //? if >=1.19.3 {
+        containerHeight = btnOk.getY() + btnOk.getHeight();
+        //?} else {
+        /*containerHeight = btnOk.y + btnOk.getHeight();
+        *///?}
 
         containerOffsetX = Math.max((width / 2 - (containerWidth + CONTAINER_PADDING_X * 2)) / 2 + CONTAINER_PADDING_X, 20);
         containerOffsetY = (height - (containerHeight + CONTAINER_PADDING_Y * 2)) / 2 + CONTAINER_PADDING_Y;
         for (GuiEventListener child : children()) {
             AbstractWidget widget = (AbstractWidget)child;
-            widget #if MC_VERSION >= "11903" .setX #else .x = #endif (widget #if MC_VERSION >= "11903" .getX() #else .x #endif + containerOffsetX);
-            widget #if MC_VERSION >= "11903" .setY #else .y = #endif (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + containerOffsetY);
+            //? if >=1.19.3 {
+            widget.setX(widget.getX() + containerOffsetX);
+            widget.setY(widget.getY() + containerOffsetY);
+            //?} else {
+            /*widget.x = widget.x + containerOffsetX;
+            widget.y = widget.y + containerOffsetY;
+            *///?}
         }
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiParam
-                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
+    //? if >=1.20.2 {
+    public void extractBackground(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
+    //?} else {
+    /*public void extractBackground(GuiGraphicsExtractor guiParam) {
+    *///?}
         ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
         guiGraphics.enableBlend();
         guiGraphics.blitNineSlicedFast(

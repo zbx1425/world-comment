@@ -17,72 +17,72 @@ import java.util.Optional;
 
 public class SnGuiCanvas12106 implements ISnGuiCanvas {
 
-    private GuiGraphicsExtractor sink;
+    private GuiGraphicsExtractor guiGraphics;
     private int currentColor = -1;
 
     private static SnGuiCanvas12106 INSTANCE = null;
 
     private SnGuiCanvas12106(GuiGraphicsExtractor sink) {
-        this.sink = sink;
+        this.guiGraphics = sink;
     }
 
     public static SnGuiCanvas12106 withGuiParam(GuiGraphicsExtractor sink) {
         if (INSTANCE == null) {
             INSTANCE = new SnGuiCanvas12106(sink);
         } else {
-            INSTANCE.sink = sink;
+            INSTANCE.guiGraphics = sink;
         }
         return INSTANCE;
     }
 
     @Override
     public GuiGraphicsExtractor getGuiParam() {
-        return sink;
+        return guiGraphics;
     }
 
     @Override
     public void blit(Identifier atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
-        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, uOffset, vOffset, padLeft, padTop, padLeft1, padTop1, texWidth, texHeight, currentColor);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, uOffset, vOffset, padLeft, padTop, padLeft1, padTop1, texWidth, texHeight, currentColor);
     }
 
     @Override
     public void blit(Identifier atlasLocation, int x, int y, int uOffset, int vOffset, int uWidth, int vHeight) {
-        sink.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, (float)uOffset, vOffset, uWidth, vHeight, 256, 256);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, atlasLocation, x, y, (float)uOffset, vOffset, uWidth, vHeight, 256, 256);
     }
 
     @Override
     public void fill(int i, int i1, int i2, int i3, int shadowColor) {
-        sink.fill(i, i1, i2, i3, shadowColor);
+        guiGraphics.fill(i, i1, i2, i3, shadowColor);
     }
 
     @Override
     public void enableScissor(int i, int i1, int i2, int i3) {
-        sink.enableScissor(i, i1, i2, i3);
+        guiGraphics.enableScissor(i, i1, i2, i3);
     }
 
     @Override
     public void disableScissor() {
-        sink.disableScissor();
+        guiGraphics.disableScissor();
     }
 
     @Override
     public void drawString(Font var1, String var2, int var3, int var4, int var5, boolean var6) {
-         sink.text(var1, var2, var3, var4, var5, var6);
+         guiGraphics.text(var1, var2, var3, var4, var5, var6);
     }
 
     @Override
     public void drawString(Font var1, FormattedCharSequence var2, int var3, int var4, int var5, boolean var6) {
-        sink.text(var1, var2, var3, var4, var5, var6);
+        guiGraphics.text(var1, var2, var3, var4, var5, var6);
     }
 
     @Override
     public void drawString(Font var1, Component var2, int var3, int var4, int var5) {
-        sink.text(var1, var2, var3, var4, var5);
+        guiGraphics.text(var1, var2, var3, var4, var5);
     }
 
     @Override
     public void drawString(Font var1, Component var2, int var3, int var4, int var5, boolean var6) {
-        sink.text(var1, var2, var3, var4, var5, var6);
+        guiGraphics.text(var1, var2, var3, var4, var5, var6);
     }
 
     @Override
@@ -92,52 +92,52 @@ public class SnGuiCanvas12106 implements ISnGuiCanvas {
 
     @Override
     public void drawCenteredString(Font font, Component translatedKeyMessage, int i, int i1, int i2) {
-        sink.centeredText(font, translatedKeyMessage, i, i1, i2);
+        guiGraphics.centeredText(font, translatedKeyMessage, i, i1, i2);
     }
 
     @Override
     public void renderTooltip(Font font, MutableComponent translatable, int mouseX, int mouseY) {
-        sink.setTooltipForNextFrame(font, translatable, mouseX, mouseY);
+        guiGraphics.setTooltipForNextFrame(font, translatable, mouseX, mouseY);
     }
 
     @Override
     public void renderTooltip(Font font, List<Component> append, Optional<TooltipComponent> empty, int mouseX, int mouseY) {
-        sink.setTooltipForNextFrame(font, append, empty, mouseX, mouseY);
+        guiGraphics.setTooltipForNextFrame(font, append, empty, mouseX, mouseY);
     }
 
     @Override
     public int guiWidth() {
-        return sink.guiWidth();
+        return guiGraphics.guiWidth();
     }
 
     @Override
     public int guiHeight() {
-        return sink.guiHeight();
+        return guiGraphics.guiHeight();
     }
 
     @Override
     public void blit(AbstractTexture texture, int x1, int y1, int x2, int y2) {
-        sink.blit(texture.getTextureView(), texture.getSampler(), x1, y1, x2, y2, 0, 1, 0, 1);
+        guiGraphics.blit(texture.getTextureView(), texture.getSampler(), x1, y1, x2, y2, 0, 1, 0, 1);
     }
 
     @Override
     public void pushPose() {
-        sink.pose().pushMatrix();
+        guiGraphics.pose().pushMatrix();
     }
 
     @Override
     public void popPose() {
-        sink.pose().popMatrix();
+        guiGraphics.pose().popMatrix();
     }
 
     @Override
     public void translate(float x, float y, float z) {
-        sink.pose().translate(x, y);
+        guiGraphics.pose().translate(x, y);
     }
 
     @Override
     public void scale(float x, float y) {
-        sink.pose().scale(x, y);
+        guiGraphics.pose().scale(x, y);
     }
 
     @Override

@@ -46,10 +46,16 @@ public interface ISnGuiCanvas extends ISnGuiCanvasDrawUtil {
     void enableBlend();
     void disableBlend();
 
+    default void text(Font f, String s, int x, int y, int color, boolean shadow) { drawString(f, s, x, y, color, shadow); }
+    default void text(Font f, FormattedCharSequence s, int x, int y, int color, boolean shadow) { drawString(f, s, x, y, color, shadow); }
+    default void text(Font f, Component c, int x, int y, int color) { drawString(f, c, x, y, color); }
+    default void text(Font f, Component c, int x, int y, int color, boolean shadow) { drawString(f, c, x, y, color, shadow); }
+    default void centeredText(Font f, Component c, int x, int y, int color) { drawCenteredString(f, c, x, y, color); }
+
 //? if >=1.20 {
     static ISnGuiCanvas fromGuiParam(GuiGraphicsExtractor guiParam) {
 //? } else {
-    /*static ISnGuiCanvas fromGuiParam(PoseStack guiParam) {
+    /*static ISnGuiCanvas fromGuiParam(GuiGraphics guiParam) {
 *///? }
 //? if >=1.21.6 {
         return SnGuiCanvas12106.withGuiParam(guiParam);

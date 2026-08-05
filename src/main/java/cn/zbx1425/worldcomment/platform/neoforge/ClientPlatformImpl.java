@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.KeyMapping;
@@ -91,3 +93,5 @@ public class ClientPlatformImpl {
 *///? }
     }
 }
+
+//? }

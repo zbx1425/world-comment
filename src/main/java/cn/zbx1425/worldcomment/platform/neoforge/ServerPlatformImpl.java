@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
@@ -141,3 +143,5 @@ public class ServerPlatformImpl {
 *///? }
     }
 }
+
+//? }

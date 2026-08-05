@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.ServerCommand;
@@ -83,3 +85,5 @@ public class MainForge {
 		}
 	}
 }
+
+//? }

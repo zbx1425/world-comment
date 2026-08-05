@@ -179,10 +179,17 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void extractBackground(GuiGraphicsExtractor guiParam
-                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
+    //? if >=1.20.2 {
+    public void extractBackground(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
+    //?} else {
+    /*public void extractBackground(GuiGraphicsExtractor guiParam) {
+    *///?}
         ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
-        super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
+        //? if >=1.20.2 {
+        super.extractBackground(guiParam, mouseX, mouseY, partialTick);
+        //?} else {
+        /*super.extractBackground(guiParam);
+        *///?}
         guiGraphics.pushPose();
 //        setupAnimationTransform(guiGraphics);
         guiGraphics.enableBlend();

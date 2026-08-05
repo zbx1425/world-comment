@@ -4,7 +4,7 @@ plugins {
 }
 
 version = "${property("mod.version")}+${sc.current.version}"
-base.archivesName = "${property("mod.id") as String}-neoforge"
+base.archivesName = "${property("mod.name") as String}-neoforge"
 
 val requiredJava = when {
     sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
@@ -29,11 +29,9 @@ repositories {
 
 dependencies {
 
-    jarJar(implementation("io.lettuce:lettuce-core:6.2.3.RELEASE") {
-        version {
-            prefer("6.2.3")
-        }
-    })
+    jarJar(implementation("io.lettuce:lettuce-core:6.2.3.RELEASE") { version { prefer("6.2.3") } })
+    jarJar(implementation("io.projectreactor:reactor-core:3.4.27") { version { prefer("3.4.27") } })
+    jarJar(implementation("org.reactivestreams:reactive-streams:1.0.4") { version { prefer("1.0.4") } })
 //    if (sc.current.parsed < "1.21.9") additionalRuntimeClasspath("io.lettuce:lettuce-core:7.6.0.RELEASE")
 
     jarJar(implementation("dev.matrixlab.webp4j:webp4j-core:2.5.0") {

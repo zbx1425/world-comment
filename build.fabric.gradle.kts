@@ -5,7 +5,7 @@ plugins {
 
 // DO NOT set group = ...!
 version = "${property("mod.version")}+${sc.current.version}"
-base.archivesName = "${property("mod.id") as String}-fabric"
+base.archivesName = "${property("mod.name") as String}-fabric"
 
 val requiredJava: JavaVersion = when {
     sc.current.parsed >= "26.1" -> JavaVersion.VERSION_25
@@ -50,6 +50,8 @@ dependencies {
     fapi("fabric-lifecycle-events-v1", "fabric-resource-loader-v0", "fabric-content-registries-v0", "fabric-registry-sync-v0")
 
     implementation(include("io.lettuce:lettuce-core:6.2.3.RELEASE")!!)
+    implementation(include("io.projectreactor:reactor-core:3.4.27")!!)
+    implementation(include("org.reactivestreams:reactive-streams:1.0.4")!!)
 
     implementation(include("dev.matrixlab.webp4j:webp4j-core:2.5.0")!!)
 }

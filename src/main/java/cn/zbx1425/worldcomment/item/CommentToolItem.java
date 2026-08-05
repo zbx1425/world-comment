@@ -38,11 +38,19 @@ public class CommentToolItem extends Item implements GroupedItem {
     }
 
     @Override
-    public #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTab() {
+    //? if >=1.20 {
+    public ResourceKey<CreativeModeTab> getTab() {
+    //?} else {
+    /*public CreativeModeTab getTab() {
+    *///?}
         return getTabImpl();
     }
 
-    public static #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTabImpl() {
+    //? if >=1.20 {
+    public static ResourceKey<CreativeModeTab> getTabImpl() {
+    //?} else {
+    /*public static CreativeModeTab getTabImpl() {
+    *///?}
 //? if >=1.20 {
             return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
 //? } else {
@@ -119,8 +127,14 @@ public class CommentToolItem extends Item implements GroupedItem {
             return true;
         }
 
-        private static final SoundEvent shutterSoundEvent = #if MC_VERSION >= "11903" SoundEvent.createFixedRangeEvent #else new SoundEvent #endif (
+        //? if >=1.19.3 {
+        private static final SoundEvent shutterSoundEvent = SoundEvent.createFixedRangeEvent(
             Main.id("shutter"), 16
         );
+        //?} else {
+        /*private static final SoundEvent shutterSoundEvent = new SoundEvent(
+            Main.id("shutter"), 16
+        );
+        *///?}
     }
 }

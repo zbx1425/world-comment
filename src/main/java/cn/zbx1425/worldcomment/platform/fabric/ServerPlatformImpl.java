@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
-import cn.zbx1425.worldcomment.platform.ServerPlatform;
+//? if fabric {
+
+/*import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -29,8 +31,8 @@ public class ServerPlatformImpl {
 //? if >=1.21 {
         MainFabric.PACKET_REGISTRY.registerNetworkReceiverC2S(resourceLocation, packetCallback);
 //? } else {
-        /*ServerPlayNetworking.registerGlobalReceiver(resourceLocation, (server, player, handler, packet, responseSender) -> packetCallback.handlePacket(server, player, packet));
-*///? }
+        /^ServerPlayNetworking.registerGlobalReceiver(resourceLocation, (server, player, handler, packet, responseSender) -> packetCallback.handlePacket(server, player, packet));
+^///? }
     }
 
     public static void registerPlayerJoinEvent(Consumer<ServerPlayer> consumer) {
@@ -57,8 +59,8 @@ public class ServerPlatformImpl {
 //? if >=1.20.1 {
         ServerLifecycleEvents.BEFORE_SAVE.register((server, flush, force) -> consumer.accept(server));
 //? } else {
-        /*ServerLifecycleEvents.SERVER_STOPPING.register(consumer::accept);
-*///? }
+        /^ServerLifecycleEvents.SERVER_STOPPING.register(consumer::accept);
+^///? }
     }
 
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
@@ -69,7 +71,9 @@ public class ServerPlatformImpl {
 //? if >=1.21 {
         MainFabric.PACKET_REGISTRY.sendS2C(player, id, packet);
 //? } else {
-        /*ServerPlayNetworking.send(player, id, packet);
-*///? }
+        /^ServerPlayNetworking.send(player, id, packet);
+^///? }
     }
 }
+
+*///? }

@@ -64,17 +64,33 @@ public class PlaceableCommentItem extends Item implements GroupedItem {
     }
 
     @Override
-    public @NotNull #if MC_VERSION < "12108" InteractionResultHolder<ItemStack> #else InteractionResult #endif use(Level level, Player player, InteractionHand usedHand) {
+    //? if <1.21.8 {
+    /*public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+    *///?} else {
+    public @NotNull InteractionResult use(Level level, Player player, InteractionHand usedHand) {
+    //?}
         ItemStack item = player.getItemInHand(usedHand);
-        if (!level.isClientSide()) return #if MC_VERSION < "12108" InteractionResultHolder.pass(item) #else InteractionResult.PASS #endif;
+        //? if <1.21.8 {
+        /*if (!level.isClientSide()) return InteractionResultHolder.pass(item);
         if (usedHand != InteractionHand.MAIN_HAND
-            || !item.is(Main.ITEM_PLACEABLE_COMMENT.get())) return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
+            || !item.is(Main.ITEM_PLACEABLE_COMMENT.get())) return InteractionResultHolder.fail(item);
 
         if (Client.placeUploadJob(level, player, item)) {
-            return #if MC_VERSION < "12108" InteractionResultHolder.success(item) #else InteractionResult.SUCCESS #endif;
+            return InteractionResultHolder.success(item);
         } else {
-            return #if MC_VERSION < "12108" InteractionResultHolder.fail(item) #else InteractionResult.FAIL #endif;
+            return InteractionResultHolder.fail(item);
         }
+        *///?} else {
+        if (!level.isClientSide()) return InteractionResult.PASS;
+        if (usedHand != InteractionHand.MAIN_HAND
+            || !item.is(Main.ITEM_PLACEABLE_COMMENT.get())) return InteractionResult.FAIL;
+
+        if (Client.placeUploadJob(level, player, item)) {
+            return InteractionResult.SUCCESS;
+        } else {
+            return InteractionResult.FAIL;
+        }
+        //?}
     }
 
     public static class Client {

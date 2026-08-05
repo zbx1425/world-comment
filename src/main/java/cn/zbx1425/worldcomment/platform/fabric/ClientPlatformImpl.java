@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
-import cn.zbx1425.worldcomment.util.RegistryObject;
+//? if fabric {
+
+/*import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -24,8 +26,8 @@ public class ClientPlatformImpl {
 //? if >=1.21 {
         MainFabric.PACKET_REGISTRY.registerNetworkReceiverS2C(resourceLocation, consumer);
 //? } else {
-        /*ClientPlayNetworking.registerGlobalReceiver(resourceLocation, (client, handler, packet, responseSender) -> consumer.accept(packet));
-*///? }
+        /^ClientPlayNetworking.registerGlobalReceiver(resourceLocation, (client, handler, packet, responseSender) -> consumer.accept(packet));
+^///? }
     }
 
     public static void registerPlayerJoinEvent(Consumer<LocalPlayer> consumer) {
@@ -50,7 +52,9 @@ public class ClientPlatformImpl {
 //? if >=1.21 {
         MainFabric.PACKET_REGISTRY.sendC2S(id, packet);
 //? } else {
-        /*ClientPlayNetworking.send(id, packet);
-*///? }
+        /^ClientPlayNetworking.send(id, packet);
+^///? }
     }
 }
+
+*///? }

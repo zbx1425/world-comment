@@ -250,7 +250,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         Minecraft minecraft = Minecraft.getInstance();
         //? if <1.20.2
 //extractBackground(guiParam);
-        #if MC_VERSION >= "12100" super.extractRenderState(guiParam, mouseX, mouseY, partialTick); #endif
+        //? if >=1.21
+        super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
         guiGraphics.pushPose();
         guiGraphics.translate(0, 0, 1);
 
@@ -258,7 +259,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         guiGraphics.text(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
                 xAsideLeftL + (ASIDE_L_WIDTH - titleWidth) / 2, 15, 0xFFFFE6C0, true);
         for (net.minecraft.client.gui.components.Button button : pageButtons) {
-            button #if MC_VERSION >= "11903" .setX #else .x = #endif (xAsideLeftL + 10);
+            //? if >=1.19.3 {
+            button.setX(xAsideLeftL + 10);
+            //?} else {
+            /*button.x = xAsideLeftL + 10;
+            *///?}
         }
 
         getCurrentView().render(guiParam, guiGraphics, mouseX, mouseY, partialTick);
@@ -307,19 +312,31 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY #if MC_VERSION >= "12002", double deltaX #endif, double deltaY) {
+    //? if >=1.20.2 {
+    public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
+    //?} else {
+    /*public boolean mouseScrolled(double mouseX, double mouseY, double deltaY) {
+    *///?}
         if (this.accumulatedScroll != 0.0 && Math.signum(deltaY) != Math.signum(this.accumulatedScroll)) {
             this.accumulatedScroll = 0.0;
         }
         this.accumulatedScroll += deltaY;
         int scrollAmount = (int)this.accumulatedScroll;
-        if (scrollAmount == 0) return super.mouseScrolled(mouseX, mouseY #if MC_VERSION >= "12002", deltaX #endif, deltaY);
+        //? if >=1.20.2 {
+        if (scrollAmount == 0) return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
+        //?} else {
+        /*if (scrollAmount == 0) return super.mouseScrolled(mouseX, mouseY, deltaY);
+        *///?}
         this.accumulatedScroll -= scrollAmount;
 
         if (getCurrentView().handleScroll(scrollAmount)) {
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY #if MC_VERSION >= "12002", deltaX #endif, deltaY);
+        //? if >=1.20.2 {
+        return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
+        //?} else {
+        /*return super.mouseScrolled(mouseX, mouseY, deltaY);
+        *///?}
     }
 
     @Override

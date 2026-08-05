@@ -57,7 +57,7 @@ public class WidgetLabel extends AbstractWidget {
                     if (textWidth > this.padWidth()) {
                         int offset = (int)(System.currentTimeMillis() / 25 % (textWidth + 40));
 //? if >=1.20 {
-                        guiGraphics.enableScissor(this.padX(), this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.padX() + this.padWidth(), this #if MC_VERSION >= "11903" .getY() #else .y #endif + this.height);
+                        guiGraphics.enableScissor(this.padX(), this.getY(), this.padX() + this.padWidth(), this.getY() + this.height);
                         guiGraphics.text(Minecraft.getInstance().font, lines[i], x - offset, y, -1);
                         guiGraphics.text(Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
                         guiGraphics.disableScissor();
@@ -109,7 +109,11 @@ public class WidgetLabel extends AbstractWidget {
 
 
     private int padX() {
-        return this #if MC_VERSION >= "11903" .getX() #else .x #endif + padding;
+        //? if >=1.19.3 {
+        return this.getX() + padding;
+        //?} else {
+        /*return this.x + padding;
+        *///?}
     }
 
     private int padWidth() {

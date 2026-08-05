@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 //? if >=1.21 {
 import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import net.minecraft.network.FriendlyByteBuf;
@@ -88,3 +90,5 @@ public class CompatPacketRegistry {
 }
 
 *///? }
+
+//? }

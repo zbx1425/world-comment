@@ -41,8 +41,13 @@ public class CommentOverlayRenderer {
             guiGraphics.pushPose();
             WidgetCommentEntry pickedWidget = cachedWidgets.get(ClientRayPicking.overlayOffset);
 
+            //? if >=1.19.3 {
             int baseYOffset = guiGraphics.guiHeight() / 2
-                    - (pickedWidget #if MC_VERSION >= "11903" .getY() #else .y #endif + WidgetCommentEntry.TOP_SINK);
+                    - (pickedWidget.getY() + WidgetCommentEntry.TOP_SINK);
+            //?} else {
+            /*int baseYOffset = guiGraphics.guiHeight() / 2
+                    - (pickedWidget.y + WidgetCommentEntry.TOP_SINK);
+            *///?}
 
             // Make sure the picked comment is fully visible
             if (baseYOffset + pickedWidget.getY() + pickedWidget.getHeight() + 10 > guiGraphics.guiHeight()) {
@@ -51,8 +56,13 @@ public class CommentOverlayRenderer {
 
             guiGraphics.translate(0, baseYOffset, 0);
             for (WidgetCommentEntry widget : cachedWidgets) {
-                if (widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset + widget.getHeight() > 0
-                        && widget #if MC_VERSION >= "11903" .getY() #else .y #endif + baseYOffset < guiGraphics.guiHeight()) {
+                //? if >=1.19.3 {
+                if (widget.getY() + baseYOffset + widget.getHeight() > 0
+                        && widget.getY() + baseYOffset < guiGraphics.guiHeight()) {
+                //?} else {
+                /*if (widget.y + baseYOffset + widget.getHeight() > 0
+                        && widget.y + baseYOffset < guiGraphics.guiHeight()) {
+                *///?}
                     widget.extractRenderState(guiGraphics.getGuiParam(), 0, 0, 0);
                 }
             }

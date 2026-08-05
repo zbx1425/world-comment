@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -25,3 +26,5 @@ public interface RegistryUtilities {
         return new Item.Properties();
     }
 }
+
+//? }

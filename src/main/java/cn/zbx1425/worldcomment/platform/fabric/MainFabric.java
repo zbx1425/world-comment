@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
-import cn.zbx1425.worldcomment.Main;
+//? if fabric {
+
+/*import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.ServerCommand;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -23,3 +25,5 @@ public class MainFabric implements ModInitializer {
 	}
 
 }
+
+*///? }

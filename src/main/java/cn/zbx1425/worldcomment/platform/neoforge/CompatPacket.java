@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 //? if >=1.21 {
 import cn.zbx1425.worldcomment.Main;
 import io.netty.buffer.ByteBuf;
@@ -52,3 +54,5 @@ public class CompatPacket {
 /*public class CompatPacket { }
 
 *///? }
+
+//? }

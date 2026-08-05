@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
@@ -61,7 +63,11 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
     }
 
     @Override
-    public void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab) {
+    //? if >=1.20 {
+    public void registerBlockAndItem(String id, RegistryObject<Block> block, ResourceKey<CreativeModeTab> tab) {
+    //?} else {
+    /*public void registerBlockAndItem(String id, RegistryObject<Block> block, CreativeModeTab tab) {
+    *///?}
         BLOCKS.register(id, block::get);
         ITEMS.register(id, () -> {
             final BlockItem blockItem = new BlockItem(block.get(), RegistryUtilities.createItemProperties());
@@ -113,9 +119,17 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
     }
 
 
-    private static final Map<#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif, ArrayList<Item>> CREATIVE_TABS = new HashMap<>();
+    //? if >=1.20 {
+    private static final Map<ResourceKey<CreativeModeTab>, ArrayList<Item>> CREATIVE_TABS = new HashMap<>();
+    //?} else {
+    /*private static final Map<CreativeModeTab, ArrayList<Item>> CREATIVE_TABS = new HashMap<>();
+    *///?}
 
-    public static void registerCreativeModeTab(#if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif resourceLocation, Item item) {
+    //? if >=1.20 {
+    public static void registerCreativeModeTab(ResourceKey<CreativeModeTab> resourceLocation, Item item) {
+    //?} else {
+    /*public static void registerCreativeModeTab(CreativeModeTab resourceLocation, Item item) {
+    *///?}
         if (resourceLocation == null) return;
         CREATIVE_TABS.computeIfAbsent(resourceLocation, ignored -> new ArrayList<>()).add(item);
     }
@@ -127,7 +141,11 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
         public static void onRegisterCreativeModeTabsEvent(BuildCreativeModeTabContentsEvent event) {
             CREATIVE_TABS.forEach((key, items) -> {
                 if (event.getTabKey().equals(key)) {
-                    items.forEach(item -> #if MC_VERSION >= "12100" event.accept( #else event.getEntries().put( #endif new ItemStack(item), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+                    //? if >=1.21 {
+                    items.forEach(item -> event.accept(new ItemStack(item), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+                    //?} else {
+                    /*items.forEach(item -> event.getEntries().put(new ItemStack(item), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+                    *///?}
                 }
             });
         }
@@ -135,3 +153,5 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
 
     }
 }
+
+//? }

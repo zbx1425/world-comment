@@ -1,5 +1,7 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
+//? if neoforge {
+
 import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
@@ -64,8 +66,13 @@ public class ClientProxy {
         private static class PickedCommentsOverlay implements IGuiOverlay {
 
             @Override
-            public void render(ForgeGui forgeGui, #if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiGraphics, float f, int i, int j) {
-                OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphicsExtractor.withPose(guiGraphics) #endif);
+            //? if >=1.20 {
+            public void render(ForgeGui forgeGui, GuiGraphicsExtractor guiGraphics, float f, int i, int j) {
+                OverlayLayer.render(guiGraphics);
+            //?} else {
+            public void render(ForgeGui forgeGui, PoseStack guiGraphics, float f, int i, int j) {
+                OverlayLayer.render(GuiGraphicsExtractor.withPose(guiGraphics));
+            //?}
             }
         }
 *///? }
@@ -151,7 +158,7 @@ public class ClientProxy {
         @Override
         public boolean isActive() {
             return true;
-        }#if
+        }
 
         @Override
         public boolean conflicts(IKeyConflictContext iKeyConflictContext) {
@@ -159,3 +166,5 @@ public class ClientProxy {
         }
     }
 }
+
+//? }

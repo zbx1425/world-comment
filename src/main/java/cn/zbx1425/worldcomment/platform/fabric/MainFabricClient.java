@@ -1,6 +1,8 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
-import cn.zbx1425.worldcomment.ClientCommand;
+//? if fabric {
+
+/*import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
@@ -14,7 +16,11 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+//? if >=1.20 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/^import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
+^///?}
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
@@ -82,3 +88,5 @@ public class MainFabricClient implements ClientModInitializer {
 		);
 	}
 }
+
+*///? }
