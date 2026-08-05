@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "Post comments right into the game world, associated with certain locations.",
+  "authors": [
+    "Zbx1425"
+  ],
+  "contact": {
+		"homepage": "https://github.com/zbx1425/WorldComment",
+		"sources": "https://github.com/zbx1425/WorldComment"
+  },
+  "license": "MIT",
+  "icon": "assets/worldcomment/icon.png",
+  "environment": "*",
+  "entrypoints": {
+		"main": [
+			"cn.zbx1425.worldcomment.fabric.MainFabric"
+		],
+		"client": [
+			"cn.zbx1425.worldcomment.fabric.MainFabricClient"
+		]
+  },
+  "mixins": [
+    "worldcomment.mixins.json",
+	  "worldcomment.fabric.mixins.json"
+  ],
+  "accessWidener": "worldcomment.ct",
+  "depends": {
+    "fabricloader": ">=0.17",
+    "minecraft": "${minecraft}"
+  }
+}

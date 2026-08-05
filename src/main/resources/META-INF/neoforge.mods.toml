@@ -1,0 +1,25 @@
+license = "MIT"
+
+modLoader="javafml"
+loaderVersion="[1,)"
+
+[[mods]]
+modId = "${id}"
+displayName = "${name}"
+version = "${version}"
+authors = "Zbx1425"
+description = "Post comments right into the game world, associated with certain locations."
+
+logoFile = "assets/worldcomment/icon.png"
+displayURL = "https://github.com/zbx1425/WorldComment/"
+issueTrackerURL="https://github.com/zbx1425/WorldComment/issues"
+
+[[mixins]]
+config = "worldcomment.mixins.json"
+
+[[dependencies.${id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft}"
+ordering = "NONE"
+side = "BOTH"

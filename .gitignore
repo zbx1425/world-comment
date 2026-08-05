@@ -20,10 +20,10 @@ classes/
 
 .settings/
 .vscode/
-.cursor/
 bin/
 .classpath
 .project
+.cursor/
 
 # macos
 
@@ -32,12 +32,11 @@ bin/
 # fabric
 
 run/
-mappings
-checkouts
-.architectury-transformer
+.architectury-transformer/
 
-# manifold
-build.properties
+# java
 
-# BuildConfig
-common/src/main/java/cn/zbx1425/worldcomment/BuildConfig.java
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr

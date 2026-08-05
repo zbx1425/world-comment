@@ -1,0 +1,22 @@
+# See https://stonecutter.kikugie.dev/wiki/config/properties#centralized-properties
+mod.id = "worldcomment"
+mod.name = "WorldComment"
+mod.group = "cn.zbx1425"
+mod.version = "0.7.0-beta.1"
+
+deps.fabric_loader = "0.19.3"
+loomx.loom_version = "1.17-SNAPSHOT"
+
+
+["26.1.x"]
+mod.mc_releases = ["26.1"]
+
+
+[fabric."26.1.x"]
+mod.mc_compat = "~26.1"
+deps.fabric_api = "0.150.0+26.1.2"
+
+
+[neoforge."26.1.x"]
+mod.mc_compat = "[26.1, 26.2)"
+deps.neo_loader = "26.1.2.87"

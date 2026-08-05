@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "cn.zbx1425.worldcomment.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "${java}",
   "client": [
     "AbstractContainerScreenAccessor",
     "CreativeModeInventoryScreenMixin",
