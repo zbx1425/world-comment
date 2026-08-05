@@ -7,7 +7,7 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 //? if >=1.20
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
@@ -44,7 +44,7 @@ public class MainFabricClient implements ClientModInitializer {
 //? }
 
 		HudElementRegistry.attachElementAfter(VanillaHudElements.SCOREBOARD, Main.id("picked_comments"),
-			(guiParam, deltaTracker) -> OverlayLayer.render(ISnGuiGraphicsExtractor.fromGuiParam(guiParam)));
+			(guiParam, deltaTracker) -> OverlayLayer.render(ISnGuiCanvas.fromGuiParam(guiParam)));
 
 //? if >=1.21 {
 		// TODO: Correct timing?

@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.gui;
 
 //? if >=1.20
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 //? if >=1.20
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if <1.20
@@ -25,7 +25,7 @@ public class WidgetFlagLabel extends WidgetLabel implements IGuiCommon {
 //? } else {
     /*public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
 *///? }
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
         guiGraphics.setColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,
                 (color & 0xFF) / 255f, 1);
         guiGraphics.blit(ATLAS_LOCATION, getX(), getY(), 10, getHeight(),

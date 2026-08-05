@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.gui;
 
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 //? if >=1.20
@@ -41,7 +41,7 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
     /*public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);
 *///? }
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
         int x1 = getX(), x2 = getX() + getWidth();
         int y1 = getY(), y2 = getY() + getHeight();
 

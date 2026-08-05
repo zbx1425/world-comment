@@ -8,7 +8,7 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import cn.zbx1425.worldcomment.util.KeyMappingUtil;
@@ -16,7 +16,7 @@ import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 //? if <1.20.2
@@ -44,13 +44,13 @@ public class ClientProxy {
             event.registerAbove(VanillaGuiLayers.SCOREBOARD_SIDEBAR, Main.id("picked_comments"), PICKED_COMMENTS_OVERLAY);
         }
 
-        private static final #if MC_VERSION >= "12002" GuiLayer #else LayeredDraw.Layer #endif PICKED_COMMENTS_OVERLAY = new PickedCommentsOverlay();
+        private static final GuiLayer PICKED_COMMENTS_OVERLAY = new PickedCommentsOverlay();
 
-        private static class PickedCommentsOverlay implements #if MC_VERSION >= "12002" GuiLayer #else LayeredDraw.Layer #endif {
+        private static class PickedCommentsOverlay implements GuiLayer {
 
             @Override
             public void render(GuiGraphicsExtractor guiParam, DeltaTracker deltaTracker) {
-                OverlayLayer.render(ISnGuiGraphicsExtractor.fromGuiParam(guiParam));
+                OverlayLayer.render(ISnGuiCanvas.fromGuiParam(guiParam));
             }
         }
 //? } else {
@@ -151,7 +151,7 @@ public class ClientProxy {
         @Override
         public boolean isActive() {
             return true;
-        }
+        }#if
 
         @Override
         public boolean conflicts(IKeyConflictContext iKeyConflictContext) {

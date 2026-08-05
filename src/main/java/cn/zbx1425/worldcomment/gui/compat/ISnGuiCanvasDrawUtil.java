@@ -2,7 +2,6 @@ package cn.zbx1425.worldcomment.gui.compat;
 
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -10,7 +9,7 @@ import net.minecraft.util.Util;
 
 import java.util.NoSuchElementException;
 
-public interface ISnGuiGraphicsExtractorDrawUtil {
+public interface ISnGuiCanvasDrawUtil {
 
     default void blitNineSliced(Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
         this.blitNineSliced(var1, var2, var3, var4, var5, var6, var6, var6, var6, var7, var8, var9, var10);
@@ -23,7 +22,7 @@ public interface ISnGuiGraphicsExtractorDrawUtil {
     default void blitNineSliced(
             Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11, int var12, int var13
     ) {
-        ISnGuiGraphicsExtractor guiGraphics = (ISnGuiGraphicsExtractor) this;
+        ISnGuiCanvas guiGraphics = (ISnGuiCanvas) this;
         var6 = Math.min(var6, var4 / 2);
         var8 = Math.min(var8, var4 / 2);
         var7 = Math.min(var7, var5 / 2);
@@ -66,7 +65,7 @@ public interface ISnGuiGraphicsExtractorDrawUtil {
             for(IntIterator var15 = slices(var5, var9); var15.hasNext(); var14 += var16) {
                 var16 = var15.nextInt();
                 int var17 = (var9 - var16) / 2;
-                ((ISnGuiGraphicsExtractor) this).blit(var1, var10, var14, var6 + var13, var7 + var17, var12, var16);
+                ((ISnGuiCanvas) this).blit(var1, var10, var14, var6 + var13, var7 + var17, var12, var16);
             }
         }
     }
@@ -75,7 +74,7 @@ public interface ISnGuiGraphicsExtractorDrawUtil {
     default void blitNineSlicedFast(Identifier atlasLocation, int x, int y, int width, int height,
                                int uOffset, int vOffset, int uWidth, int vHeight, int texWidth, int texHeight,
                                int padTop, int padRight, int padBottom, int padLeft) {
-        ISnGuiGraphicsExtractor guiGraphics = (ISnGuiGraphicsExtractor) this;
+        ISnGuiCanvas guiGraphics = (ISnGuiCanvas) this;
         if (padTop > 0) {
             guiGraphics.blit(atlasLocation,
                     x, y, padLeft, padTop,
@@ -130,7 +129,7 @@ public interface ISnGuiGraphicsExtractorDrawUtil {
     }
 
     default void renderScrollingString(Font var1, Component var2, int var3, int var4, int var5, int var6, int var7) {
-        ISnGuiGraphicsExtractor guiGraphics = (ISnGuiGraphicsExtractor) this;
+        ISnGuiCanvas guiGraphics = (ISnGuiCanvas) this;
         int var8 = var1.width(var2);
         int var9 = (var4 + var6 - 9) / 2 + 1;
         int var10 = var5 - var3;

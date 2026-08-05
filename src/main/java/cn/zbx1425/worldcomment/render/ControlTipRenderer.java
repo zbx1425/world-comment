@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import net.minecraft.client.KeyMapping;
@@ -43,7 +43,7 @@ public class ControlTipRenderer implements IGuiCommon {
             List.of(TIP_PLACE_COMMENT, TIP_CREATE,
                     TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL);
 
-    public static void render(ISnGuiGraphicsExtractor guiGraphics) {
+    public static void render(ISnGuiCanvas guiGraphics) {
         update();
         int yOffset = 10;
         for (ControlTip tip : TIPS) {
@@ -110,7 +110,7 @@ public class ControlTipRenderer implements IGuiCommon {
             this.atCursor = false;
         }
 
-        public void render(ISnGuiGraphicsExtractor guiGraphics, int x, int y) {
+        public void render(ISnGuiCanvas guiGraphics, int x, int y) {
             Font font = Minecraft.getInstance().font;
             int innerWidth = 20 + 4 + font.width(text.get());
             if (atCursor) {

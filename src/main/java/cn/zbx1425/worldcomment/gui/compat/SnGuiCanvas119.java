@@ -22,23 +22,23 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class SnGuiGraphicsExtractor119 implements ISnGuiGraphicsExtractor {
+public class SnGuiCanvas119 implements ISnGuiCanvas {
 
     private final Minecraft minecraft;
     private final MultiBufferSource.BufferSource bufferSource;
     private PoseStack pose;
 
-    private static SnGuiGraphicsExtractor119 INSTANCE = null;
+    private static SnGuiCanvas119 INSTANCE = null;
 
-    private SnGuiGraphicsExtractor119(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
+    private SnGuiCanvas119(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
         this.minecraft = minecraft;
         this.pose = poseStack;
         this.bufferSource = bufferSource;
     }
 
-    public static SnGuiGraphicsExtractor119 withGuiParam(PoseStack poseStack) {
+    public static SnGuiCanvas119 withGuiParam(PoseStack poseStack) {
         if (INSTANCE == null) {
-            INSTANCE = new SnGuiGraphicsExtractor119(Minecraft.getInstance(), poseStack, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()));
+            INSTANCE = new SnGuiCanvas119(Minecraft.getInstance(), poseStack, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()));
         } else {
             INSTANCE.pose = poseStack;
         }

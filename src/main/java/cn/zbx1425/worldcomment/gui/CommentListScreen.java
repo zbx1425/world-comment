@@ -7,7 +7,7 @@ import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import cn.zbx1425.worldcomment.util.FrameTask;
@@ -45,8 +45,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     private interface SubView {
         void onEnter();
-        void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
-                    ISnGuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick);
+        void render(GuiGraphicsExtractor guiParam,
+                    ISnGuiCanvas guiGraphics, int mouseX, int mouseY, float partialTick);
         boolean handleClick(double mouseX, double mouseY);
         boolean handleScroll(int scrollAmount);
     }
@@ -184,7 +184,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         }
     }
 
-    private static void renderIcon(ISnGuiGraphicsExtractor g, int x, int y, int size, int u, int v, double mx, double my) {
+    private static void renderIcon(ISnGuiCanvas g, int x, int y, int size, int u, int v, double mx, double my) {
         g.blit(ATLAS_LOCATION, x, y, size, size, u, v, 20, 20, 256, 256);
         if (mx > x && mx < x + size && my > y && my < y + size) {
             g.blit(ATLAS_LOCATION, x, y, size, size, 236, 60, 20, 20, 256, 256);
@@ -244,8 +244,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+    public void extractRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
 
         Minecraft minecraft = Minecraft.getInstance();
         //? if <1.20.2
@@ -280,10 +280,15 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     private static final Identifier INWORLD_MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
 
     @Override
-    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
-                                 #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
-        super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
+    public void extractBackground(GuiGraphicsExtractor guiParam
+                                  //? if >=1.20.2
+                                  , int mouseX, int mouseY, float partialTick
+    ) {
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
+        super.extractBackground(guiParam
+            //? if >=1.20.2
+            , mouseX, mouseY, partialTick
+        );
 
         guiGraphics.enableBlend();
 
@@ -422,8 +427,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         }
 
         @Override
-        public void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
-                           ISnGuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        public void render(GuiGraphicsExtractor guiParam,
+                           ISnGuiCanvas guiGraphics, int mouseX, int mouseY, float partialTick) {
             scrollCurrentPixel = animateScroll(
                     scrollAnimStartPixel, scrollTargetPixel, scrollAnimStartNanos, System.nanoTime());
 
@@ -582,8 +587,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         }
 
         @Override
-        public void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
-                           ISnGuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        public void render(GuiGraphicsExtractor guiParam,
+                           ISnGuiCanvas guiGraphics, int mouseX, int mouseY, float partialTick) {
             Minecraft minecraft = Minecraft.getInstance();
             CommentEntry comment = commentForDetail;
             if (comment == null) return;

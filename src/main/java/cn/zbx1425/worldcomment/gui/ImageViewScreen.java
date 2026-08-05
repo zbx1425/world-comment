@@ -4,7 +4,7 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.network.CommentImage;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -60,13 +60,13 @@ public class ImageViewScreen extends Screen {
 
     @Override
     public void extractBackground(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphicsExtractor g = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+        ISnGuiCanvas g = ISnGuiCanvas.fromGuiParam(guiParam);
         g.fill(0, 0, width, height, 0xFF000000);
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphicsExtractor g = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+        ISnGuiCanvas g = ISnGuiCanvas.fromGuiParam(guiParam);
         Minecraft mc = Minecraft.getInstance();
 
         super.extractRenderState(guiParam, mouseX, mouseY, partialTick);

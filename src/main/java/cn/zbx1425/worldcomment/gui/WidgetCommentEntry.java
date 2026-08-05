@@ -5,7 +5,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -71,7 +71,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
 
         guiGraphics.blitNineSlicedFast(
                 ATLAS_LOCATION, getX(), getY(), getWidth(), getHeight(),

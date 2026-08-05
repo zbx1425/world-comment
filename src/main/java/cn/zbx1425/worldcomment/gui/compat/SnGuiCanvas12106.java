@@ -15,20 +15,20 @@ import java.util.Optional;
 
 //? if >=1.21.6 {
 
-public class SnGuiGraphicsExtractor12106 implements ISnGuiGraphicsExtractor {
+public class SnGuiCanvas12106 implements ISnGuiCanvas {
 
     private GuiGraphicsExtractor sink;
     private int currentColor = -1;
 
-    private static SnGuiGraphicsExtractor12106 INSTANCE = null;
+    private static SnGuiCanvas12106 INSTANCE = null;
 
-    private SnGuiGraphicsExtractor12106(GuiGraphicsExtractor sink) {
+    private SnGuiCanvas12106(GuiGraphicsExtractor sink) {
         this.sink = sink;
     }
 
-    public static SnGuiGraphicsExtractor12106 withGuiParam(GuiGraphicsExtractor sink) {
+    public static SnGuiCanvas12106 withGuiParam(GuiGraphicsExtractor sink) {
         if (INSTANCE == null) {
-            INSTANCE = new SnGuiGraphicsExtractor12106(sink);
+            INSTANCE = new SnGuiCanvas12106(sink);
         } else {
             INSTANCE.sink = sink;
         }

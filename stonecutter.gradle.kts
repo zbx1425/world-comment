@@ -28,6 +28,12 @@ stonecutter parameters {
             replace("classTweaker v2 named", "classTweaker v2 official")
         }
 
+        string(current.parsed >= "1.20") {
+            replace("PoseStack guiParam", "GuiGraphics guiParam")
+        }
+        string(current.parsed >= "1.20.2") {
+            replace("LayeredDraw.Layer", "GuiLayer")
+        }
         string(current.parsed >= "1.21.11") {
             replace("ResourceLocation", "Identifier")
             replace("import net.minecraft.Util;", "import net.minecraft.util.Util;")

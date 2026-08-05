@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
-import it.unimi.dsi.fastutil.ints.IntIterator;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -8,14 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public interface ISnGuiGraphicsExtractor extends ISnGuiGraphicsExtractorDrawUtil {
+public interface ISnGuiCanvas extends ISnGuiCanvasDrawUtil {
 
 //? if >=1.20 {
     GuiGraphicsExtractor getGuiParam();
@@ -50,16 +47,16 @@ public interface ISnGuiGraphicsExtractor extends ISnGuiGraphicsExtractorDrawUtil
     void disableBlend();
 
 //? if >=1.20 {
-    static ISnGuiGraphicsExtractor fromGuiParam(GuiGraphicsExtractor guiParam) {
+    static ISnGuiCanvas fromGuiParam(GuiGraphicsExtractor guiParam) {
 //? } else {
-    /*static ISnGuiGraphicsExtractor fromGuiParam(PoseStack guiParam) {
+    /*static ISnGuiCanvas fromGuiParam(PoseStack guiParam) {
 *///? }
 //? if >=1.21.6 {
-        return SnGuiGraphicsExtractor12106.withGuiParam(guiParam);
+        return SnGuiCanvas12106.withGuiParam(guiParam);
 //? } else if >=1.20 {
-        /*return SnGuiGraphicsExtractor120.withGuiParam(guiParam);
+        /*return SnGuiCanvas120.withGuiParam(guiParam);
 *///? } else {
-        /*return SnGuiGraphicsExtractor119.withGuiParam(guiParam);
+        /*return SnGuiCanvas119.withGuiParam(guiParam);
 *///? }
     }
 }

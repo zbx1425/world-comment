@@ -6,7 +6,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.data.network.upload.ModerationException;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import cn.zbx1425.worldcomment.network.PacketRequestPlacementC2S;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -167,8 +167,8 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+    public void extractRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
         //? if <1.20.2
 //extractBackground(guiParam);
         guiGraphics.pushPose();
@@ -179,9 +179,9 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     }
 
     @Override
-    public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
+    public void extractBackground(GuiGraphicsExtractor guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
+        ISnGuiCanvas guiGraphics = ISnGuiCanvas.fromGuiParam(guiParam);
         super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
         guiGraphics.pushPose();
 //        setupAnimationTransform(guiGraphics);

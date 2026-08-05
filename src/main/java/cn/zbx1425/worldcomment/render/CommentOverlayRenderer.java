@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.gui.WidgetCommentEntry;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import net.minecraft.client.Minecraft;
 //? if >=1.20
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -32,7 +32,7 @@ public class CommentOverlayRenderer {
         }
     }
 
-    public static void render(ISnGuiGraphicsExtractor guiGraphics) {
+    public static void render(ISnGuiCanvas guiGraphics) {
         if (cachedWidth != guiGraphics.guiWidth() || !ClientRayPicking.pickedComments.equals(cachedComments)) {
             calculateLayout(guiGraphics.guiWidth());
             cachedWidth = guiGraphics.guiWidth();
