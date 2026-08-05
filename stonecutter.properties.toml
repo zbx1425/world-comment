@@ -8,15 +8,15 @@ deps.fabric_loader = "0.19.3"
 loomx.loom_version = "1.17-SNAPSHOT"
 
 
-["26.1.x"]
+["26.1"]
 mod.mc_releases = ["26.1"]
 
 
-[fabric."26.1.x"]
+[fabric."26.1"]
 mod.mc_compat = "~26.1"
 deps.fabric_api = "0.150.0+26.1.2"
 
 
-[neoforge."26.1.x"]
+[neoforge."26.1"]
 mod.mc_compat = "[26.1, 26.2)"
 deps.neo_loader = "26.1.2.87"

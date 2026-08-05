@@ -2,7 +2,7 @@ plugins {
     id("dev.kikugie.stonecutter")
 }
 
-stonecutter active "26.1.x-neoforge"
+stonecutter active "26.1-neoforge"
 
 // See https://stonecutter.kikugie.dev/wiki/config/params
 stonecutter parameters {

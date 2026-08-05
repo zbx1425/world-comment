@@ -1,6 +1,7 @@
 plugins {
     // This plugin applies the correct loom variant based on the Minecraft version
     id("dev.kikugie.loom-back-compat")
+    `maven-publish`
 }
 
 // DO NOT set group = ...!
@@ -47,7 +48,15 @@ dependencies {
 
     // Use `mod{dependency type}` even on 26.1+ - loom-back-compat converts them
     modImplementation("net.fabricmc:fabric-loader:${property("deps.fabric_loader")}")
-    fapi("fabric-lifecycle-events-v1", "fabric-resource-loader-v0", "fabric-content-registries-v0", "fabric-registry-sync-v0")
+    fapi(
+        "fabric-lifecycle-events-v1", "fabric-resource-loader-v0", "fabric-content-registries-v0", "fabric-registry-sync-v0",
+        "fabric-command-api-v2", "fabric-rendering-v1", "fabric-creative-tab-api-v1"
+    )
+    if (sc.current.parsed >= "26.1") {
+        fapi("fabric-key-mapping-api-v1", "fabric-creative-tab-api-v1")
+    } else {
+        fapi("fabric-key-binding-api-v1", "fabric-item-group-api-v1")
+    }
 
     implementation(include("io.lettuce:lettuce-core:6.2.3.RELEASE")!!)
     implementation(include("io.projectreactor:reactor-core:3.4.27")!!)
@@ -83,6 +92,45 @@ java {
     toolchain {
         vendor = JvmVendorSpec.ADOPTIUM
         languageVersion = JavaLanguageVersion.of(requiredJava.majorVersion)
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("mod") {
+            from(components["java"])
+
+            groupId = property("mod.group") as String
+            artifactId = base.archivesName.get().lowercase()
+            version = project.version as String
+
+            pom {
+                name = property("mod.name") as String
+                description = "Place comments in your Minecraft world"
+                url = "https://github.com/zbx1425/WorldComment"
+                licenses {
+                    license {
+                        name = "MIT"
+                        url = "https://github.com/zbx1425/WorldComment/blob/master/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "zbx1425"
+                        name = "Zbx1425"
+                        email = "support@zbx1425.cn"
+                    }
+                }
+                scm {
+                    url = "https://github.com/zbx1425/WorldComment"
+                    connection = "scm:git:git//github.com/zbx1425/WorldComment.git"
+                    developerConnection = "scm:git:ssh://git@github.com/zbx1425/WorldComment.git"
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
     }
 }
 

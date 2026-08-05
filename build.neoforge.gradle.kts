@@ -1,6 +1,7 @@
 plugins {
     id("net.neoforged.moddev") version "2.0.140"
     id("neoforge-mutex")
+    `maven-publish`
 }
 
 version = "${property("mod.version")}+${sc.current.version}"
@@ -72,6 +73,45 @@ java {
     toolchain {
         vendor = JvmVendorSpec.ADOPTIUM
         languageVersion = JavaLanguageVersion.of(requiredJava.majorVersion)
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("mod") {
+            from(components["java"])
+
+            groupId = property("mod.group") as String
+            artifactId = base.archivesName.get().lowercase()
+            version = project.version as String
+
+            pom {
+                name = property("mod.name") as String
+                description = "Place comments in your Minecraft world"
+                url = "https://github.com/zbx1425/WorldComment"
+                licenses {
+                    license {
+                        name = "MIT"
+                        url = "https://github.com/zbx1425/WorldComment/blob/master/LICENSE"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "zbx1425"
+                        name = "Zbx1425"
+                        email = "support@zbx1425.cn"
+                    }
+                }
+                scm {
+                    url = "https://github.com/zbx1425/WorldComment"
+                    connection = "scm:git:git//github.com/zbx1425/WorldComment.git"
+                    developerConnection = "scm:git:ssh://git@github.com/zbx1425/WorldComment.git"
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
     }
 }
 
