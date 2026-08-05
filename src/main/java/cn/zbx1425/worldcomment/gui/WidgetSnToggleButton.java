@@ -26,12 +26,12 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
     }
 
     @Override
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-#else
-    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+//? } else {
+    /*public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);
-#endif
+*///? }
         ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         guiGraphics.blit(ATLAS_LOCATION, getX(), getY(),
                 BTN_SIZE, BTN_SIZE,

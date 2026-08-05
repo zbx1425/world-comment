@@ -10,8 +10,8 @@ import java.nio.channels.WritableByteChannel;
 @Mixin(NativeImage.class)
 public interface NativeImageAccessor {
 
-#if MC_VERSION >= 12106
+//? if >=1.21.6 {
     @Invoker
     boolean invokeWriteToChannel(WritableByteChannel channel) throws IOException;
-#endif
+//? }
 }

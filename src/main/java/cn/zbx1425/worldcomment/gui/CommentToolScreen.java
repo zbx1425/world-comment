@@ -13,8 +13,13 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
-#if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <1.20
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
+import com.mojang.blaze3d.vertex.PoseStack;
+//? if <1.20.3
+//import cn.zbx1425.worldcomment.util.compat.Checkbox;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -63,12 +68,12 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         try {
             offHeapBuffer.put(imageBytes);
             offHeapBuffer.rewind();
-#if MC_VERSION >= "12106"
+//? if >=1.21.6 {
             this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(
                 () -> Screenshot.getAvailableFile().toPath().toString(), NativeImage.read(offHeapBuffer)));
-#else
-            this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(offHeapBuffer)));
-#endif
+//? } else {
+            /*this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(NativeImage.read(offHeapBuffer)));
+*///? }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -164,7 +169,8 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     @Override
     public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
         ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
-        #if MC_VERSION < "12002" extractBackground(guiParam); #endif
+        //? if <1.20.2
+//extractBackground(guiParam);
         guiGraphics.pushPose();
 //        boolean animationDone = setupAnimationTransform(guiGraphics);
 //        guiGraphics.translate(0, 0, 1);
@@ -289,19 +295,19 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     private void updateBtnSendFeedback() {
         if (emojiPanel.getSelectedId() == 0) {
             btnSendFeedback.active = false;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
             btnSendFeedback.setTooltip(Tooltip.create(Component.translatable("gui.worldcomment.require_comment_type").withStyle(ChatFormatting.RED)));
-#endif
+//? }
         } else if (textBoxMessage.getValue().length() > CommentEntry.MESSAGE_MAX_LENGTH) {
             btnSendFeedback.active = false;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
             btnSendFeedback.setTooltip(Tooltip.create(Component.translatable("gui.worldcomment.message_too_long").withStyle(ChatFormatting.RED)));
-#endif
+//? }
         } else {
             btnSendFeedback.active = true;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
             btnSendFeedback.setTooltip(null);
-#endif
+//? }
         }
     }
 }

@@ -19,9 +19,9 @@ import org.joml.Matrix4f;
 import java.util.List;
 import java.util.Optional;
 
-#if MC_VERSION >= "12000" && MC_VERSION < "12106"
+//? if >=1.20 && <1.21.6 {
 
-public class SnGuiGraphicsExtractor120 implements ISnGuiGraphicsExtractor {
+/*public class SnGuiGraphicsExtractor120 implements ISnGuiGraphicsExtractor {
 
     private GuiGraphicsExtractor sink;
     private int currentColor = -1;
@@ -127,7 +127,7 @@ public class SnGuiGraphicsExtractor120 implements ISnGuiGraphicsExtractor {
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         Matrix4f matrix4f = sink.pose().last().pose();
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         BufferBuilder bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 0);
@@ -135,15 +135,15 @@ public class SnGuiGraphicsExtractor120 implements ISnGuiGraphicsExtractor {
         bufferBuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 1);
         bufferBuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 0);
         BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-#else
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+//? } else {
+        /^BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
         bufferBuilder.vertex(matrix4f, x1, y2, 0).uv(0, 1).endVertex();
         bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
         bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
         BufferUploader.drawWithShader(bufferBuilder.end());
-#endif
+^///? }
     }
 
     @Override
@@ -177,4 +177,4 @@ public class SnGuiGraphicsExtractor120 implements ISnGuiGraphicsExtractor {
     }
 }
 
-#endif
+*///? }

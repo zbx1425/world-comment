@@ -78,11 +78,11 @@ public class CommentEntry {
     public CommentEntry(JsonObject json) {
         id = json.get("id").getAsLong();
         timestamp = json.get("timestamp").getAsLong();
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         level = Identifier.parse(json.get("level").getAsString());
-#else
-        level = new Identifier(json.get("level").getAsString());
-#endif
+//? } else {
+        /*level = new Identifier(json.get("level").getAsString());
+*///? }
         if (json.has("location")) {
             JsonArray loc = json.getAsJsonArray("location");
             setLocation(new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt()));

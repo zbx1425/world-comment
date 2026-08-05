@@ -5,13 +5,13 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-#endif
+//? }
 import net.minecraft.client.gui.components.AbstractWidget;
-#if MC_VERSION >= "11700"
+//? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-#endif
+//? }
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
@@ -34,51 +34,51 @@ public class WidgetLabel extends AbstractWidget {
     }
 
     @Override
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-#elif MC_VERSION >= "11904"
-        public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
-#else
-            public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-#endif
+//? } else if >=1.19.4 {
+        /*public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
+*///? } else {
+            /*public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+*///? }
                 if (!visible) return;
                 String[] lines = this.getMessage().getString().split("\n");
                 this.height = lines.length * 10;
                 int textStart = Math.max(getY(), getY() + (getHeight() - 10 * lines.length) / 2);
                 for (int i = 0; i < lines.length; ++i) {
                     int textWidth = Minecraft.getInstance().font.width(lines[i]);
-#if MC_VERSION >= "11903"
+//? if >=1.19.3 {
                     int x = alignR ? this.padX() + this.padWidth() - textWidth : this.padX();
                     int y = textStart + 10 * i;
-#else
-                    int x = alignR ? this.padX() + this.width - textWidth : this.padX();
+//? } else {
+                    /*int x = alignR ? this.padX() + this.width - textWidth : this.padX();
                     int y = textStart + 10 * i;
-#endif
+*///? }
                     if (textWidth > this.padWidth()) {
                         int offset = (int)(System.currentTimeMillis() / 25 % (textWidth + 40));
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
                         guiGraphics.enableScissor(this.padX(), this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.padX() + this.padWidth(), this #if MC_VERSION >= "11903" .getY() #else .y #endif + this.height);
                         guiGraphics.text(Minecraft.getInstance().font, lines[i], x - offset, y, -1);
                         guiGraphics.text(Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
                         guiGraphics.disableScissor();
-#else
-                        drawString(matrices, Minecraft.getInstance().font, lines[i], x - offset, y, -1);
+//? } else {
+                        /*drawString(matrices, Minecraft.getInstance().font, lines[i], x - offset, y, -1);
                         drawString(matrices, Minecraft.getInstance().font, lines[i], x + textWidth + 40 - offset, y, -1);
                         RenderSystem.disableScissor();
-#endif
+*///? }
                     } else {
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
                         guiGraphics.text(Minecraft.getInstance().font, lines[i], x, y, -1);
-#else
-                        drawString(matrices, Minecraft.getInstance().font, lines[i], x, y, -1);
-#endif
+//? } else {
+                        /*drawString(matrices, Minecraft.getInstance().font, lines[i], x, y, -1);
+*///? }
                     }
                     if (!isActive()) {
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
                         guiGraphics.text(Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
-#else
-                        drawString(matrices, Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
-#endif
+//? } else {
+                        /*drawString(matrices, Minecraft.getInstance().font, "▶", x - 8, y, 0xffff0000);
+*///? }
                     }
                 }
             }
@@ -89,23 +89,23 @@ public class WidgetLabel extends AbstractWidget {
         if (onClick != null) onClick.run();
     }
 
-#if MC_VERSION >= "11903"
+//? if >=1.19.3 {
             @Override
             protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
-#elif MC_VERSION >= "11700"
-            @Override
+//? } else if >=1.17 {
+            /*@Override
             public void updateNarration(NarrationElementOutput arg) { }
-#endif
+*///? }
 
-#if MC_VERSION < "11903"
-            protected int getX() {
+//? if <1.19.3 {
+            /*protected int getX() {
                 return x;
             }
 
             protected int getY() {
                 return y;
             }
-#endif
+*///? }
 
 
     private int padX() {

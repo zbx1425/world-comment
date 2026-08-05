@@ -17,11 +17,11 @@ import java.util.Optional;
 
 public interface ISnGuiGraphicsExtractor extends ISnGuiGraphicsExtractorDrawUtil {
 
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     GuiGraphicsExtractor getGuiParam();
-#else
-    PoseStack getGuiParam();
-#endif
+//? } else {
+    /*PoseStack getGuiParam();
+*///? }
 
     void blit(Identifier atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight);
     void blit(Identifier var1, int var10, int var14, int i, int i1, int var12, int var16);
@@ -49,17 +49,17 @@ public interface ISnGuiGraphicsExtractor extends ISnGuiGraphicsExtractorDrawUtil
     void enableBlend();
     void disableBlend();
 
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     static ISnGuiGraphicsExtractor fromGuiParam(GuiGraphicsExtractor guiParam) {
-#else
-    static ISnGuiGraphicsExtractor fromGuiParam(PoseStack guiParam) {
-#endif
-#if MC_VERSION >= "12106"
+//? } else {
+    /*static ISnGuiGraphicsExtractor fromGuiParam(PoseStack guiParam) {
+*///? }
+//? if >=1.21.6 {
         return SnGuiGraphicsExtractor12106.withGuiParam(guiParam);
-#elif MC_VERSION >= "12000"
-        return SnGuiGraphicsExtractor120.withGuiParam(guiParam);
-#else
-        return SnGuiGraphicsExtractor119.withGuiParam(guiParam);
-#endif
+//? } else if >=1.20 {
+        /*return SnGuiGraphicsExtractor120.withGuiParam(guiParam);
+*///? } else {
+        /*return SnGuiGraphicsExtractor119.withGuiParam(guiParam);
+*///? }
     }
 }

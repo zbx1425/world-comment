@@ -5,12 +5,12 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.item.GroupedItem;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
-#else
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+//? } else {
+/*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
-#endif
+*///? }
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -37,24 +37,24 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
     @Override
     public void registerBlockAndItem(String id, RegistryObject<Block> block, #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif tab) {
         Registry.register(RegistryUtilities.registryGetBlock(), Main.id(id), block.get());
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
         final BlockItem blockItem = new BlockItem(block.get(), new Item.Properties());
-#else
-        final BlockItem blockItem = new BlockItem(block.get(), new FabricItemSettings().group(tab));
-#endif
+//? } else {
+        /*final BlockItem blockItem = new BlockItem(block.get(), new FabricItemSettings().group(tab));
+*///? }
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), blockItem);
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
         CreativeModeTabEvents.modifyOutputEvent(tab).register(consumer -> consumer.accept(blockItem));
-#endif
+//? }
     }
 
     @Override
     public <T extends Item & GroupedItem> void registerItem(String id, RegistryObject<T> item) {
         Registry.register(RegistryUtilities.registryGetItem(), Main.id(id), item.get());
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
         if (item.get().getTab() == null) return;
         CreativeModeTabEvents.modifyOutputEvent(item.get().getTab()).register(consumer -> consumer.accept(item.get()));
-#endif
+//? }
     }
 
     @Override

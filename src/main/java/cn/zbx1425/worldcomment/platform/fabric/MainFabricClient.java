@@ -5,7 +5,8 @@ import cn.zbx1425.worldcomment.ClientConfig;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.util.KeyMappingUtil;
-#if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
+//? if >=1.20
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -38,14 +39,14 @@ public class MainFabricClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		MainClient.init();
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 		MainFabric.PACKET_REGISTRY.commitClient();
-#endif
+//? }
 
 		HudElementRegistry.attachElementAfter(VanillaHudElements.SCOREBOARD, Main.id("picked_comments"),
 			(guiParam, deltaTracker) -> OverlayLayer.render(ISnGuiGraphicsExtractor.fromGuiParam(guiParam)));
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 		// TODO: Correct timing?
 		LevelRenderEvents.AFTER_TRANSLUCENT_FEATURES.register((context) -> {
 			if (KeyMappingUtil.isKeyDown(Minecraft.getInstance().options.keyPlayerList)) {
@@ -64,7 +65,7 @@ public class MainFabricClient implements ClientModInitializer {
 			CommentWorldRenderer.renderComments(Minecraft.getInstance().renderBuffers().bufferSource(), matrices);
 			matrices.popPose();
 		});
-#endif
+//? }
 
 		ClientTickEvents.END_CLIENT_TICK.register(minecraft -> {
 			MainClient.CLIENT_CONFIG.tick(1, 0);

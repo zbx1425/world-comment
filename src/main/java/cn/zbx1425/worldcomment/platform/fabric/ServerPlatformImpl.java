@@ -20,17 +20,17 @@ public class ServerPlatformImpl {
     }
 
     public static void registerPacket(Identifier resourceLocation) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainFabric.PACKET_REGISTRY.registerPacket(resourceLocation);
-#endif
+//? }
     }
 
     public static void registerNetworkReceiver(Identifier resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainFabric.PACKET_REGISTRY.registerNetworkReceiverC2S(resourceLocation, packetCallback);
-#else
-        ServerPlayNetworking.registerGlobalReceiver(resourceLocation, (server, player, handler, packet, responseSender) -> packetCallback.handlePacket(server, player, packet));
-#endif
+//? } else {
+        /*ServerPlayNetworking.registerGlobalReceiver(resourceLocation, (server, player, handler, packet, responseSender) -> packetCallback.handlePacket(server, player, packet));
+*///? }
     }
 
     public static void registerPlayerJoinEvent(Consumer<ServerPlayer> consumer) {
@@ -54,11 +54,11 @@ public class ServerPlatformImpl {
     }
 
     public static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
-#if MC_VERSION >= "12001"
+//? if >=1.20.1 {
         ServerLifecycleEvents.BEFORE_SAVE.register((server, flush, force) -> consumer.accept(server));
-#else
-        ServerLifecycleEvents.SERVER_STOPPING.register(consumer::accept);
-#endif
+//? } else {
+        /*ServerLifecycleEvents.SERVER_STOPPING.register(consumer::accept);
+*///? }
     }
 
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
@@ -66,10 +66,10 @@ public class ServerPlatformImpl {
     }
 
     public static void sendPacketToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf packet) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainFabric.PACKET_REGISTRY.sendS2C(player, id, packet);
-#else
-        ServerPlayNetworking.send(player, id, packet);
-#endif
+//? } else {
+        /*ServerPlayNetworking.send(player, id, packet);
+*///? }
     }
 }

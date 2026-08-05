@@ -9,7 +9,10 @@ import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <1.20
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -138,16 +141,16 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
     }
 
     @Override
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
-#else
-    public void updateNarration(NarrationElementOutput narrationElementOutput) { }
-#endif
+//? } else {
+    /*public void updateNarration(NarrationElementOutput narrationElementOutput) { }
+*///? }
 
-#if MC_VERSION < "12000"
-    private int getX() { return x; }
+//? if <1.20 {
+    /*private int getX() { return x; }
     private int getY() { return y; }
     private void setX(int x) { this.x = x; }
     private void setY(int y) { this.y = y; }
-#endif
+*///? }
 }

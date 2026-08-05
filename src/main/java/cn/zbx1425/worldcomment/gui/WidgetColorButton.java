@@ -2,14 +2,20 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
-#if MC_VERSION >= "12002" import net.minecraft.client.gui.components.WidgetSprites; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <1.20
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
+//? if >=1.20.2
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.Button;
-#if MC_VERSION >= "12106" import net.minecraft.client.renderer.RenderPipelines; #endif
+//? if >=1.21.6
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
-#if MC_VERSION >= "12000" import java.util.function.Supplier; #endif
+//? if >=1.20
+import java.util.function.Supplier;
 
 public class WidgetColorButton extends Button implements IGuiCommon {
 
@@ -27,11 +33,11 @@ public class WidgetColorButton extends Button implements IGuiCommon {
         this.color = color;
     }
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDefaultNamespace("widget/button"), Identifier.withDefaultNamespace("widget/button_disabled"), Identifier.withDefaultNamespace("widget/button_highlighted"));
-#elif MC_VERSION >= "12002"
-    private static final WidgetSprites SPRITES = new WidgetSprites(new Identifier("widget/button"), new Identifier("widget/button_disabled"), new Identifier("widget/button_highlighted"));
-#endif
+//? } else if >=1.20.2 {
+    /*private static final WidgetSprites SPRITES = new WidgetSprites(new Identifier("widget/button"), new Identifier("widget/button_disabled"), new Identifier("widget/button_highlighted"));
+*///? }
 
     @Override
     protected void extractContents(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
@@ -44,14 +50,14 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
             guiGraphics.setColor(1.0f, 1.0f, 1.0f, this.alpha);
         }
         guiGraphics.enableBlend();
-#if MC_VERSION >= "12106"
+//? if >=1.21.6 {
         guiGraphics.getGuiParam().blitSprite(RenderPipelines.GUI_TEXTURED, SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight(),
                 this.active ? color : -1);
-#elif MC_VERSION >= "12002"
-        guiGraphics.getGuiParam().blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-#else
-        guiGraphics.blitNineSliced(WIDGETS_LOCATION, this #if MC_VERSION >= "11903" .getX() #else .x #endif, this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
-#endif
+//? } else if >=1.20.2 {
+        /*guiGraphics.getGuiParam().blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+*///? } else {
+        /*guiGraphics.blitNineSliced(WIDGETS_LOCATION, this #if MC_VERSION >= "11903" .getX() #else .x #endif, this #if MC_VERSION >= "11903" .getY() #else .y #endif, this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
+*///? }
         guiGraphics.disableBlend();
         guiGraphics.setColor(1.0f, 1.0f, 1.0f, 1.0f);
         int i = this.active ? 0xFFFFFF : 0xA0A0A0;
@@ -78,8 +84,8 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
         this.iconV = iconV;
     }
 
-#if MC_VERSION < "12000"
-    public void renderString(GuiGraphicsExtractor var1, net.minecraft.client.gui.Font var2, int var4) {
+//? if <1.20 {
+    /*public void renderString(GuiGraphicsExtractor var1, net.minecraft.client.gui.Font var2, int var4) {
         int var3 = 2;
         int var5 = this.x + var3;
         int var6 = this.x + this.getWidth() - var3;
@@ -90,5 +96,5 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
     public Component getMessage() {
         return Component.empty();
     }
-#endif
+*///? }
 }

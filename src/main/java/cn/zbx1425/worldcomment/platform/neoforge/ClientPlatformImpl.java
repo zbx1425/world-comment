@@ -25,11 +25,11 @@ public class ClientPlatformImpl {
     }
 
     public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainForge.PACKET_REGISTRY.registerNetworkReceiverS2C(resourceLocation, consumer);
-#else
-        NetworkManager.registerReceiver(NetworkManager.Side.S2C, resourceLocation, (packet, context) -> consumer.accept(packet));
-#endif
+//? } else {
+        /*NetworkManager.registerReceiver(NetworkManager.Side.S2C, resourceLocation, (packet, context) -> consumer.accept(packet));
+*///? }
     }
 
     public static List<Consumer<LocalPlayer>> PLAYER_JOIN_EVENT = new ObjectArrayList<>();
@@ -84,10 +84,10 @@ public class ClientPlatformImpl {
 
     public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {
         packet.readerIndex(0);
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainForge.PACKET_REGISTRY.sendC2S(id, packet);
-#else
-        NetworkManager.sendToServer(id, packet);
-#endif
+//? } else {
+        /*NetworkManager.sendToServer(id, packet);
+*///? }
     }
 }

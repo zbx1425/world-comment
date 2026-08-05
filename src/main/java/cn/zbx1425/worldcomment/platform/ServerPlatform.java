@@ -21,9 +21,9 @@ public class ServerPlatform {
 
     public static boolean isFabric() {
         //? if fabric
-        return true;
+        //return true;
         //? if !fabric
-        //return false;
+        return false;
     }
 
     @SuppressWarnings("unchecked")

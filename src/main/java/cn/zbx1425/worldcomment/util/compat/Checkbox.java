@@ -1,8 +1,8 @@
 package cn.zbx1425.worldcomment.util.compat;
 
-#if MC_VERSION < "12003"
+//? if <1.20.3 {
 
-import net.minecraft.client.gui.Font;
+/*import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 
 public class Checkbox {
@@ -41,4 +41,4 @@ public class Checkbox {
     }
 }
 
-#endif
+*///? }

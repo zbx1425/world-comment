@@ -5,8 +5,12 @@ import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
-#if MC_VERSION < "12003" import cn.zbx1425.worldcomment.util.compat.Checkbox; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <1.20
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
+//? if <1.20.3
+//import cn.zbx1425.worldcomment.util.compat.Checkbox;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -109,7 +113,8 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
 
     @Override
     public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        #if MC_VERSION < "12002" extractBackground(guiParam); #endif
+        //? if <1.20.2
+//extractBackground(guiParam);
         super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
     }
 

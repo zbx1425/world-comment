@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.platform.fabric;
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -53,7 +53,7 @@ public class CompatPacket {
     };
 }
 
-#else
-public class CompatPacket { }
+//? } else {
+/*public class CompatPacket { }
 
-#endif
+*///? }

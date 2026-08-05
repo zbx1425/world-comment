@@ -41,11 +41,11 @@ public class CommentRepository {
 
         try (Stream<Path> levelFiles = Files.list(basePath.resolve("region"))) {
             for (Path levelPath : levelFiles.toList()) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
                 Identifier dimension = Identifier.parse(levelPath.getFileName().toString().replace("+", ":"));
-#else
-                Identifier dimension = new Identifier(levelPath.getFileName().toString().replace("+", ":"));
-#endif
+//? } else {
+                /*Identifier dimension = new Identifier(levelPath.getFileName().toString().replace("+", ":"));
+*///? }
                 try (Stream<Path> files = Files.list(levelPath)) {
                     for (Path file : files.toList()) {
                         String[] fileNameParts = file.getFileName().toString().split("\\.");

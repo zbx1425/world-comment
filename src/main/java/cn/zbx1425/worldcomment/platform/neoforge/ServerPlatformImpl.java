@@ -25,22 +25,22 @@ public class ServerPlatformImpl {
     }
 
     public static void registerPacket(Identifier resourceLocation) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainForge.PACKET_REGISTRY.registerPacket(resourceLocation);
-#endif
+//? }
     }
 
     public static void registerNetworkReceiver(Identifier resourceLocation, ServerPlatform.C2SPacketHandler packetCallback) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainForge.PACKET_REGISTRY.registerNetworkReceiverC2S(resourceLocation, packetCallback);
-#else
-        NetworkManager.registerReceiver(NetworkManager.Side.C2S, resourceLocation, (packet, context) -> {
+//? } else {
+        /*NetworkManager.registerReceiver(NetworkManager.Side.C2S, resourceLocation, (packet, context) -> {
             final Player player = context.getPlayer();
             if (player != null) {
                 packetCallback.handlePacket(player.getServer(), (ServerPlayer) player, packet);
             }
         });
-#endif
+*///? }
     }
 
     public static List<Consumer<ServerPlayer>> PLAYER_JOIN_EVENT = new ObjectArrayList<>();
@@ -134,10 +134,10 @@ public class ServerPlatformImpl {
 
     public static void sendPacketToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf packet) {
         packet.readerIndex(0);
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainForge.PACKET_REGISTRY.sendS2C(player, id, packet);
-#else
-        NetworkManager.sendToPlayer(player, id, packet);
-#endif
+//? } else {
+        /*NetworkManager.sendToPlayer(player, id, packet);
+*///? }
     }
 }

@@ -8,15 +8,15 @@ import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-#if MC_VERSION < "12108"
-@Mixin(Inventory.class)
-#else
+//? if <1.21.8 {
+/*@Mixin(Inventory.class)
+*///? } else {
 @Mixin(MouseHandler.class)
-#endif
+//? }
 public class InventoryMixin {
 
-#if MC_VERSION < "12108"
-    @Inject(method = "swapPaint", at = @At("HEAD"), cancellable = true)
+//? if <1.21.8 {
+    /*@Inject(method = "swapPaint", at = @At("HEAD"), cancellable = true)
     void swapPaint(double direction, CallbackInfo ci) {
         int pickedCommentsSize = ClientRayPicking.pickedComments.size();
         if (pickedCommentsSize > 1) {
@@ -25,7 +25,7 @@ public class InventoryMixin {
             ci.cancel();
         }
     }
-#else
+*///? } else {
     @WrapOperation(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ScrollWheelHandler;getNextScrollWheelSelection(DII)I"))
     int onScroll(double yOffset, int selected, int selectionSize, Operation<Integer> original) {
         int pickedCommentsSize = ClientRayPicking.pickedComments.size();
@@ -36,7 +36,7 @@ public class InventoryMixin {
         }
         return original.call(yOffset, selected, selectionSize);
     }
-#endif
+//? }
 }
 
 

@@ -8,16 +8,16 @@ import net.minecraft.commands.Commands;
 
 public class MainFabric implements ModInitializer {
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 	public static final CompatPacketRegistry PACKET_REGISTRY = new CompatPacketRegistry();
-#endif
+//? }
 
 	@Override
 	public void onInitialize() {
 		Main.init(new RegistriesWrapperImpl());
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 		PACKET_REGISTRY.commitCommon();
-#endif
+//? }
 		CommandRegistrationCallback.EVENT.register((commandDispatcher, commandBuildContext, commandSelection) ->
 				ServerCommand.register(commandDispatcher, Commands::literal, Commands::argument));
 	}

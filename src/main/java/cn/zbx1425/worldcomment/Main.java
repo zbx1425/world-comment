@@ -77,11 +77,11 @@ public class Main {
 
 		ServerPlatform.registerServerStartingEvent(server -> {
 			try {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 				SERVER_CONFIG.load(server.getServerDirectory()
-#else
-				SERVER_CONFIG.load(server.getServerDirectory().toPath()
-#endif
+//? } else {
+				/*SERVER_CONFIG.load(server.getServerDirectory().toPath()
+*///? }
 						.resolve("config").resolve("world-comment.json"));
 
 				DATABASE = new ServerWorldData(server, SERVER_CONFIG.syncRole.value == ServerConfig.SyncRole.HOST);
@@ -116,19 +116,19 @@ public class Main {
 	}
 
 	public static Identifier id(String path) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
-#else
-		return new Identifier(MOD_ID, path);
-#endif
+//? } else {
+		/*return new Identifier(MOD_ID, path);
+*///? }
 	}
 
 	public static Identifier vanillaId(String path) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 		return Identifier.withDefaultNamespace(path);
-#else
-		return new Identifier(path);
-#endif
+//? } else {
+		/*return new Identifier(path);
+*///? }
 	}
 
 }

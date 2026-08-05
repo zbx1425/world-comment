@@ -1,8 +1,8 @@
 package cn.zbx1425.worldcomment.util.compat;
 
-#if MC_VERSION < "12000"
+//? if <1.20 {
 
-import net.minecraft.network.chat.Component;
+/*import net.minecraft.network.chat.Component;
 
 public class Button {
 
@@ -51,4 +51,4 @@ public class Button {
     }
 }
 
-#endif
+*///? }

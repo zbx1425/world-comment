@@ -17,7 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-#if MC_VERSION >= "12000" import net.minecraftforge.event.BuildCreativeModeTabContentsEvent; #endif
+//? if >=1.20
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -95,7 +96,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
 
     public static class RegisterCreativeTabs {
 
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
         @SubscribeEvent
         public static void onRegisterCreativeModeTabsEvent(BuildCreativeModeTabContentsEvent event) {
             CREATIVE_TABS.forEach((key, items) -> {
@@ -104,7 +105,7 @@ public class RegistriesWrapperImpl implements RegistriesWrapper {
                 }
             });
         }
-#endif
+//? }
 
     }
 }

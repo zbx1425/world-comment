@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import java.util.List;
 import java.util.Optional;
 
-#if MC_VERSION >= "12106"
+//? if >=1.21.6 {
 
 public class SnGuiGraphicsExtractor12106 implements ISnGuiGraphicsExtractor {
 
@@ -151,4 +151,4 @@ public class SnGuiGraphicsExtractor12106 implements ISnGuiGraphicsExtractor {
     }
 }
 
-#endif
+//? }

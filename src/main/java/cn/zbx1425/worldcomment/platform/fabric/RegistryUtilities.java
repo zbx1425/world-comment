@@ -3,9 +3,9 @@ package cn.zbx1425.worldcomment.platform.fabric;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
 import net.minecraft.core.registries.BuiltInRegistries;
-#endif
+//? }
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;

@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.platform.neoforge;
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 import cn.zbx1425.worldcomment.Main;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
@@ -48,7 +48,7 @@ public class CompatPacket {
     };
 }
 
-#else
-public class CompatPacket { }
+//? } else {
+/*public class CompatPacket { }
 
-#endif
+*///? }

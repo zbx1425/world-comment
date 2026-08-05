@@ -17,20 +17,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.BuiltInRegistries;
-#else
-#if MC_VERSION >= "12000" import net.minecraftforge.event.BuildCreativeModeTabContentsEvent; #endif
+//? } else {
+/*//? if >=1.20
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.eventbus.api.IEventBus;
-#endif
+*///? }
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,20 +40,20 @@ import java.util.Map;
 
 public class RegistriesWrapperImpl implements RegistriesWrapper {
 
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
 private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Main.MOD_ID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Main.MOD_ID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, Main.MOD_ID);
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, Main.MOD_ID);
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Main.MOD_ID);
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(BuiltInRegistries.DATA_COMPONENT_TYPE, Main.MOD_ID);
-#else
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Main.MOD_ID);
+//? } else {
+    /*private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Main.MOD_ID);
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Main.MOD_ID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Main.MOD_ID);
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Main.MOD_ID);
     private static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, Main.MOD_ID);
-#endif
+*///? }
 
     @Override
     public void registerBlock(String id, RegistryObject<Block> block) {
@@ -121,7 +122,7 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
 
     public static class RegisterCreativeTabs {
 
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
         @SubscribeEvent
         public static void onRegisterCreativeModeTabsEvent(BuildCreativeModeTabContentsEvent event) {
             CREATIVE_TABS.forEach((key, items) -> {
@@ -130,7 +131,7 @@ private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Buil
                 }
             });
         }
-#endif
+//? }
 
     }
 }

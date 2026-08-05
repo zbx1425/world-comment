@@ -12,29 +12,33 @@ import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import cn.zbx1425.worldcomment.util.KeyMappingUtil;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
-#if MC_VERSION < "12002" import net.minecraft.client.gui.LayeredDraw; #endif
-#if MC_VERSION >= "12002"import net.minecraft.client.resources.model.sprite.AtlasManager;
+//? if <1.20.2
+//import net.minecraft.client.gui.LayeredDraw;
+//? if >=1.20.2
+import net.minecraft.client.resources.model.sprite.AtlasManager;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.client.gui.GuiLayer; #endif
+import net.neoforged.neoforge.client.gui.GuiLayer;
+//? }
 import net.minecraft.commands.Commands;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-#if MC_VERSION >= "12102" import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent; #endif
+//? if >=1.21.2
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.client.settings.IKeyConflictContext;
 
 public class ClientProxy {
 
     public static class ModEventBusListener {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         @SubscribeEvent
         public static void onRegisterGuiOverlays(RegisterGuiLayersEvent event) {
             event.registerAbove(VanillaGuiLayers.SCOREBOARD_SIDEBAR, Main.id("picked_comments"), PICKED_COMMENTS_OVERLAY);
@@ -49,8 +53,8 @@ public class ClientProxy {
                 OverlayLayer.render(ISnGuiGraphicsExtractor.fromGuiParam(guiParam));
             }
         }
-#else
-        @SubscribeEvent
+//? } else {
+        /*@SubscribeEvent
         public static void onRegisterGuiOverlays(RegisterGuiOverlaysEvent event) {
             event.registerAbove(VanillaGuiOverlay.SCOREBOARD.id(), "picked_comments", PICKED_COMMENTS_OVERLAY);
         }
@@ -64,7 +68,7 @@ public class ClientProxy {
                 OverlayLayer.render(#if MC_VERSION >= "12000" guiGraphics #else GuiGraphicsExtractor.withPose(guiGraphics) #endif);
             }
         }
-#endif
+*///? }
 
         @SubscribeEvent
         public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
@@ -80,12 +84,12 @@ public class ClientProxy {
 
         }
 
-#if MC_VERSION >= "12102"
+//? if >=1.21.2 {
         @SubscribeEvent
         private static void onRegisterClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
             MainForge.PACKET_REGISTRY.commitClient(event);
         }
-#endif
+//? }
 
         @SubscribeEvent
         private static void onRegisterClientResourceReloadListeners(AddClientReloadListenersEvent event) {
@@ -102,14 +106,14 @@ public class ClientProxy {
 
         private static boolean world_comment$lastFrameKeyPlayerListDown = false;
 
-#if MC_VERSION >= "12102"
+//? if >=1.21.2 {
         @SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent.AfterTranslucentFeatures event) { {
-#else
-        @SubscribeEvent
+//? } else {
+        /*@SubscribeEvent
         public static void onRenderLevelStage(RenderLevelStageEvent event) {
             if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-#endif
+*///? }
                 if (KeyMappingUtil.isKeyDown(Minecraft.getInstance().options.keyPlayerList)) {
                     if (!world_comment$lastFrameKeyPlayerListDown) {
                         CommentListScreen.handleKeyTab();

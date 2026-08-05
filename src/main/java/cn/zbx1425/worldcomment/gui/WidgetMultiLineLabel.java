@@ -1,14 +1,14 @@
 package cn.zbx1425.worldcomment.gui;
 
 
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-#endif
+//? }
 import net.minecraft.client.gui.components.AbstractWidget;
-#if MC_VERSION >= "11700"
+//? if >=1.17 {
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-#endif
+//? }
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -41,29 +41,29 @@ public class WidgetMultiLineLabel extends AbstractWidget {
     }
 
     @Override
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float delta) {
-#elif MC_VERSION >= "11904"
-        public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
-#else
-            public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-#endif
+//? } else if >=1.19.4 {
+        /*public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
+*///? } else {
+            /*public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+*///? }
                 if (!visible) return;
                 int textStart = Math.max(getY(), getY() + (getHeight() - 10 * lines.size()) / 2);
                 for (int i = 0; i < lines.size(); ++i) {
                     int textWidth = Minecraft.getInstance().font.width(lines.get(i));
-#if MC_VERSION >= "11903"
+//? if >=1.19.3 {
                     int x = alignR ? this.padX() + this.padWidth() - textWidth : this.padX();
                     int y = textStart + 10 * i;
-#else
-                    int x = alignR ? this.padX() + this.width - textWidth : this.padX();
+//? } else {
+                    /*int x = alignR ? this.padX() + this.width - textWidth : this.padX();
                     int y = textStart + 10 * i;
-#endif
-#if MC_VERSION >= "12000"
+*///? }
+//? if >=1.20 {
                         guiGraphics.text(Minecraft.getInstance().font, lines.get(i), x, y, -1, false);
-#else
-                        drawString(matrices, Minecraft.getInstance().font, lines.get(i), x, y, -1);
-#endif
+//? } else {
+                        /*drawString(matrices, Minecraft.getInstance().font, lines.get(i), x, y, -1);
+*///? }
                 }
             }
 
@@ -79,23 +79,23 @@ public class WidgetMultiLineLabel extends AbstractWidget {
         if (onClick != null) onClick.run();
     }
 
-#if MC_VERSION >= "11903"
+//? if >=1.19.3 {
             @Override
             protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
-#elif MC_VERSION >= "11700"
-            @Override
+//? } else if >=1.17 {
+            /*@Override
             public void updateNarration(NarrationElementOutput arg) { }
-#endif
+*///? }
 
-#if MC_VERSION < "11903"
-            protected int getX() {
+//? if <1.19.3 {
+            /*protected int getX() {
                 return x;
             }
 
             protected int getY() {
                 return y;
             }
-#endif
+*///? }
 
 
     private int padX() {

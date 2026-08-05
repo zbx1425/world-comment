@@ -21,11 +21,11 @@ public class ClientPlatformImpl {
     }
 
     public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainFabric.PACKET_REGISTRY.registerNetworkReceiverS2C(resourceLocation, consumer);
-#else
-        ClientPlayNetworking.registerGlobalReceiver(resourceLocation, (client, handler, packet, responseSender) -> consumer.accept(packet));
-#endif
+//? } else {
+        /*ClientPlayNetworking.registerGlobalReceiver(resourceLocation, (client, handler, packet, responseSender) -> consumer.accept(packet));
+*///? }
     }
 
     public static void registerPlayerJoinEvent(Consumer<LocalPlayer> consumer) {
@@ -47,10 +47,10 @@ public class ClientPlatformImpl {
     }
 
     public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         MainFabric.PACKET_REGISTRY.sendC2S(id, packet);
-#else
-        ClientPlayNetworking.send(id, packet);
-#endif
+//? } else {
+        /*ClientPlayNetworking.send(id, packet);
+*///? }
     }
 }

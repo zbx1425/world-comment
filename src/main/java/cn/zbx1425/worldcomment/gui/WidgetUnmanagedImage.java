@@ -3,14 +3,20 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <1.20
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
-#if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
+//? if >=1.19.3
+import org.joml.Matrix4f;
+//? if <1.19.3
+//import com.mojang.math.Matrix4f;
 
 public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseable {
 
@@ -29,12 +35,12 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
     }
 
     @Override
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-#else
-    public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
+//? } else {
+    /*public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);
-#endif
+*///? }
         ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         int x1 = getX(), x2 = getX() + getWidth();
         int y1 = getY(), y2 = getY() + getHeight();
@@ -50,11 +56,11 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
     }
 
     @Override
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) { }
-#else
-    public void updateNarration(NarrationElementOutput narrationElementOutput) { }
-#endif
+//? } else {
+    /*public void updateNarration(NarrationElementOutput narrationElementOutput) { }
+*///? }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
@@ -66,10 +72,10 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
         texture.close();
     }
 
-#if MC_VERSION < "12000"
-    private int getX() { return x; }
+//? if <1.20 {
+    /*private int getX() { return x; }
     private int getY() { return y; }
     private void setX(int x) { this.x = x; }
     private void setY(int y) { this.y = y; }
-#endif
+*///? }
 }

@@ -12,7 +12,10 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.world.phys.Vec3;
-#if MC_VERSION >= "11903" import org.joml.Matrix4f; #else import com.mojang.math.Matrix4f; #endif
+//? if >=1.19.3
+import org.joml.Matrix4f;
+//? if <1.19.3
+//import com.mojang.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,8 +29,8 @@ public class LevelRendererMixin {
     @Shadow @Final
     private RenderBuffers renderBuffers;
 
-#if MC_VERSION < "12100"
-    @Unique
+//? if <1.21 {
+    /*@Unique
     private boolean world_comment$lastFrameKeyPlayerListDown = false;
 
     @Inject(method = "renderLevel", at = @At(value = "CONSTANT", args = "stringValue=blockentities", ordinal = 0))
@@ -47,5 +50,5 @@ public class LevelRendererMixin {
         CommentWorldRenderer.renderComments(renderBuffers.bufferSource(), matrices);
         matrices.popPose();
     }
-#endif
+*///? }
 }

@@ -6,7 +6,10 @@ import cn.zbx1425.worldcomment.gui.CommentListScreen;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? else
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.world.phys.Vec3;

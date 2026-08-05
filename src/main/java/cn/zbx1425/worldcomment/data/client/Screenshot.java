@@ -20,7 +20,7 @@ public class Screenshot {
 
     public static boolean isGrabbing = false;
 
-#if MC_VERSION >= "12106"
+//? if >=1.21.6 {
     public static void grabScreenshotInternal(Consumer<byte[]> callback) {
         RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
         net.minecraft.client.Screenshot.takeScreenshot(frameBuf, nativeImage -> {
@@ -35,8 +35,8 @@ public class Screenshot {
             }
         });
     }
-#else
-    public static void grabScreenshot(Consumer<byte[]> callback) {
+//? } else {
+    /*public static void grabScreenshot(Consumer<byte[]> callback) {
         RenderTarget frameBuf = Minecraft.getInstance().getMainRenderTarget();
         NativeImage fullSizeImage = new NativeImage(frameBuf.width, frameBuf.height, false);
         try (fullSizeImage) {
@@ -48,7 +48,7 @@ public class Screenshot {
             Main.LOGGER.error("Failed to save screenshot", ex);
         }
     }
-#endif
+*///? }
 
     public static void grabScreenshot(Consumer<byte[]> callback) {
         if (isGrabbing) return;

@@ -1,8 +1,8 @@
 package cn.zbx1425.worldcomment.gui.compat;
 
-#if MC_VERSION < "12000"
+//? if <1.20 {
 
-import com.mojang.blaze3d.systems.RenderSystem;
+/*import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.ints.IntIterator;
@@ -137,7 +137,7 @@ public class SnGuiGraphicsExtractor119 implements ISnGuiGraphicsExtractor {
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         Matrix4f matrix4f = guiGraphics.pose().last().pose();
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         BufferBuilder bufferBuilder = Tesselator.getInstance()
                 .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 0);
@@ -145,17 +145,17 @@ public class SnGuiGraphicsExtractor119 implements ISnGuiGraphicsExtractor {
         bufferBuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 1);
         bufferBuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 0);
         BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-#else
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+//? } else {
+        /^BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, x1, y1, 0).uv(0, 0).endVertex();
         bufferBuilder.vertex(matrix4f, x1, y2, 0).uv(0, 1).endVertex();
         bufferBuilder.vertex(matrix4f, x2, y2, 0).uv(1, 1).endVertex();
         bufferBuilder.vertex(matrix4f, x2, y1, 0).uv(1, 0).endVertex();
         BufferUploader.drawWithShader(bufferBuilder.end());
-#endif
+^///? }
     }
 
 }
 
-#endif
+*///? }

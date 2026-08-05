@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.item;
 
 import cn.zbx1425.worldcomment.Main;
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
@@ -11,11 +11,13 @@ import cn.zbx1425.worldcomment.mixin.KeyMappingAccessor;
 import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.core.registries.Registries; #endif
+import net.minecraft.core.registries.Registries;
+//? }
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-#if MC_VERSION < "12108" import net.minecraft.world.InteractionResultHolder; #endif
+//? if <1.21.8
+//import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
@@ -41,11 +43,11 @@ public class CommentToolItem extends Item implements GroupedItem {
     }
 
     public static #if MC_VERSION >= "12000" ResourceKey<CreativeModeTab> #else CreativeModeTab #endif getTabImpl() {
-        #if MC_VERSION >= "12000"
+//? if >=1.20 {
             return ResourceKey.create(Registries.CREATIVE_MODE_TAB, Main.vanillaId("tools_and_utilities"));
-        #else
-            return CreativeModeTab.TAB_MISC;
-        #endif
+//? } else {
+            /*return CreativeModeTab.TAB_MISC;
+*///? }
     }
 
     public static class Client {

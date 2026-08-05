@@ -12,7 +12,10 @@ import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import cn.zbx1425.worldcomment.util.FrameTask;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
+//? if >=1.20
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//? if <1.20
+//import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -245,7 +248,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
 
         Minecraft minecraft = Minecraft.getInstance();
-        #if MC_VERSION < "12002" extractBackground(guiParam); #endif
+        //? if <1.20.2
+//extractBackground(guiParam);
         #if MC_VERSION >= "12100" super.extractRenderState(guiParam, mouseX, mouseY, partialTick); #endif
         guiGraphics.pushPose();
         guiGraphics.translate(0, 0, 1);
@@ -260,7 +264,8 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         getCurrentView().render(guiParam, guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.popPose();
-        #if MC_VERSION < "12100" super.render(guiParam, mouseX, mouseY, partialTick); #endif
+        //? if <1.21
+//super.render(guiParam, mouseX, mouseY, partialTick);
     }
 
     @Override

@@ -7,7 +7,10 @@ import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-#if MC_VERSION >= "11903" import com.mojang.math.Axis; #else import com.mojang.math.Vector3f; #endif
+//? if >=1.19.3
+import com.mojang.math.Axis;
+//? if <1.19.3
+//import com.mojang.math.Vector3f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -50,11 +53,11 @@ public class CommentWorldRenderer implements IGuiCommon {
         matrices.translate(commentAndSituation.renderOffset.x, cycleHoverY * 0.1, commentAndSituation.renderOffset.y);
         float yaw = (float)Mth.atan2(comment.location.getX() + commentAndSituation.renderOffset.x - cameraPos.x(),
             comment.location.getZ() + commentAndSituation.renderOffset.y - cameraPos.z());
-#if MC_VERSION >= "12000"
+//? if >=1.20 {
         matrices.mulPose(Axis.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
-#else
-        matrices.mulPose(Vector3f.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
-#endif
+//? } else {
+        /*matrices.mulPose(Vector3f.YP.rotation(yaw + cycleRotateY * (Mth.PI / 24)));
+*///? }
 
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 
@@ -88,13 +91,13 @@ public class CommentWorldRenderer implements IGuiCommon {
     }
 
     private static void vertex(VertexConsumer vertices, PoseStack.Pose pose, float x, float y, float z, float u, float v) {
-#if MC_VERSION >= "12100"
+//? if >=1.21 {
         vertices.addVertex(pose.pose(), x, y, z).setColor(0xFFFFFFFF).setUv(u, v)
             .setOverlay(OverlayTexture.NO_OVERLAY).setLight(LightCoordsUtil.FULL_BRIGHT).setNormal(pose, 0, 1, 0);
-#else
-        vertices.vertex(pose.pose(), x, y, z).color(0xFFFFFFFF).uv(u, v)
+//? } else {
+        /*vertices.vertex(pose.pose(), x, y, z).color(0xFFFFFFFF).uv(u, v)
             .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(pose.normal(), 0, 1, 0).endVertex();
-#endif
+*///? }
     }
 
     public static void renderComments(MultiBufferSource buffers, PoseStack matrices) {

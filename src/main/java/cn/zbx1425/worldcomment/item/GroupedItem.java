@@ -20,9 +20,9 @@ public interface GroupedItem {
         #if MC_VERSION < "12000"
                         .tab(getTab.get()));
         #endif
-        #if MC_VERSION >= "12102"
+//? if >=1.21.2 {
                         .setId(ResourceKey.create(Registries.ITEM, id))
-        #endif
+//? }
         );
     }
 }
