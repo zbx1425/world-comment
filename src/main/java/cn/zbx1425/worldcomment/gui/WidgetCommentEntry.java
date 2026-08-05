@@ -5,7 +5,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -68,7 +68,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
 
     @Override
     protected void extractWidgetRenderState(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
 
         guiGraphics.blitNineSlicedFast(
                 ATLAS_LOCATION, getX(), getY(), getWidth(), getHeight(),
@@ -85,7 +85,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
                 guiGraphics.pushPose();
                 guiGraphics.translate(getX() + 16, lineY, 0);
                 guiGraphics.scale(formattedText.sizeModifier, formattedText.sizeModifier);
-                guiGraphics.drawString(font, formattedText.ordered, 0, 0, 0xFF444444, false);
+                guiGraphics.text(font, formattedText.ordered, 0, 0, 0xFF444444, false);
                 guiGraphics.popPose();
                 lineY += (int) (font.lineHeight * formattedText.sizeModifier);
             }
@@ -106,13 +106,13 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         String uuidToDisplay = comment.initiatorName.isEmpty()
                 ? (Minecraft.getInstance().player.permissions().hasPermission(Permissions.COMMANDS_ADMIN) ? comment.initiator.toString() : "")
                 : "..." + comment.initiator.toString().substring(24);
-        guiGraphics.drawString(font, nameComponent,
+        guiGraphics.text(font, nameComponent,
                 getX() + 34, getY() + 8, 0xFFFFFFFF, true);
 
         if (showImage && !comment.initiator.equals(CommentEntry.SYSTEM_MESSAGE_MAGIC_INITIATOR)) {
             String timeStr = DateTimeFormatter.ofPattern("MM-dd HH:mm", Locale.ROOT)
                     .format(Instant.ofEpochMilli(comment.timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime());
-            guiGraphics.drawString(font, timeStr,
+            guiGraphics.text(font, timeStr,
                     getX() + getWidth() - 6 - font.width(timeStr), getY() + 8, 0xFFBBBBBB, true);
         }
 

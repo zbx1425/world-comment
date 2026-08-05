@@ -1,9 +1,7 @@
-package cn.zbx1425.worldcomment;
+package cn.zbx1425.worldcomment.platform;
 
 
 import com.mojang.serialization.Codec;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -14,11 +12,18 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.Consumer;
 
+//? if neoforge
+import cn.zbx1425.worldcomment.platform.neoforge.ServerPlatformImpl;
+//? if fabric
+//import cn.zbx1425.worldcomment.platform.fabric.ServerPlatformImpl;
+
 public class ServerPlatform {
 
-    @ExpectPlatform
     public static boolean isFabric() {
-        throw new AssertionError();
+        //? if fabric
+        return true;
+        //? if !fabric
+        //return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -27,49 +32,40 @@ public class ServerPlatform {
             .networkSynchronized((StreamCodec<? super RegistryFriendlyByteBuf, Object>)streamCodec).build();
     }
 
-    @ExpectPlatform
     public static void registerPacket(Identifier resourceLocation) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerPacket(resourceLocation);
     }
 
-    @ExpectPlatform
     public static void registerNetworkReceiver(Identifier resourceLocation, C2SPacketHandler packetCallback) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerNetworkReceiver(resourceLocation, packetCallback);
     }
 
-    @ExpectPlatform
     public static void registerPlayerJoinEvent(Consumer<ServerPlayer> consumer) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerPlayerJoinEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void registerPlayerQuitEvent(Consumer<ServerPlayer> consumer) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerPlayerQuitEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void registerServerStartingEvent(Consumer<MinecraftServer> consumer) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerServerStartingEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void registerServerStoppingEvent(Consumer<MinecraftServer> consumer) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerServerStoppingEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void registerWorldSaveEvent(Consumer<MinecraftServer> consumer) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerWorldSaveEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void registerTickEvent(Consumer<MinecraftServer> consumer) {
-        throw new AssertionError();
+        ServerPlatformImpl.registerTickEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void sendPacketToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf packet) {
-        throw new AssertionError();
+        ServerPlatformImpl.sendPacketToPlayer(player, id, packet);
     }
 
     @FunctionalInterface

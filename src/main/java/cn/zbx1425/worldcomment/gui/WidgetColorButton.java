@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.gui;
 
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
 #if MC_VERSION >= "12002" import net.minecraft.client.gui.components.WidgetSprites; #endif
@@ -35,7 +35,7 @@ private static final WidgetSprites SPRITES = new WidgetSprites(Identifier.withDe
 
     @Override
     protected void extractContents(GuiGraphicsExtractor guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         Minecraft minecraft = Minecraft.getInstance();
         if (this.active) {
             guiGraphics.setColor(((color >> 16) & 0xFF) / 255f, ((color >> 8) & 0xFF) / 255f,

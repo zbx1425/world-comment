@@ -1,14 +1,12 @@
 package cn.zbx1425.worldcomment.mixin;
 
-import cn.zbx1425.worldcomment.ServerPlatform;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import cn.zbx1425.worldcomment.gui.WidgetSnToggleButton;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;

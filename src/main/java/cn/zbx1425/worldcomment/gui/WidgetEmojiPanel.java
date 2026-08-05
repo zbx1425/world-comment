@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -41,7 +41,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
 
     @Override
     protected void extractWidgetRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(graphics);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(graphics);
         guiGraphics.blitNineSlicedFast(
             ATLAS_LOCATION,
             getX(), getY(), width - scrollbarWidth(), height,

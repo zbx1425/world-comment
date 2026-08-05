@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.neoforge;
+package cn.zbx1425.worldcomment.platform.neoforge;
 
 #if MC_VERSION >= "12100"
 import cn.zbx1425.worldcomment.Main;

@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.fabric;
+package cn.zbx1425.worldcomment.platform.fabric;
 
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;

@@ -1,6 +1,6 @@
-package cn.zbx1425.worldcomment.neoforge;
+package cn.zbx1425.worldcomment.platform.neoforge;
 
-import cn.zbx1425.worldcomment.ServerPlatform;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;

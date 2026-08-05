@@ -1,6 +1,6 @@
-package cn.zbx1425.worldcomment.fabric;
+package cn.zbx1425.worldcomment.platform.fabric;
 
-import cn.zbx1425.worldcomment.ServerPlatform;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;

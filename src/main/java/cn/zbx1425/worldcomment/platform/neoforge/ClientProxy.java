@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.neoforge;
+package cn.zbx1425.worldcomment.platform.neoforge;
 
 import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
@@ -8,7 +8,7 @@ import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import cn.zbx1425.worldcomment.render.CommentWorldRenderer;
 import cn.zbx1425.worldcomment.render.OverlayLayer;
 import cn.zbx1425.worldcomment.util.KeyMappingUtil;
@@ -46,7 +46,7 @@ public class ClientProxy {
 
             @Override
             public void render(GuiGraphicsExtractor guiParam, DeltaTracker deltaTracker) {
-                OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam));
+                OverlayLayer.render(ISnGuiGraphicsExtractor.fromGuiParam(guiParam));
             }
         }
 #else

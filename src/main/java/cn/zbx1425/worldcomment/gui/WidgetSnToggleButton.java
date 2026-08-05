@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);
 #endif
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         guiGraphics.blit(ATLAS_LOCATION, getX(), getY(),
                 BTN_SIZE, BTN_SIZE,
                 160 + (MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference ? 0 : 32), 96,
@@ -60,7 +60,7 @@ public class WidgetSnToggleButton extends AbstractWidget implements IGuiCommon {
         Component countComponent = Component.literal(String.format("x%d", ClientRayPicking.nearbyCommentsCount));
         int countWidth = Minecraft.getInstance().font.width(countComponent);
         int yOffset = (BTN_SIZE - Minecraft.getInstance().font.lineHeight) / 2;
-        guiGraphics.drawString(Minecraft.getInstance().font, countComponent,
+        guiGraphics.text(Minecraft.getInstance().font, countComponent,
             textOnTheLeft ? getX() - BTN_SIZE / 3 - countWidth : getX() + BTN_SIZE + BTN_SIZE / 3, getY() + yOffset,
                 0xFFFFFFFF, true);
     }

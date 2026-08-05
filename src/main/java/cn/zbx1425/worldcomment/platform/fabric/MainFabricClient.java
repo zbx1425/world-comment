@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.fabric;
+package cn.zbx1425.worldcomment.platform.fabric;
 
 import cn.zbx1425.worldcomment.ClientCommand;
 import cn.zbx1425.worldcomment.ClientConfig;
@@ -6,7 +6,7 @@ import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.util.KeyMappingUtil;
 #if MC_VERSION >= "12000" import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
@@ -43,7 +43,7 @@ public class MainFabricClient implements ClientModInitializer {
 #endif
 
 		HudElementRegistry.attachElementAfter(VanillaHudElements.SCOREBOARD, Main.id("picked_comments"),
-			(guiParam, deltaTracker) -> OverlayLayer.render(ISnGuiGraphics.fromGuiParam(guiParam)));
+			(guiParam, deltaTracker) -> OverlayLayer.render(ISnGuiGraphicsExtractor.fromGuiParam(guiParam)));
 
 #if MC_VERSION >= "12100"
 		// TODO: Correct timing?

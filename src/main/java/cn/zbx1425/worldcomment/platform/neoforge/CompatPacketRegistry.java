@@ -1,7 +1,7 @@
-package cn.zbx1425.worldcomment.neoforge;
+package cn.zbx1425.worldcomment.platform.neoforge;
 
 #if MC_VERSION >= "12100"
-import cn.zbx1425.worldcomment.ServerPlatform;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;

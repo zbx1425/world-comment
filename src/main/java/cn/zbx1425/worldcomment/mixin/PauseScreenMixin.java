@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.mixin;
 
 import cn.zbx1425.worldcomment.gui.WidgetSnToggleButton;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;

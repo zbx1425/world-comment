@@ -39,7 +39,7 @@ stonecutter {
 
         // See https://stonecutter.kikugie.dev/wiki/start/#choosing-minecraft-versions
         match("26.1.x", "fabric", "neoforge", version = "26.1.2")
-        vcsVersion = "26.1.x-fabric"
+        vcsVersion = "26.1.x-neoforge"
     }
 }
 

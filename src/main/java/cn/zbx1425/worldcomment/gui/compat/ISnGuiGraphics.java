@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public interface ISnGuiGraphics extends ISnGuiGraphicsDrawUtil {
+public interface ISnGuiGraphicsExtractor extends ISnGuiGraphicsExtractorDrawUtil {
 
 #if MC_VERSION >= "12000"
     GuiGraphicsExtractor getGuiParam();
@@ -50,16 +50,16 @@ public interface ISnGuiGraphics extends ISnGuiGraphicsDrawUtil {
     void disableBlend();
 
 #if MC_VERSION >= "12000"
-    static ISnGuiGraphics fromGuiParam(GuiGraphicsExtractor guiParam) {
+    static ISnGuiGraphicsExtractor fromGuiParam(GuiGraphicsExtractor guiParam) {
 #else
-    static ISnGuiGraphics fromGuiParam(PoseStack guiParam) {
+    static ISnGuiGraphicsExtractor fromGuiParam(PoseStack guiParam) {
 #endif
 #if MC_VERSION >= "12106"
-        return SnGuiGraphics12106.withGuiParam(guiParam);
+        return SnGuiGraphicsExtractor12106.withGuiParam(guiParam);
 #elif MC_VERSION >= "12000"
-        return SnGuiGraphics120.withGuiParam(guiParam);
+        return SnGuiGraphicsExtractor120.withGuiParam(guiParam);
 #else
-        return SnGuiGraphics119.withGuiParam(guiParam);
+        return SnGuiGraphicsExtractor119.withGuiParam(guiParam);
 #endif
     }
 }

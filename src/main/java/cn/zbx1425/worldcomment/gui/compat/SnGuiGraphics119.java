@@ -13,7 +13,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -22,23 +22,23 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class SnGuiGraphics119 implements ISnGuiGraphics {
+public class SnGuiGraphicsExtractor119 implements ISnGuiGraphicsExtractor {
 
     private final Minecraft minecraft;
     private final MultiBufferSource.BufferSource bufferSource;
     private PoseStack pose;
 
-    private static SnGuiGraphics119 INSTANCE = null;
+    private static SnGuiGraphicsExtractor119 INSTANCE = null;
 
-    private SnGuiGraphics119(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
+    private SnGuiGraphicsExtractor119(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
         this.minecraft = minecraft;
         this.pose = poseStack;
         this.bufferSource = bufferSource;
     }
 
-    public static SnGuiGraphics119 withGuiParam(PoseStack poseStack) {
+    public static SnGuiGraphicsExtractor119 withGuiParam(PoseStack poseStack) {
         if (INSTANCE == null) {
-            INSTANCE = new SnGuiGraphics119(Minecraft.getInstance(), poseStack, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()));
+            INSTANCE = new SnGuiGraphicsExtractor119(Minecraft.getInstance(), poseStack, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()));
         } else {
             INSTANCE.pose = poseStack;
         }
@@ -49,12 +49,12 @@ public class SnGuiGraphics119 implements ISnGuiGraphics {
         return pose;
     }
 
-    public void blit(ResourceLocation atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
+    public void blit(Identifier atlasLocation, int x, int y, int padLeft, int padTop, int uOffset, int vOffset, int padLeft1, int padTop1, int texWidth, int texHeight) {
         RenderSystem.setShaderTexture(0, atlasLocation);
         GuiComponent.blit(pose, x, y, padLeft, padTop, uOffset, vOffset, padLeft1, padTop1, texWidth, texHeight);
     }
 
-    private void blit(ResourceLocation var1, int var10, int var14, int i, int i1, int var12, int var16) {
+    private void blit(Identifier var1, int var10, int var14, int i, int i1, int var12, int var16) {
         RenderSystem.setShaderTexture(0, var1);
         GuiComponent.blit(pose, var10, var14, i, i1, var12, var16, 256, 256);
     }

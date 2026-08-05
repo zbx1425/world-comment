@@ -1,12 +1,12 @@
 package cn.zbx1425.worldcomment.render;
 
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
 
 public class OverlayLayer {
 
-    public static void render(ISnGuiGraphics guiGraphics) {
+    public static void render(ISnGuiGraphicsExtractor guiGraphics) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.screen != null) return;
         if (minecraft.options.hideGui) return;

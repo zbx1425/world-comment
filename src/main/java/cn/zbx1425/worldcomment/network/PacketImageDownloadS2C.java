@@ -1,17 +1,14 @@
 package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.ServerPlatform;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import cn.zbx1425.worldcomment.data.network.upload.LocalStorageUploader;
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 public class PacketImageDownloadS2C {

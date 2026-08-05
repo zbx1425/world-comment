@@ -7,7 +7,7 @@ import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.network.ImageDownload;
 import cn.zbx1425.worldcomment.data.network.ImageUrlResolver;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import cn.zbx1425.worldcomment.network.PacketCollectionRequestC2S;
 import cn.zbx1425.worldcomment.network.PacketEntryActionC2S;
 import cn.zbx1425.worldcomment.util.FrameTask;
@@ -43,7 +43,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     private interface SubView {
         void onEnter();
         void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
-                    ISnGuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick);
+                    ISnGuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick);
         boolean handleClick(double mouseX, double mouseY);
         boolean handleScroll(int scrollAmount);
     }
@@ -181,7 +181,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         }
     }
 
-    private static void renderIcon(ISnGuiGraphics g, int x, int y, int size, int u, int v, double mx, double my) {
+    private static void renderIcon(ISnGuiGraphicsExtractor g, int x, int y, int size, int u, int v, double mx, double my) {
         g.blit(ATLAS_LOCATION, x, y, size, size, u, v, 20, 20, 256, 256);
         if (mx > x && mx < x + size && my > y && my < y + size) {
             g.blit(ATLAS_LOCATION, x, y, size, size, 236, 60, 20, 20, 256, 256);
@@ -242,16 +242,16 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
     @Override
     public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
 
         Minecraft minecraft = Minecraft.getInstance();
-        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
+        #if MC_VERSION < "12002" extractBackground(guiParam); #endif
         #if MC_VERSION >= "12100" super.extractRenderState(guiParam, mouseX, mouseY, partialTick); #endif
         guiGraphics.pushPose();
         guiGraphics.translate(0, 0, 1);
 
         int titleWidth = minecraft.font.width(Component.translatable("gui.worldcomment.list.title"));
-        guiGraphics.drawString(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
+        guiGraphics.text(minecraft.font, Component.translatable("gui.worldcomment.list.title"),
                 xAsideLeftL + (ASIDE_L_WIDTH - titleWidth) / 2, 15, 0xFFFFE6C0, true);
         for (net.minecraft.client.gui.components.Button button : pageButtons) {
             button #if MC_VERSION >= "11903" .setX #else .x = #endif (xAsideLeftL + 10);
@@ -277,7 +277,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
     @Override
     public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         super.extractBackground(guiParam #if MC_VERSION >= "12002", mouseX, mouseY, partialTick #endif);
 
         guiGraphics.enableBlend();
@@ -418,7 +418,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
         @Override
         public void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
-                           ISnGuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                           ISnGuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
             scrollCurrentPixel = animateScroll(
                     scrollAnimStartPixel, scrollTargetPixel, scrollAnimStartNanos, System.nanoTime());
 
@@ -466,7 +466,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             if (footerHeight > 0) {
                 int footerTextY = viewportTop + (totalContentHeight - footerHeight) + 20 - (int) scrollCurrentPixel;
                 if (footerTextY < viewportBottom && footerTextY + font.lineHeight > viewportTop) {
-                    guiGraphics.drawCenteredString(font,
+                    guiGraphics.centeredText(font,
                             Component.translatable("gui.worldcomment.list.no_more"),
                             xListL + listWidth / 2, footerTextY, 0xFFA5D6A7);
                 }
@@ -475,10 +475,10 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             if (commentList.size() > 1) {
                 int topIndex = findSnapIndex(scrollCurrentPixel) + 1;
                 String pageStr = String.format("↕ %d / %d", topIndex, commentList.size());
-                guiGraphics.drawString(Minecraft.getInstance().font, pageStr,
+                guiGraphics.text(Minecraft.getInstance().font, pageStr,
                     xAsideRightL + 5, 5, 0xFFA5D6A7, true);
             } else if (commentList.isEmpty()) {
-                guiGraphics.drawCenteredString(Minecraft.getInstance().font,
+                guiGraphics.centeredText(Minecraft.getInstance().font,
                         Component.translatable("gui.worldcomment.list.empty"),
                         xListL + listWidth / 2, height / 2 - 5, 0xFFA5D6A7);
             }
@@ -578,7 +578,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
         @Override
         public void render(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam,
-                           ISnGuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+                           ISnGuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
             Minecraft minecraft = Minecraft.getInstance();
             CommentEntry comment = commentForDetail;
             if (comment == null) return;
@@ -616,17 +616,17 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             Component typeName = Component.translatable("gui.worldcomment.comment_type." + comment.messageType)
                     .setStyle(Style.EMPTY.withBold(true) /* .withColor(
                             CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF) */);
-            guiGraphics.drawString(font, typeName, contentLeft + 18, y + 3, 0xFFFFFFFF, true);
+            guiGraphics.text(font, typeName, contentLeft + 18, y + 3, 0xFFFFFFFF, true);
             y += 25;
 
             Component nameComponent = comment.initiatorName.isEmpty()
                     ? Component.translatable("gui.worldcomment.anonymous")
                     : Component.literal(comment.initiatorName);
-            guiGraphics.drawString(font, nameComponent, contentLeft, y, 0xFFFFFFFF, true);
+            guiGraphics.text(font, nameComponent, contentLeft, y, 0xFFFFFFFF, true);
             if (minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) {
                 y += 14;
                 String uuid = comment.initiator.toString();
-                guiGraphics.drawString(font, uuid,
+                guiGraphics.text(font, uuid,
                         contentLeft, y, 0xFF888888, true);
             }
             y += 14;
@@ -634,11 +634,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             String timeStr = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
                     .format(Instant.ofEpochMilli(comment.timestamp)
                             .atZone(ZoneId.systemDefault()).toLocalDateTime());
-            guiGraphics.drawString(font, timeStr, contentLeft, y, 0xFFBBBBBB, true);
+            guiGraphics.text(font, timeStr, contentLeft, y, 0xFFBBBBBB, true);
             y += 14;
 
             String locStr = comment.level.toString() + "  " + comment.location.toShortString();
-            guiGraphics.drawString(font, locStr, contentLeft, y, 0xFFBBBBBB, true);
+            guiGraphics.text(font, locStr, contentLeft, y, 0xFFBBBBBB, true);
             y += 14;
 
             y += 6;
@@ -653,7 +653,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     guiGraphics.pushPose();
                     guiGraphics.translate(contentLeft, y, 0);
                     guiGraphics.scale(line.sizeModifier, line.sizeModifier);
-                    guiGraphics.drawString(font, line.ordered, 0, 0, 0xFFDDDDDD, true);
+                    guiGraphics.text(font, line.ordered, 0, 0, 0xFFDDDDDD, true);
                     guiGraphics.popPose();
                     y += (int)(font.lineHeight * line.sizeModifier) + 1;
                 }
@@ -693,7 +693,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
                 Component hint = Component.translatable("gui.worldcomment.detail.click_to_view");
                 int hintWidth = font.width(hint);
-                guiGraphics.drawString(font, hint,
+                guiGraphics.text(font, hint,
                         contentLeft + (contentWidth - hintWidth) / 2, y, 0xFF8888FF, true);
                 y += font.lineHeight + 4;
             }

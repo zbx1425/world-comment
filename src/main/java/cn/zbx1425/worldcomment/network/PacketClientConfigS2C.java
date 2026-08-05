@@ -2,6 +2,7 @@ package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.*;
 import cn.zbx1425.worldcomment.data.ServerWorldMeta;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;

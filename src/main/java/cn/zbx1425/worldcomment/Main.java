@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import cn.zbx1425.worldcomment.network.*;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import cn.zbx1425.worldcomment.util.RegistriesWrapper;
 import cn.zbx1425.worldcomment.util.RegistryObject;
 import net.minecraft.core.component.DataComponentType;

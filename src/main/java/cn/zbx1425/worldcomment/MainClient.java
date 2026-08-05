@@ -4,11 +4,9 @@ import cn.zbx1425.worldcomment.data.client.ClientWorldData;
 import cn.zbx1425.worldcomment.interop.BulletChatInterop;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.network.*;
+import cn.zbx1425.worldcomment.platform.ClientPlatform;
 import cn.zbx1425.worldcomment.util.RegistryObject;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import org.lwjgl.glfw.GLFW;
 
 public class MainClient {

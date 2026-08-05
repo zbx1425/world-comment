@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.gui;
 
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; #endif
@@ -35,7 +35,7 @@ public class WidgetUnmanagedImage extends AbstractWidget implements AutoCloseabl
     public void render(PoseStack guiParam, int mouseX, int mouseY, float partialTick) {
         super.render(guiParam, mouseX, mouseY, partialTick);
 #endif
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         int x1 = getX(), x2 = getX() + getWidth();
         int y1 = getY(), y2 = getY() + getHeight();
 

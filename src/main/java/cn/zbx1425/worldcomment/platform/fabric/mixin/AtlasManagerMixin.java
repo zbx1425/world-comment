@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.fabric.mixin;
+package cn.zbx1425.worldcomment.platform.fabric.mixin;
 
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import net.minecraft.client.resources.model.sprite.AtlasManager;

@@ -1,7 +1,6 @@
-package cn.zbx1425.worldcomment;
+package cn.zbx1425.worldcomment.platform;
 
 import cn.zbx1425.worldcomment.util.RegistryObject;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -10,35 +9,34 @@ import net.minecraft.resources.Identifier;
 
 import java.util.function.Consumer;
 
+//? if neoforge
+import cn.zbx1425.worldcomment.platform.neoforge.ClientPlatformImpl;
+//? if fabric
+//import cn.zbx1425.worldcomment.platform.fabric.ClientPlatformImpl;
+
 public class ClientPlatform {
 
-    @ExpectPlatform
     public static void registerKeyBinding(RegistryObject<KeyMapping> keyMapping) {
-        throw new AssertionError();
+        ClientPlatformImpl.registerKeyBinding(keyMapping);
     }
 
-    @ExpectPlatform
     public static void registerNetworkReceiver(Identifier resourceLocation, Consumer<FriendlyByteBuf> consumer) {
-        throw new AssertionError();
+        ClientPlatformImpl.registerNetworkReceiver(resourceLocation, consumer);
     }
 
-    @ExpectPlatform
     public static void registerPlayerJoinEvent(Consumer<LocalPlayer> consumer) {
-        throw new AssertionError();
+        ClientPlatformImpl.registerPlayerJoinEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void registerPlayerLeaveEvent(Runnable runnable) {
-        throw new AssertionError();
+        ClientPlatformImpl.registerPlayerLeaveEvent(runnable);
     }
 
-    @ExpectPlatform
     public static void registerTickEvent(Consumer<Minecraft> consumer) {
-        throw new AssertionError();
+        ClientPlatformImpl.registerTickEvent(consumer);
     }
 
-    @ExpectPlatform
     public static void sendPacketToServer(Identifier id, FriendlyByteBuf packet) {
-        throw new AssertionError();
+        ClientPlatformImpl.sendPacketToServer(id, packet);
     }
 }

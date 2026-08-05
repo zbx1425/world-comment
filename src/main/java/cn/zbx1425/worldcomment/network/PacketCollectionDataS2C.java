@@ -1,7 +1,7 @@
 package cn.zbx1425.worldcomment.network;
 
 import cn.zbx1425.worldcomment.Main;
-import cn.zbx1425.worldcomment.ServerPlatform;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.ImageDump;
 import cn.zbx1425.worldcomment.gui.CommentListScreen;

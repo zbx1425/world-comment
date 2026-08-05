@@ -2,7 +2,7 @@ package cn.zbx1425.worldcomment.gui;
 
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 #if MC_VERSION >= "12000" import net.minecraft.client.gui.GuiGraphicsExtractor; #else import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor; import com.mojang.blaze3d.vertex.PoseStack; #endif
@@ -70,7 +70,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
     @Override
     public void extractBackground(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam
                                  #if MC_VERSION >= "12002", int mouseX, int mouseY, float partialTick #endif) {
-        ISnGuiGraphics guiGraphics = ISnGuiGraphics.fromGuiParam(guiParam);
+        ISnGuiGraphicsExtractor guiGraphics = ISnGuiGraphicsExtractor.fromGuiParam(guiParam);
         guiGraphics.enableBlend();
         guiGraphics.blitNineSlicedFast(
             ATLAS_LOCATION,
@@ -109,7 +109,7 @@ public class ScreenshotConfigScreen extends Screen implements IGuiCommon {
 
     @Override
     public void extractRenderState(#if MC_VERSION >= "12000" GuiGraphicsExtractor #else PoseStack #endif guiParam, int mouseX, int mouseY, float partialTick) {
-        #if MC_VERSION < "12002" renderBackground(guiParam); #endif
+        #if MC_VERSION < "12002" extractBackground(guiParam); #endif
         super.extractRenderState(guiParam, mouseX, mouseY, partialTick);
     }
 

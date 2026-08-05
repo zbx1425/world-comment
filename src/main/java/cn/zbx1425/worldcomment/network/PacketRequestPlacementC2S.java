@@ -1,11 +1,10 @@
 package cn.zbx1425.worldcomment.network;
 
-import cn.zbx1425.worldcomment.ClientPlatform;
+import cn.zbx1425.worldcomment.platform.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import com.mojang.datafixers.util.Either;
 import io.netty.buffer.Unpooled;
-import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;

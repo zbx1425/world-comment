@@ -10,7 +10,7 @@ import net.minecraft.util.Util;
 
 import java.util.NoSuchElementException;
 
-public interface ISnGuiGraphicsDrawUtil {
+public interface ISnGuiGraphicsExtractorDrawUtil {
 
     default void blitNineSliced(Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10) {
         this.blitNineSliced(var1, var2, var3, var4, var5, var6, var6, var6, var6, var7, var8, var9, var10);
@@ -23,7 +23,7 @@ public interface ISnGuiGraphicsDrawUtil {
     default void blitNineSliced(
             Identifier var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11, int var12, int var13
     ) {
-        ISnGuiGraphics guiGraphics = (ISnGuiGraphics) this;
+        ISnGuiGraphicsExtractor guiGraphics = (ISnGuiGraphicsExtractor) this;
         var6 = Math.min(var6, var4 / 2);
         var8 = Math.min(var8, var4 / 2);
         var7 = Math.min(var7, var5 / 2);
@@ -66,7 +66,7 @@ public interface ISnGuiGraphicsDrawUtil {
             for(IntIterator var15 = slices(var5, var9); var15.hasNext(); var14 += var16) {
                 var16 = var15.nextInt();
                 int var17 = (var9 - var16) / 2;
-                ((ISnGuiGraphics) this).blit(var1, var10, var14, var6 + var13, var7 + var17, var12, var16);
+                ((ISnGuiGraphicsExtractor) this).blit(var1, var10, var14, var6 + var13, var7 + var17, var12, var16);
             }
         }
     }
@@ -75,7 +75,7 @@ public interface ISnGuiGraphicsDrawUtil {
     default void blitNineSlicedFast(Identifier atlasLocation, int x, int y, int width, int height,
                                int uOffset, int vOffset, int uWidth, int vHeight, int texWidth, int texHeight,
                                int padTop, int padRight, int padBottom, int padLeft) {
-        ISnGuiGraphics guiGraphics = (ISnGuiGraphics) this;
+        ISnGuiGraphicsExtractor guiGraphics = (ISnGuiGraphicsExtractor) this;
         if (padTop > 0) {
             guiGraphics.blit(atlasLocation,
                     x, y, padLeft, padTop,
@@ -130,7 +130,7 @@ public interface ISnGuiGraphicsDrawUtil {
     }
 
     default void renderScrollingString(Font var1, Component var2, int var3, int var4, int var5, int var6, int var7) {
-        ISnGuiGraphics guiGraphics = (ISnGuiGraphics) this;
+        ISnGuiGraphicsExtractor guiGraphics = (ISnGuiGraphicsExtractor) this;
         int var8 = var1.width(var2);
         int var9 = (var4 + var6 - 9) / 2 + 1;
         int var10 = var5 - var3;
@@ -141,10 +141,10 @@ public interface ISnGuiGraphicsDrawUtil {
             double var16 = Math.sin(Math.PI / 2 * Math.cos(Math.PI * 2 * var12 / var14)) / 2.0 + 0.5;
             double var18 = Mth.lerp(var16, 0.0, (double)var11);
             guiGraphics.enableScissor(var3, var4, var5, var6);
-            guiGraphics.drawString(var1, var2, var3 - (int)var18, var9, var7);
+            guiGraphics.text(var1, var2, var3 - (int)var18, var9, var7);
             guiGraphics.disableScissor();
         } else {
-            guiGraphics.drawCenteredString(var1, var2, (var3 + var5) / 2, var9, var7);
+            guiGraphics.centeredText(var1, var2, (var3 + var5) / 2, var9, var7);
         }
     }
 

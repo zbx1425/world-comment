@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.network;
 
-import cn.zbx1425.worldcomment.ClientPlatform;
+import cn.zbx1425.worldcomment.platform.ClientPlatform;
 import cn.zbx1425.worldcomment.Main;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;

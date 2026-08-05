@@ -3,7 +3,7 @@ package cn.zbx1425.worldcomment.render;
 import cn.zbx1425.worldcomment.data.client.ClientRayPicking;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.IGuiCommon;
-import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphics;
+import cn.zbx1425.worldcomment.gui.compat.ISnGuiGraphicsExtractor;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
 import net.minecraft.client.KeyMapping;
@@ -43,7 +43,7 @@ public class ControlTipRenderer implements IGuiCommon {
             List.of(TIP_PLACE_COMMENT, TIP_CREATE,
                     TIP_VIEW_MANAGE, TIP_SCROLL, TIP_DETAIL);
 
-    public static void render(ISnGuiGraphics guiGraphics) {
+    public static void render(ISnGuiGraphicsExtractor guiGraphics) {
         update();
         int yOffset = 10;
         for (ControlTip tip : TIPS) {
@@ -110,7 +110,7 @@ public class ControlTipRenderer implements IGuiCommon {
             this.atCursor = false;
         }
 
-        public void render(ISnGuiGraphics guiGraphics, int x, int y) {
+        public void render(ISnGuiGraphicsExtractor guiGraphics, int x, int y) {
             Font font = Minecraft.getInstance().font;
             int innerWidth = 20 + 4 + font.width(text.get());
             if (atCursor) {
@@ -130,15 +130,15 @@ public class ControlTipRenderer implements IGuiCommon {
                 Component keyMessage = key.getTranslatedKeyMessage();
                 int keyMessageWidth = font.width(keyMessage);
                 if (keyMessageWidth < 30) {
-                    guiGraphics.drawCenteredString(font, keyMessage, x + 10, y + 10 - 4, 0xFFFFECB3);
+                    guiGraphics.centeredText(font, keyMessage, x + 10, y + 10 - 4, 0xFFFFECB3);
                 } else {
                     guiGraphics.enableScissor(x, y, x + 20, y + 20);
                     int xOffset = (int)((System.currentTimeMillis() / 50) % (keyMessageWidth + 40));
-                    guiGraphics.drawString(font, keyMessage, x - xOffset + 20, y + 10 - 4, 0xFFFFECB3);
+                    guiGraphics.text(font, keyMessage, x - xOffset + 20, y + 10 - 4, 0xFFFFECB3);
                     guiGraphics.disableScissor();
                 }
             }
-            guiGraphics.drawString(font, text.get(), x + 20 + 4, y + 10 - 4, 0xFFFFFFFF, true);
+            guiGraphics.text(font, text.get(), x + 20 + 4, y + 10 - 4, 0xFFFFFFFF, true);
         }
     }
 

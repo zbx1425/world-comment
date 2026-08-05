@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.fabric;
+package cn.zbx1425.worldcomment.platform.fabric;
 
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.Registry;

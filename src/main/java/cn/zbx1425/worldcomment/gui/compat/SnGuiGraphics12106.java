@@ -15,20 +15,20 @@ import java.util.Optional;
 
 #if MC_VERSION >= "12106"
 
-public class SnGuiGraphics12106 implements ISnGuiGraphics {
+public class SnGuiGraphicsExtractor12106 implements ISnGuiGraphicsExtractor {
 
     private GuiGraphicsExtractor sink;
     private int currentColor = -1;
 
-    private static SnGuiGraphics12106 INSTANCE = null;
+    private static SnGuiGraphicsExtractor12106 INSTANCE = null;
 
-    private SnGuiGraphics12106(GuiGraphicsExtractor sink) {
+    private SnGuiGraphicsExtractor12106(GuiGraphicsExtractor sink) {
         this.sink = sink;
     }
 
-    public static SnGuiGraphics12106 withGuiParam(GuiGraphicsExtractor sink) {
+    public static SnGuiGraphicsExtractor12106 withGuiParam(GuiGraphicsExtractor sink) {
         if (INSTANCE == null) {
-            INSTANCE = new SnGuiGraphics12106(sink);
+            INSTANCE = new SnGuiGraphicsExtractor12106(sink);
         } else {
             INSTANCE.sink = sink;
         }

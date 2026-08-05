@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "cn.zbx1425.worldcomment.fabric.mixin",
+  "package": "cn.zbx1425.worldcomment.platform.fabric.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
     "AtlasManagerMixin"

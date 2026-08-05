@@ -1,4 +1,4 @@
-package cn.zbx1425.worldcomment.fabric;
+package cn.zbx1425.worldcomment.platform.fabric;
 
 #if MC_VERSION >= "12100"
 import io.netty.buffer.ByteBuf;
