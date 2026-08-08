@@ -10,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -24,6 +25,10 @@ public class ServerPlatformImpl {
 
     public static boolean isFabric() {
         return false;
+    }
+
+    public static boolean isProduction() {
+        return FMLEnvironment.isProduction();
     }
 
     public static void registerPacket(Identifier resourceLocation) {

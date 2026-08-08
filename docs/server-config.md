@@ -25,7 +25,6 @@
 | `commentVisibilityCriteria` | string | `"preference"` | 评论可见性策略。`always` / `never` / `preference` |
 | `markerVisibilityCriteria` | string | `"always"` | 标记物可见性策略。同上 |
 | `defaultCommentVisibilityPreference` | boolean | `false` | 新玩家加入时的默认可见性偏好 |
-| `screenshotKeyTriggersComment` | boolean | `true` | 截图快捷键是否触发评论界面 |
 
 ---
 
@@ -242,12 +241,20 @@
 
 `cdnImageTransform` 用于在显示时在 CDN 层生成不同尺寸的图片 URL，而只需存储一份。使用以下模板变量：
 
-| 变量 | 说明 |
-|------|------|
-| `{path}` | 原始图片路径（不含前导 `/`） |
-| `{width}` | 目标宽度（像素） |
-| `{quality}` | 目标质量 (1-100) |
-| `{quality_frac}` | 目标质量 (0.00-1.00) |
+| 变量            | 说明                             |
+|---------------|--------------------------------|
+| `{path}`      | 原始图片路径（不含前导 `/`）               |
+| `{width}`     | 目标宽度（像素）                       |
+| `{quality}`   | 目标质量 (1-100)                   |
+| `{0.quality}` | 目标质量 (0.00-1.00)               |
+| `{variant}`   | 变体标签 `src` / `mid` / `thumb`   |
+| `{.variant}`  | 带点的变体后缀 `` / `.mid` / `.thumb` |
+| `{dir}`       | 文件夹（不含后缀 `/`）                  |
+| `{fileName.ext}` | 文件名及扩展名                        |
+| `{fileName}` | 文件名不含扩展名                       |
+| `{.ext}` | 扩展名含点，或当无扩展名时 ``               |
+| `{ext}` | 扩展名不含点，或当无扩展名时 ``              |
+
 
 这项服务通常额外计费，请检查具体提供商的计费策略。
 

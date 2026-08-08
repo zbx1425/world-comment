@@ -12,13 +12,14 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
-import java.util.function.BiConsumer;
+import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
 
 public class SubmitDispatcher {
 
     private static final Long2ObjectMap<SubmitJob> pendingJobs = new Long2ObjectOpenHashMap<>();
 
-    public static long addJob(CommentEntry comment, byte[] imageBytes, BiConsumer<SubmitJob, Throwable> callback) {
+    public static long addJob(CommentEntry comment, byte[] imageBytes, Consumer<SubmitStageEvent> callback) {
         SubmitJob job = new SubmitJob(comment, imageBytes, callback, MainClient.CLIENT_CONFIG);
         addJob(comment.id, job);
         return comment.id;
@@ -37,13 +38,13 @@ public class SubmitDispatcher {
                     new CommentAffinityInfo(job.comment),
                     jobId
             )
-                    .thenAccept(commentImage -> {
-                        job.setImage(commentImage);
+                    .thenAccept(outcome -> {
+                        job.acceptUploadOutcome(outcome);
                         trySendPackage(jobId);
                     })
                     .exceptionally(ex -> {
                         Main.LOGGER.error("Upload Image", ex);
-                        if (job.callback != null) job.callback.accept(job, ex);
+                        if (job.callback != null) job.callback.accept(new SubmitStageEvent.UploaderFailed(unwrapCause(ex)));
                         if (job.uploaderToUse.isEmpty()) {
                             removeJob(jobId);
                         } else {
@@ -94,12 +95,17 @@ public class SubmitDispatcher {
         SubmitJob job = pendingJobs.get(jobId);
         if (job.isReady()) {
             PacketEntryCreateC2S.ClientLogics.send(job.comment);
-            if (job.callback != null) job.callback.accept(null, null);
+            if (job.callback != null) job.callback.accept(new SubmitStageEvent.Sent(job.uploadWarnings()));
             removeJob(jobId);
         } else {
             if (job.imageBytes != null && !job.imageReady) {
-                if (job.callback != null) job.callback.accept(job, null);
+                if (job.callback != null) job.callback.accept(new SubmitStageEvent.WaitingForUpload());
             }
         }
+    }
+
+    private static Throwable unwrapCause(Throwable ex) {
+        return (ex instanceof CompletionException cex && cex.getCause() != null)
+                ? cex.getCause() : ex;
     }
 }

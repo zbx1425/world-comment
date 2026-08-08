@@ -12,21 +12,9 @@ public record CdnTransformConfig(@NonNull String template) {
         return !template.isEmpty();
     }
 
-    public String apply(String sourceUrl, int width, int quality) {
-        if (!isEnabled()) return sourceUrl;
-        try {
-            URI uri = URI.create(sourceUrl);
-            String path = uri.getPath();
-            String pathNoLeadingSlash = path.startsWith("/") ? path.substring(1) : path;
-            String transformed = template
-                .replace("{path}", pathNoLeadingSlash)
-                .replace("{width}", Integer.toString(width))
-                .replace("{quality}", Integer.toString(quality))
-                .replace("{quality_frac}", String.format("%.2f", quality / 100f));
-            return sourceUrl.replace(path, transformed);
-        } catch (Exception e) {
-            return sourceUrl;
-        }
+    public String apply(URI sourceUrl, ImageFilePurpose variant, ImageVariantConfig.VariantSpec variantSpec) {
+        if (!isEnabled()) return sourceUrl.toString();
+        return UrlTemplate.transformCdn(template, sourceUrl, variant, variantSpec);
     }
 
     public static CdnTransformConfig fromJson(JsonObject uploaderConfig) {

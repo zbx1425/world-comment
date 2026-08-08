@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.platform.fabric;
 //? if fabric {
 
 /*import cn.zbx1425.worldcomment.platform.ServerPlatform;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -19,6 +20,10 @@ public class ServerPlatformImpl {
 
     public static boolean isFabric() {
         return true;
+    }
+
+    public static boolean isProduction() {
+        return !FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     public static void registerPacket(Identifier resourceLocation) {

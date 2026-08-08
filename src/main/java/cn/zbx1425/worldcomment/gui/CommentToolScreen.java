@@ -5,19 +5,17 @@ import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
-import cn.zbx1425.worldcomment.data.network.upload.ModerationException;
+import cn.zbx1425.worldcomment.data.network.SubmitStageEvent;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
 import cn.zbx1425.worldcomment.network.PacketRequestPlacementC2S;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 //? if >=1.20
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 //? if <1.20
 //import cn.zbx1425.worldcomment.util.compat.GuiGraphicsExtractor;
-import com.mojang.blaze3d.vertex.PoseStack;
 //? if <1.20.3
 //import cn.zbx1425.worldcomment.util.compat.Checkbox;
 import net.minecraft.client.gui.components.*;
@@ -31,7 +29,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.CompletionException;
 
 public class CommentToolScreen extends Screen implements IGuiCommon {
 
@@ -223,36 +220,30 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             );
             long jobId = SubmitDispatcher.addJob(
                     comment, checkBoxNoImage.selected() ? null : imageBytes,
-                    (job, exOut) -> Minecraft.getInstance().execute(() -> {
-                        if (job == null) {
-                            player.sendSystemMessage(
-                                    Component.translatable("gui.worldcomment.send_finish"));
-                            if (!MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference) {
-                                player.sendSystemMessage(Component.translatable("gui.worldcomment.send_finish_but_hidden"));
-                            }
-                        } else {
-                            Throwable ex = exOut;
-                            if (ex != null) {
-                                if (ex instanceof CompletionException cex) ex = cex.getCause();
-                                if (ex instanceof ModerationException mex) {
-                                    switch (mex.code()) {
-                                        case MODERATION_ERROR -> player.sendSystemMessage(
-                                            Component.translatable("gui.worldcomment.send_fail.moderation_error", mex.getMessage()));
-                                        case MODERATION_REJECTED -> player.sendSystemMessage(
-                                            Component.translatable("gui.worldcomment.send_fail.moderation_rejected", mex.getMessage()));
-                                    }
-                                } else {
-                                    player.sendSystemMessage(
-                                        Component.translatable("gui.worldcomment.send_fail",
-                                            ex.getClass().getName() + ": " + ex.getMessage()));
+                    event -> Minecraft.getInstance().execute(() -> {
+                        switch (event) {
+                            case SubmitStageEvent.Sent(var warnings) -> {
+                                player.sendSystemMessage(
+                                        Component.translatable("gui.worldcomment.send_finish"));
+                                for (var w : warnings) {
+                                    player.sendSystemMessage(w.message());
                                 }
-                            } else {
+                                if (!MainClient.CLIENT_CONFIG.perServerPreference.commentVisibilityPreference) {
+                                    player.sendSystemMessage(Component.translatable("gui.worldcomment.send_finish_but_hidden"));
+                                }
+                            }
+                            case SubmitStageEvent.WaitingForUpload() -> {
                                 player.sendSystemMessage(
                                         Component.translatable("gui.worldcomment.send_upload_incomplete"));
                             }
+                            case SubmitStageEvent.UploaderFailed(var cause) -> {
+                                player.sendSystemMessage(
+                                        Component.translatable("gui.worldcomment.send_fail",
+                                                cause.getClass().getName() + ": " + cause.getMessage()));
+                            }
                         }
-                    }
-            ));
+                    })
+            );
             if (!withPlacingDown) {
                 boolean placedOnGround = SubmitDispatcher.placeJobAtSnapping(
                     jobId,

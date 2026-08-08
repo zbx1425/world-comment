@@ -1,10 +1,13 @@
 package cn.zbx1425.worldcomment.data.network;
 
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.network.upload.CdnTransformConfig;
+import cn.zbx1425.worldcomment.data.network.upload.ImageFilePurpose;
 import cn.zbx1425.worldcomment.data.network.upload.ImageVariantConfig;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
+import java.net.URI;
 import java.util.Map;
 
 public class ImageUrlResolver {
@@ -41,15 +44,35 @@ public class ImageUrlResolver {
         boolean cdnEnabled = cdn != null && cdn.isEnabled();
 
         if (cdnEnabled) {
-            if (imageUsagePurpose == ImageUsagePurpose.THUMBNAIL) {
-                ImageVariantConfig.VariantSpec spec = variantConfig.hasThumbnail()
-                        ? variantConfig.thumbnail() : variantConfig.detail();
-                return cdn.apply(image.sourceUrl, spec.maxWidth(), spec.quality());
+            try {
+                String cdnResult = null;
+                URI sourceUrl = URI.create(image.sourceUrl);
+                if (imageUsagePurpose == ImageUsagePurpose.THUMBNAIL) {
+                    ImageVariantConfig.VariantSpec spec = variantConfig.hasThumbnail()
+                            ? variantConfig.thumbnail() : variantConfig.detail();
+                    ImageFilePurpose fileThatMayExist = variantConfig.hasThumbnail()
+                            ? ImageFilePurpose.THUMBNAIL
+                            : (variantConfig.hasArchive()
+                                ? ImageFilePurpose.MEDIUM
+                                : ImageFilePurpose.SOURCE);
+                    cdnResult = cdn.apply(sourceUrl, fileThatMayExist, spec);
+                }
+                if (imageUsagePurpose == ImageUsagePurpose.DETAIL && variantConfig.hasArchive()) {
+                    cdnResult = cdn.apply(sourceUrl, ImageFilePurpose.MEDIUM, variantConfig.detail());
+                }
+                // !hasArchive + DETAIL: source is already detail quality, skip CDN
+
+                if (cdnResult != null && !cdnResult.isEmpty()) {
+                    try {
+                        return sourceUrl.resolve(cdnResult).toString();
+                    } catch (IllegalArgumentException e) {
+                        Main.LOGGER.warn("Exception when parsing cdnImageTransform result", e);
+                        return cdnResult;
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                Main.LOGGER.warn("Exception when parsing image.sourceUrl", e);
             }
-            if (imageUsagePurpose == ImageUsagePurpose.DETAIL && variantConfig.hasArchive()) {
-                return cdn.apply(image.sourceUrl, variantConfig.detail().maxWidth(), variantConfig.detail().quality());
-            }
-            // !hasArchive + DETAIL: source is already detail quality, skip CDN
         }
 
         // Fallback: pick the best available URL

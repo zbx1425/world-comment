@@ -39,7 +39,7 @@ public abstract class ImageUploader {
     }
 
     public String resolveFilename(long commentId, CommentAffinityInfo info, ImageFilePurpose variant) {
-        return UrlTemplate.transform(filenameFormat, commentId, info, variant) + ".webp";
+        return UrlTemplate.transformUpload(filenameFormat, commentId, info, variant) + ".webp";
     }
 
     public abstract CompletableFuture<UploadResult> uploadImage(

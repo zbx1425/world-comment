@@ -77,8 +77,8 @@
   "gui.worldcomment.send_finish": "§aYour message is sent successfully.",
   "gui.worldcomment.send_finish_but_hidden": "§c§lBut: §r§cYou won't see it after a few seconds because your settings hide all comments.\nWe're showing it briefly now so you know it went through.\nYou can change this in your settings.",
   "gui.worldcomment.send_fail": "§c§lError occurred while processing your message: %s\n  §c§lError occurred while processing your message.",
-  "gui.worldcomment.send_fail.moderation_error": "§c§lAn error occurred while processing your message: An internal error occurred during automatic moderation by the cloud storage service provider.\nTechnical information: %s",
-  "gui.worldcomment.send_fail.moderation_rejected": "§c§lThe automatic moderation by the cloud storage service provider has rejected your image, possibly because it was deemed to contain sensitive text or visual content.\nTechnical information: %s",
+  "gui.worldcomment.upload_warning.moderation_error": "§cAn internal error occurred during automatic moderation by the cloud storage provider.\n§fTechnical info: %s\n§aHowever, you can still send this comment as normal. An admin may manually process your image later to make it visible.",
+  "gui.worldcomment.upload_warning.moderation_rejected": "§cThe cloud storage provider's automatic moderation has rejected your image, possibly because it was deemed to contain sensitive text or visual content.\n§fTechnical info: %s\n§aHowever, you can still send this comment as normal. An admin may manually process your image later to make it visible.",
   "gui.worldcomment.image_global_kill_feedback": "Image global kill switch has been set to %s.",
 
   "key.worldcomment.send_comment_modifier": "WorldComment: Send / Modifier"

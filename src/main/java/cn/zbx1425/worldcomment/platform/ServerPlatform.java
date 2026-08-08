@@ -26,6 +26,10 @@ public class ServerPlatform {
         return false;
     }
 
+    public static boolean isProduction() {
+        return ServerPlatformImpl.isProduction();
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> DataComponentType<T> createDataComponentType(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
         return (DataComponentType<T>) DataComponentType.builder().persistent((Codec<Object>)codec)

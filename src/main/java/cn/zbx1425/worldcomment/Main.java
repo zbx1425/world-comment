@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.network.RequestContext;
 import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
 import cn.zbx1425.worldcomment.item.PlaceableCommentItem;
@@ -27,7 +28,7 @@ public class Main {
 
 	public static ServerConfig SERVER_CONFIG = new ServerConfig();
 
-	public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+	public static final HttpClient HTTP_CLIENT = RequestContext.createHttpClient();
 	public static final Executor IO_EXECUTOR = Executors.newCachedThreadPool();
 
 	public static final RegistryObject<CommentToolItem> ITEM_COMMENT_TOOL = new RegistryObject<>(CommentToolItem::new);

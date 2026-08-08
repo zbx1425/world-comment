@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.data.network.upload;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -11,7 +12,7 @@ public class UrlTemplate {
     private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final Random RANDOM = new Random();
 
-    public static String transform(String template, long commentId, CommentAffinityInfo comment, ImageFilePurpose variant) {
+    public static String transformUpload(String template, long commentId, CommentAffinityInfo comment, ImageFilePurpose variant) {
         LocalDateTime now = LocalDateTime.now();
 
         return PATTERN.matcher(template).replaceAll(match -> {
@@ -41,6 +42,48 @@ public class UrlTemplate {
                 case "d" -> now.format(DateTimeFormatter.ofPattern("dd"));
                 case "timestamp" -> Long.toString(System.currentTimeMillis() / 1000);
                 case "uniqid" -> generateUniqid();
+                default -> match.group(0);
+            };
+        });
+    }
+
+    public static String transformCdn(String template, URI sourceUrl, ImageFilePurpose variant, ImageVariantConfig.VariantSpec variantSpec) {
+        String path = sourceUrl.getPath();
+        String pathNoLeadingSlash = path.startsWith("/") ? path.substring(1) : path;
+
+        int lastSlashIdx = pathNoLeadingSlash.lastIndexOf('/');
+        String dir = lastSlashIdx >= 0 ? pathNoLeadingSlash.substring(0, lastSlashIdx) : "";
+        String fileNameExt = lastSlashIdx >= 0 ? pathNoLeadingSlash.substring(lastSlashIdx + 1) : pathNoLeadingSlash;
+
+        int lastDotIdx = fileNameExt.lastIndexOf('.');
+        String fileName;
+        String dotExt;
+        String ext;
+        if (lastDotIdx > 0) {
+            fileName = fileNameExt.substring(0, lastDotIdx);
+            dotExt = fileNameExt.substring(lastDotIdx);          // 包含点
+            ext = fileNameExt.substring(lastDotIdx + 1);         // 不含点
+        } else {
+            fileName = fileNameExt;
+            dotExt = "";
+            ext = "";
+        }
+
+        return PATTERN.matcher(template).replaceAll(match -> {
+            String key = match.group(1);
+
+            return switch (key) {
+                case "path" -> pathNoLeadingSlash;
+                case "dir" -> dir;
+                case "fileName.ext" -> fileNameExt;
+                case "fileName" -> fileName;
+                case ".ext" -> dotExt;
+                case "ext" -> ext;
+                case "variant" -> variant.fileTag();
+                case ".variant" -> variant.dotFileTag();
+                case "width" -> Integer.toString(variantSpec.maxWidth());
+                case "quality" -> Integer.toString(variantSpec.quality());
+                case "0.quality" -> String.format("%.2f", variantSpec.quality() / 100f);
                 default -> match.group(0);
             };
         });

@@ -91,53 +91,56 @@ public class S3PreSignedUploader extends ImageUploader {
         return future;
     }
 
-    public CompletableFuture<Void> uploadToS3(String presignedUrl, byte[] webpData) {
+    public CompletableFuture<List<UploadOutcome.Warning>> uploadToS3(String presignedUrl, byte[] webpData) {
         return CompletableFuture.supplyAsync(() ->
                 ImageUploader.requestBuilder(URI.create(presignedUrl))
                         .header("Content-Type", "image/webp")
                         .PUT(HttpRequest.BodyPublishers.ofByteArray(webpData))
                         .build(), Main.IO_EXECUTOR)
                 .thenCompose(request -> Main.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
-                .thenAccept(response -> {
+                .thenApply(response -> {
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
                         throw new CompletionException(new IOException(
                                 "S3 upload failed: " + response.statusCode() + " " + response.body()));
                     }
 
+                    List<UploadOutcome.Warning> warnings = new ArrayList<>();
+
                     // "S3ish" reverse proxy support
                     Optional<String> s3ishStatus = response.headers().firstValue("x-s3ish-status");
                     if (s3ishStatus.isPresent() && s3ishStatus.get().equals("rejected")) {
+                        JsonObject errorJsonObj;
                         try {
-                            JsonObject errorJsonObj = JsonParser.parseString(response.body()).getAsJsonObject();
-                            switch (errorJsonObj.get("code").getAsString().toUpperCase(Locale.ROOT)) {
-                                case "MODERATION_ERROR" -> throw new CompletionException(
-                                    new ModerationException(ModerationException.Code.MODERATION_ERROR,
-                                        errorJsonObj.get("message").getAsString()
-                                    ));
-                                case "MODERATION_REJECTED" -> throw new CompletionException(
-                                    new ModerationException(ModerationException.Code.MODERATION_REJECTED,
-                                        errorJsonObj.get("message").getAsString()
-                                    ));
-                            }
+                            errorJsonObj = JsonParser.parseString(response.body()).getAsJsonObject();
                         } catch (Exception ex) {
-                            throw new CompletionException(new ModerationException(ModerationException.Code.MODERATION_ERROR, ex.toString()));
+                            warnings.add(new ModerationWarning(ModerationWarning.Code.MODERATION_ERROR, ex.toString()));
+                            return warnings;
+                        }
+                        switch (errorJsonObj.get("code").getAsString().toUpperCase(Locale.ROOT)) {
+                            case "MODERATION_ERROR" -> warnings.add(new ModerationWarning(
+                                    ModerationWarning.Code.MODERATION_ERROR,
+                                    errorJsonObj.get("message").getAsString()));
+                            case "MODERATION_REJECTED" -> warnings.add(new ModerationWarning(
+                                    ModerationWarning.Code.MODERATION_REJECTED,
+                                    errorJsonObj.get("message").getAsString()));
                         }
                     }
+                    return warnings;
                 });
     }
 
     public PreSignResponse performPreSign(long commentId, CommentAffinityInfo comment, ImageVariantConfig variantConfig) throws Exception {
         List<PreSignedSlot> slots = new ArrayList<>();
 
-        String sourcePath = UrlTemplate.transform(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.SOURCE) + ".webp";
+        String sourcePath = UrlTemplate.transformUpload(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.SOURCE) + ".webp";
         slots.add(makeSlot(ImageFilePurpose.SOURCE, sourcePath));
 
         if (variantConfig.hasArchive() && !hasCdnTransform()) {
-            String mediumPath = UrlTemplate.transform(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.MEDIUM) + ".webp";
+            String mediumPath = UrlTemplate.transformUpload(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.MEDIUM) + ".webp";
             slots.add(makeSlot(ImageFilePurpose.MEDIUM, mediumPath));
         }
         if (variantConfig.hasThumbnail() && !hasCdnTransform()) {
-            String thumbPath = UrlTemplate.transform(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.THUMBNAIL) + ".webp";
+            String thumbPath = UrlTemplate.transformUpload(serverConfig.pathFormat, commentId, comment, ImageFilePurpose.THUMBNAIL) + ".webp";
             slots.add(makeSlot(ImageFilePurpose.THUMBNAIL, thumbPath));
         }
 
@@ -149,7 +152,7 @@ public class S3PreSignedUploader extends ImageUploader {
                 "PUT", serverConfig.s3Endpoint, serverConfig.s3Bucket, objectKey,
                 serverConfig.s3Region, serverConfig.s3AccessKeyId, serverConfig.s3SecretAccessKey, 900
         );
-        String accessUrl = serverConfig.cdnBaseUrl + "/" + objectKey;
+        String accessUrl = serverConfig.cdnBaseUrl + (serverConfig.cdnBaseUrl.endsWith("/") ? "" : "/") + objectKey;
         return new PreSignedSlot(purpose, uploadUrl, accessUrl);
     }
 
@@ -200,7 +203,9 @@ public class S3PreSignedUploader extends ImageUploader {
         String baseUrl;
         if (endpoint != null && !endpoint.isEmpty()) {
             URI endpointUri = new URI(endpoint);
-            host = bucketName + "." + endpointUri.getHost();
+            String portlessHost = bucketName + "." + endpointUri.getHost();
+            String portSegment = endpointUri.getPort() == -1 ? "" : ":" + endpointUri.getPort();
+            host = portlessHost + portSegment;
             baseUrl = endpointUri.getScheme() + "://" + host;
         } else {
             host = bucketName + ".s3." + region + ".amazonaws.com";

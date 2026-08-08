@@ -30,7 +30,6 @@ public class ClientConfig {
         public ServerConfig.Visibility commentVisibilityCriteria;
         public ServerConfig.Visibility markerVisibilityCriteria;
         public boolean imageGlobalKill;
-        public boolean screenshotKeyTriggersComment;
         public boolean defaultCommentVisibilityPreference;
 
         public ServerIssuedConfig() {
@@ -41,7 +40,6 @@ public class ClientConfig {
             commentVisibilityCriteria = ServerConfig.Visibility.PREFERENCE;
             markerVisibilityCriteria = ServerConfig.Visibility.ALWAYS;
             imageGlobalKill = false;
-            screenshotKeyTriggersComment = true;
             defaultCommentVisibilityPreference = true;
         }
 
@@ -67,7 +65,6 @@ public class ClientConfig {
             commentVisibilityCriteria = packet.readEnum(ServerConfig.Visibility.class);
             markerVisibilityCriteria = packet.readEnum(ServerConfig.Visibility.class);
             imageGlobalKill = packet.readBoolean();
-            screenshotKeyTriggersComment = packet.readBoolean();
             defaultCommentVisibilityPreference = packet.readBoolean();
         }
 
@@ -84,7 +81,6 @@ public class ClientConfig {
             commentVisibilityCriteria = serverConfig.commentVisibilityCriteria.value;
             markerVisibilityCriteria = serverConfig.markerVisibilityCriteria.value;
             imageGlobalKill = serverConfig.imageGlobalKill.value;
-            screenshotKeyTriggersComment = serverConfig.screenshotKeyTriggersComment.value;
             defaultCommentVisibilityPreference = serverConfig.defaultCommentVisibilityPreference.value;
         }
 
@@ -106,7 +102,6 @@ public class ClientConfig {
             packet.writeEnum(commentVisibilityCriteria);
             packet.writeEnum(markerVisibilityCriteria);
             packet.writeBoolean(imageGlobalKill);
-            packet.writeBoolean(screenshotKeyTriggersComment);
             packet.writeBoolean(defaultCommentVisibilityPreference);
         }
     }
