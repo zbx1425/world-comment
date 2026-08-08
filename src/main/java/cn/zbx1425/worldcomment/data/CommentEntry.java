@@ -21,6 +21,11 @@ public class CommentEntry {
 
     public static int REGION_SHIFT = 2;
     public static final int MESSAGE_MAX_LENGTH = 256;
+    public static final int HIGH_EMOJI_BASE_ID = 65472;
+
+    public static boolean isMarkerType(int messageType) {
+        return messageType >= HIGH_EMOJI_BASE_ID;
+    }
 
     public static UUID SYSTEM_MESSAGE_MAGIC_INITIATOR = UUID.fromString("21b8b366-0adf-44ef-b93c-c6ec8377fa26");
 

@@ -4,7 +4,6 @@ import cn.zbx1425.worldcomment.Main;
 //? if >=1.20 {
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.mixin.KeyMappingAccessor;
@@ -107,7 +106,7 @@ public class CommentToolItem extends Item implements GroupedItem {
                 + Component.translatable("gui.worldcomment.instruction.list_header").getString() + "\n"
                 + Component.translatable("gui.worldcomment.instruction.list_content").getString();
             return CommentEntry.createSystemMessage(
-                EmojiRegistry.HIGH_EMOJI_BASE_ID,
+                CommentEntry.HIGH_EMOJI_BASE_ID,
                 usageHelpContent,
                 Component.translatable("gui.worldcomment.instruction.title").getString()
             );

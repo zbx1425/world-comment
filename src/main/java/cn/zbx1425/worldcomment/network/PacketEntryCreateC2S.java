@@ -34,6 +34,15 @@ public class PacketEntryCreateC2S {
         if (!comment.initiator.equals(initiator.getGameProfile().id())) return;
         if (comment.message.length() > CommentEntry.MESSAGE_MAX_LENGTH) return;
         if (CommentCommand.isCommand(comment) && !initiator.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) return;
+        if (CommentEntry.isMarkerType(comment.messageType)) {
+            boolean allowed = switch (Main.SERVER_CONFIG.allowMarkerUsage.value) {
+                case OP -> initiator.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+                case CREATIVE -> initiator.isCreative()
+                    || initiator.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+                case ALL -> true;
+            };
+            if (!allowed) return;
+        }
         Main.DATABASE.insert(comment, false);
     }
 }

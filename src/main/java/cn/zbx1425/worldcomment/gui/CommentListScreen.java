@@ -675,7 +675,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
             // --- Comment text ---
             if (!comment.message.isEmpty()) {
                 List<SizedFormattedText> lines = SizedFormattedText.splitLines(comment.message, font, contentWidth, Style.EMPTY,
-                    comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID, true);
+                    CommentEntry.isMarkerType(comment.messageType), true);
                 for (SizedFormattedText line : lines) {
                     guiGraphics.pushPose();
                     guiGraphics.translate(contentLeft, y, 0);

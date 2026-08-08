@@ -57,7 +57,7 @@ public class WidgetCommentEntry extends AbstractWidget implements IGuiCommon {
         int picWidth = (comment.image.sourceUrl.isEmpty() || !showImage) ? 0 : ((width - 20) / 3);
         int textWidth = width - 20 - picWidth - (picWidth > 0 ? 4 : 0);
         wrappedText = SizedFormattedText.splitLines(comment.message, font, textWidth, Style.EMPTY,
-            comment.messageType >= EmojiRegistry.HIGH_EMOJI_BASE_ID, false);
+            CommentEntry.isMarkerType(comment.messageType), false);
         int textHeight = 0;
         for (SizedFormattedText formattedText : wrappedText) {
             textHeight += (int) (9 * formattedText.sizeModifier);

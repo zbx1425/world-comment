@@ -25,10 +25,13 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
+import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public class CommentToolScreen extends Screen implements IGuiCommon {
 
@@ -77,7 +80,13 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
             OffHeapAllocator.free(offHeapBuffer);
         }
 
-        this.emojiPanel = new WidgetEmojiPanel(MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2, _ -> updateBtnSendFeedback());
+        int[] baseIds = EmojiRegistry.INSTANCE.getSpriteIds();
+        int[] markerIds = MainClient.CLIENT_CONFIG.canAccessBuildMarkers(Minecraft.getInstance())
+            ? EmojiRegistry.INSTANCE.getMarkerSpriteIds()
+            : new int[0];
+        int[] displayIds = Arrays.copyOf(baseIds, baseIds.length + markerIds.length);
+        System.arraycopy(markerIds, 0, displayIds, baseIds.length, markerIds.length);
+        this.emojiPanel = new WidgetEmojiPanel(displayIds, MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2, _ -> updateBtnSendFeedback());
         this.textBoxMessage = new MultiLineEditBox.Builder()
             .setPlaceholder(Component.translatable("gui.worldcomment.message"))
             .build(font, MAIN_WIDTH, (ROOT_HEIGHT - 14 - 26) / 2, CommonComponents.EMPTY);

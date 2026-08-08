@@ -1,7 +1,10 @@
 package cn.zbx1425.worldcomment.gui;
 
+import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.client.EmojiRegistry;
 import cn.zbx1425.worldcomment.gui.compat.ISnGuiCanvas;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -13,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 
 public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCommon {
@@ -25,6 +29,8 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
 
     private static final int ITEM_PADDING = 2;
 
+    private final int[] displayIds;
+
     private int columns;
     private int realPaddingX;
     private int contentHeight;
@@ -32,8 +38,9 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
 
     private IntConsumer onSelectionChange;
 
-    public WidgetEmojiPanel(int width, int height, IntConsumer onSelectionChange) {
+    public WidgetEmojiPanel(int[] displayIds, int width, int height, IntConsumer onSelectionChange) {
         super(0, 0, width, height, CommonComponents.EMPTY, defaultSettings(ITEM_SIZE / 2));
+        this.displayIds = displayIds;
         this.onSelectionChange = onSelectionChange;
         this.repositionEntries();
         this.refreshScrollAmount();
@@ -55,9 +62,10 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
         int logicMouseX = mouseX - getX();
         int logicMouseY = mouseY - getY() + (int)scrollAmount();
 
-        for (int id : EmojiRegistry.INSTANCE.getSpriteIds()) {
-            int row = (id - 1) / columns;
-            int col = (id - 1) % columns;
+        for (int i = 0; i < displayIds.length; i++) {
+            int id = displayIds[i];
+            int row = i / columns;
+            int col = i % columns;
 
             int cellX = (col * (ITEM_SIZE + ITEM_SPACING_X)) + realPaddingX;
             int cellY = (row * (ITEM_SIZE + ITEM_SPACING_Y)) + PADDING_Y;
@@ -77,7 +85,14 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
                         0xFFDDDD99
                     );
                 }
-                graphics.setTooltipForNextFrame(Component.translatable("gui.worldcomment.comment_type." + id), mouseX, mouseY);
+                if (CommentEntry.isMarkerType(id)) {
+                    graphics.setTooltipForNextFrame(Minecraft.getInstance().font, List.of(
+                        Component.translatable("gui.worldcomment.comment_type." + id),
+                        Component.translatable("gui.worldcomment.emoji_category.marker").withStyle(ChatFormatting.GOLD)
+                    ), Optional.empty(), mouseX, mouseY);
+                } else {
+                    graphics.setTooltipForNextFrame(Component.translatable("gui.worldcomment.comment_type." + id), mouseX, mouseY);
+                }
             }
 
             graphics.blitSprite(RenderPipelines.GUI_TEXTURED, EmojiRegistry.INSTANCE.getSprite(id),
@@ -92,7 +107,7 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
     protected void repositionEntries() {
         columns = (width - PADDING_X * 2 - scrollbarWidth() - ITEM_SIZE) / (ITEM_SIZE + ITEM_SPACING_X) + 1;
         realPaddingX = (width - scrollbarWidth() - (ITEM_SIZE + (ITEM_SIZE + ITEM_SPACING_X) * (columns - 1))) / 2;
-        contentHeight = ((int)Math.ceil(EmojiRegistry.INSTANCE.getSpriteIds().length / (float)columns) - 1) * (ITEM_SIZE + ITEM_SPACING_Y)
+        contentHeight = ((int)Math.ceil(displayIds.length / (float)columns) - 1) * (ITEM_SIZE + ITEM_SPACING_Y)
             + ITEM_SIZE + PADDING_Y * 2;
     }
 
@@ -111,9 +126,10 @@ public class WidgetEmojiPanel extends AbstractContainerWidget implements IGuiCom
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int logicMouseX = (int)event.x() - getX();
         int logicMouseY = (int)event.y() - getY() + (int)scrollAmount();
-        for (int id : EmojiRegistry.INSTANCE.getSpriteIds()) {
-            int row = (id - 1) / columns;
-            int col = (id - 1) % columns;
+        for (int i = 0; i < displayIds.length; i++) {
+            int id = displayIds[i];
+            int row = i / columns;
+            int col = i % columns;
             int cellX = (col * (ITEM_SIZE + ITEM_SPACING_X)) + realPaddingX;
             int cellY = (row * (ITEM_SIZE + ITEM_SPACING_Y)) + PADDING_Y;
             if (cellX <= logicMouseX && cellX + ITEM_SIZE >= logicMouseX
