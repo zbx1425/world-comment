@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.data.network.upload;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -29,11 +30,16 @@ public class UrlTemplate {
 
             return switch (key) {
                 case "id" -> String.format("%016x", commentId);
+                case "ID" -> String.format("%016X", commentId);
                 case "variant" -> variant.fileTag();
                 case ".variant" -> variant.dotFileTag();
                 case "initiator" -> comment.initiator.toString();
                 case "initiatorName" -> {
                     String sanitized = comment.initiatorName.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+                    yield sanitized.isEmpty() ? "anonymous" : sanitized;
+                }
+                case "initiatorname" -> {
+                    String sanitized = comment.initiatorName.replaceAll("[^a-zA-Z0-9_\\-]", "_").toLowerCase(Locale.ROOT);
                     yield sanitized.isEmpty() ? "anonymous" : sanitized;
                 }
                 case "Y" -> now.format(DateTimeFormatter.ofPattern("yyyy"));

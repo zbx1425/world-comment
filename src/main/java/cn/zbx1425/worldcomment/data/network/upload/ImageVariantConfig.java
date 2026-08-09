@@ -25,7 +25,7 @@ public record ImageVariantConfig(
 
     public static ImageVariantConfig defaults() {
         return new ImageVariantConfig(
-            null,
+            new VariantSpec(0, 100, true),
             new VariantSpec(1920, 95, false),
             new VariantSpec(256, 80, false)
         );
