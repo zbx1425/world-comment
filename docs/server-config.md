@@ -2,7 +2,31 @@
 
 配置文件位于服务器目录下 `config/world-comment.json`。
 
-所有配置项也可通过环境变量配置，环境变量名为 `SUBNOTEICA_` + 字段名的 UPPER_SNAKE_CASE 形式（例如 `SUBNOTEICA_REDIS_URL`）。
+所有配置项也可通过环境变量配置（仿 Rust config crate 的 Environment source），规则如下：
+
+- 环境变量名以 `SUBNOTEICA_` 为前缀；
+- 用 `__`（双下划线）表示 JSON 的嵌套层级；
+- 每级路径段写为 UPPER_SNAKE_CASE，自动转换为 JSON 的 camelCase 键；
+- 纯数字路径段表示数组下标；
+- 标量值自动解析：`true`/`false` 解析为布尔，整数/小数解析为数字，其余按字符串处理。
+
+环境变量的优先级高于配置文件，且与文件内容深度合并（对象按键递归合并，数组按下标合并）。环境变量覆盖的值不会被回写到配置文件。
+
+```bash
+# 等价于 "redisUrl": "redis://localhost"
+SUBNOTEICA_REDIS_URL=redis://localhost
+
+# 等价于 "imageVariants": { "detail": { "maxWidth": 2560 } }（与文件中的 imageVariants 深度合并）
+SUBNOTEICA_IMAGE_VARIANTS__DETAIL__MAX_WIDTH=2560
+
+# 配置 imageUploadConfig 数组中的第一个上传器
+SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__SERVICE=s3PreSigned
+SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__S3_BUCKET=worldcomment
+SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__S3_REGION=auto
+SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__S3_ACCESS_KEY_ID=your-access-key
+SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__S3_SECRET_ACCESS_KEY=your-secret-key
+SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__CDN_BASE_URL=https://img.example.com
+```
 
 ---
 

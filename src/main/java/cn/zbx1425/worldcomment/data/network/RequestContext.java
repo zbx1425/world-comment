@@ -1,6 +1,6 @@
 package cn.zbx1425.worldcomment.data.network;
 
-import cn.zbx1425.worldcomment.platform.neoforge.ServerPlatformImpl;
+import cn.zbx1425.worldcomment.platform.ServerPlatform;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -16,7 +16,7 @@ public class RequestContext {
 
     public static HttpClient createHttpClient() {
         HttpClient.Builder builder = HttpClient.newBuilder();
-        if (!ServerPlatformImpl.isProduction()) {
+        if (!ServerPlatform.isProduction()) {
             builder.sslContext(InsecureAllowedTrustManager.CONTEXT);
         }
         return builder.build();

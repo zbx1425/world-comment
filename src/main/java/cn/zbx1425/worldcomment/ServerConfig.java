@@ -1,6 +1,5 @@
 package cn.zbx1425.worldcomment;
 
-import com.google.common.base.CaseFormat;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -29,44 +28,39 @@ public class ServerConfig {
         public final boolean isPresentInJson;
         private final JsonElement jsonRawValue;
 
-        public ConfigItem(JsonObject json, String camelKey, Supplier<T> defaultValue, Function<String, T> stringParser) {
+        /**
+         * @param fileJson      raw JSON from the config file; only determines whether this
+         *                      item gets persisted on save
+         * @param effectiveJson file JSON already overlaid with environment variables via
+         *                      {@link ConfigEnvironment}; the value is resolved from here
+         */
+        public ConfigItem(JsonObject fileJson, JsonObject effectiveJson, String camelKey, Supplier<T> defaultValue, Function<JsonElement, T> parser) {
             T toBeValue;
             this.camelKey = camelKey;
 
-            String snakeKey = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, camelKey);
-            String envValueStr = System.getenv("SUBNOTEICA_" + snakeKey);
-
-            if (json.has(camelKey)) {
+            if (fileJson.has(camelKey)) {
                 this.isPresentInJson = true;
-                this.jsonRawValue = json.get(camelKey);
+                this.jsonRawValue = fileJson.get(camelKey);
             } else {
                 this.isPresentInJson = false;
                 this.jsonRawValue = null;
             }
 
-            if (envValueStr != null) {
-                toBeValue = stringParser.apply(envValueStr);
-            } else {
-                if (isPresentInJson) {
-                    try {
-                        if (jsonRawValue.isJsonPrimitive()) {
-                            toBeValue = stringParser.apply(jsonRawValue.getAsString());
-                        } else {
-                            toBeValue = stringParser.apply(jsonRawValue.toString());
-                        }
-                    } catch (Exception e) {
-                        Main.LOGGER.warn("Failed to parse JSON value for " + camelKey, e);
-                        toBeValue = defaultValue.get();
-                    }
-                } else {
+            if (effectiveJson.has(camelKey)) {
+                try {
+                    toBeValue = parser.apply(effectiveJson.get(camelKey));
+                } catch (Exception e) {
+                    Main.LOGGER.warn("Failed to parse JSON value for " + camelKey, e);
                     toBeValue = defaultValue.get();
                 }
+            } else {
+                toBeValue = defaultValue.get();
             }
             this.value = toBeValue;
         }
 
-        public ConfigItem(JsonObject json, String camelKey, T defaultValue, Function<String, T> stringParser) {
-            this(json, camelKey, () -> defaultValue, stringParser);
+        public ConfigItem(JsonObject fileJson, JsonObject effectiveJson, String camelKey, T defaultValue, Function<JsonElement, T> parser) {
+            this(fileJson, effectiveJson, camelKey, () -> defaultValue, parser);
         }
 
         private ConfigItem(String camelKey, T value, boolean isPresentInJson, JsonElement jsonRawValue) {
@@ -107,38 +101,34 @@ public class ServerConfig {
 
     public void load(Path configPath) throws IOException {
         this.path = configPath;
-        JsonObject json = Files.exists(configPath)
+        JsonObject fileJson = Files.exists(configPath)
                 ? JsonParser.parseString(Files.readString(configPath)).getAsJsonObject()
                 : new JsonObject();
-        
-        redisUrl = new ConfigItem<>(json, "redisUrl", "", value -> value);
-        syncRole = new ConfigItem<>(json, "syncRole", SyncRole.HOST, str -> parseEnum(str, SyncRole.class));
-        uplinkUrl = new ConfigItem<>(json, "uplinkUrl", "", value -> value);
-        uplinkAuthKey = new ConfigItem<>(json, "uplinkAuthKey", "", value -> value);
-        imageVariants = new ConfigItem<>(json, "imageVariants",
+        JsonObject json = ConfigEnvironment.mergeWithEnvironment(fileJson);
+
+        redisUrl = new ConfigItem<>(fileJson, json, "redisUrl", "", JsonElement::getAsString);
+        syncRole = new ConfigItem<>(fileJson, json, "syncRole", SyncRole.HOST, el -> parseEnum(el.getAsString(), SyncRole.class));
+        uplinkUrl = new ConfigItem<>(fileJson, json, "uplinkUrl", "", JsonElement::getAsString);
+        uplinkAuthKey = new ConfigItem<>(fileJson, json, "uplinkAuthKey", "", JsonElement::getAsString);
+        imageVariants = new ConfigItem<>(fileJson, json, "imageVariants",
                 ImageVariantConfig.defaults(),
-                str -> ImageVariantConfig.fromJson(JsonParser.parseString(str).getAsJsonObject()));
-        imageUploaders = new ConfigItem<List<ImageUploader>>(json, "imageUploadConfig", () -> ImageUploader.parseUploaderList(List.of()), str -> {
+                el -> ImageVariantConfig.fromJson(el.getAsJsonObject()));
+        imageUploaders = new ConfigItem<List<ImageUploader>>(fileJson, json, "imageUploadConfig", () -> ImageUploader.parseUploaderList(List.of()), el -> {
             List<JsonObject> uploaderConfigs = new ArrayList<>();
-            try {
-                JsonElement rootElement = JsonParser.parseString(str);
-                if (rootElement.isJsonArray()) {
-                    for (JsonElement element : rootElement.getAsJsonArray()) {
-                        uploaderConfigs.add(element.getAsJsonObject());
-                    }
-                } else if (rootElement.isJsonObject()) {
-                    uploaderConfigs.add(rootElement.getAsJsonObject());
+            if (el.isJsonArray()) {
+                for (JsonElement element : el.getAsJsonArray()) {
+                    uploaderConfigs.add(element.getAsJsonObject());
                 }
-            } catch (Exception ex) {
-                Main.LOGGER.error("Failed to parse image upload config", ex);
+            } else if (el.isJsonObject()) {
+                uploaderConfigs.add(el.getAsJsonObject());
             }
             return ImageUploader.parseUploaderList(uploaderConfigs);
         });
-        allowMarkerUsage = new ConfigItem<>(json, "allowMarkerUsage", MarkerUsage.CREATIVE, str -> parseEnum(str, MarkerUsage.class));
-        commentVisibilityCriteria = new ConfigItem<>(json, "commentVisibilityCriteria", Visibility.PREFERENCE, str -> parseEnum(str, Visibility.class));
-        markerVisibilityCriteria = new ConfigItem<>(json, "markerVisibilityCriteria", Visibility.ALWAYS, str -> parseEnum(str, Visibility.class));
-        imageGlobalKill = new ConfigItem<>(json, "imageGlobalKill", false, Boolean::parseBoolean);
-        defaultCommentVisibilityPreference = new ConfigItem<>(json, "defaultCommentVisibilityPreference", false, Boolean::parseBoolean);
+        allowMarkerUsage = new ConfigItem<>(fileJson, json, "allowMarkerUsage", MarkerUsage.CREATIVE, el -> parseEnum(el.getAsString(), MarkerUsage.class));
+        commentVisibilityCriteria = new ConfigItem<>(fileJson, json, "commentVisibilityCriteria", Visibility.PREFERENCE, el -> parseEnum(el.getAsString(), Visibility.class));
+        markerVisibilityCriteria = new ConfigItem<>(fileJson, json, "markerVisibilityCriteria", Visibility.ALWAYS, el -> parseEnum(el.getAsString(), Visibility.class));
+        imageGlobalKill = new ConfigItem<>(fileJson, json, "imageGlobalKill", false, JsonElement::getAsBoolean);
+        defaultCommentVisibilityPreference = new ConfigItem<>(fileJson, json, "defaultCommentVisibilityPreference", false, JsonElement::getAsBoolean);
 
         if (!Files.exists(configPath)) save(configPath);
     }
