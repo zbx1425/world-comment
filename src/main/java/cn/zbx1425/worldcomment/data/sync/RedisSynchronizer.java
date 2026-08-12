@@ -1,38 +1,37 @@
 package cn.zbx1425.worldcomment.data.sync;
 
+import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.data.*;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisFuture;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
-import io.lettuce.core.codec.RedisCodec;
-import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.pubsub.RedisPubSubListener;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectSortedMap;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class RedisSynchronizer implements Synchronizer {
 
-    private final StatefulRedisPubSubConnection<String, ByteBuf> redisSub;
-    private final StatefulRedisConnection<String, ByteBuf> redisConn;
+    private final RedisClient redisClient;
+    private final StatefulRedisPubSubConnection<String, String> redisSub;
+    private final StatefulRedisConnection<String, String> redisConn;
 
     public static final String HMAP_ALL_KEY = "WORLD_COMMENT_DATA_ALL";
     public static final String META_KEY = "WORLD_COMMENT_METADATA";
 
+    private static final long META_RETRY_INTERVAL_MS = 10000;
+
     private final ServerWorldData serverWorldData;
 
     public RedisSynchronizer(String URI, ServerWorldData serverWorldData) {
-        redisConn = RedisClient.create(URI).connect(ByteBufCodec.INSTANCE);
-        redisSub = RedisClient.create(URI).connectPubSub(ByteBufCodec.INSTANCE);
+        redisClient = RedisClient.create(URI);
+        redisConn = redisClient.connect();
+        redisSub = redisClient.connectPubSub();
         redisSub.addListener(new Listener());
         redisSub.sync().subscribe(RedisMessage.COMMAND_CHANNEL);
 
@@ -41,81 +40,118 @@ public class RedisSynchronizer implements Synchronizer {
 
     @Override
     public void kvWriteAll(Long2ObjectSortedMap<CommentEntry> all, ServerWorldMeta metadata) {
-        RedisAsyncCommands<String, ByteBuf> commands = redisConn.async();
+        RedisAsyncCommands<String, String> commands = redisConn.async();
         commands.multi();
         commands.del(HMAP_ALL_KEY);
-        HashMap<String, ByteBuf> data = new HashMap<>();
+        HashMap<String, String> data = new HashMap<>();
         for (CommentEntry entry : all.values()) {
-            data.put(Long.toHexString(entry.id), entry.toBinaryBuffer());
+            data.put(Long.toHexString(entry.id), entry.toJson().toString());
         }
-        commands.hset(HMAP_ALL_KEY, data);
-        commands.set(META_KEY, Unpooled.wrappedBuffer(metadata.serialize().toString().getBytes(StandardCharsets.UTF_8)));
-        commands.exec();
+        if (!data.isEmpty()) {
+            commands.hset(HMAP_ALL_KEY, data);
+        }
+        commands.set(META_KEY, metadata.serialize().toString());
+        checkRedisFuture(commands.exec(), "kvWriteAll");
     }
 
     @Override
     public void kvWriteEntry(CommentEntry newEntry) {
-        if (newEntry.deleted) {
-            redisConn.async().hdel(HMAP_ALL_KEY, Long.toHexString(newEntry.id));
-        } else {
-            redisConn.async().hset(HMAP_ALL_KEY, Long.toHexString(newEntry.id), newEntry.toBinaryBuffer());
-        }
+        checkRedisFuture(
+                redisConn.async().hset(HMAP_ALL_KEY, Long.toHexString(newEntry.id), newEntry.toJson().toString()),
+                "kvWriteEntry"
+        );
     }
 
     @Override
     public void notifyInsert(CommentEntry newEntry) {
-        RedisMessage.insert(newEntry).publishAsync(redisConn);
-    }
-
-    protected void handleInsert(CommentEntry peerEntry) {
-        serverWorldData.insert(peerEntry, true);
+        new RedisMessage(RedisMessage.Action.INSERT, newEntry.id).publishAsync(redisConn);
     }
 
     @Override
     public void notifyUpdate(CommentEntry newEntry) {
-        RedisMessage.update(newEntry).publishAsync(redisConn);
-    }
-
-    protected void handleUpdate(CommentEntry peerEntry) {
-        serverWorldData.update(peerEntry, true);
+        new RedisMessage(RedisMessage.Action.UPDATE, newEntry.id).publishAsync(redisConn);
     }
 
     @Override
     public void notifyUpdateAllFields(CommentEntry newEntry) {
-        RedisMessage.updateAllFields(newEntry).publishAsync(redisConn);
+        new RedisMessage(RedisMessage.Action.UPDATE_ALL_FIELDS, newEntry.id).publishAsync(redisConn);
     }
 
-    protected void handleUpdateAllFields(CommentEntry peerEntry) {
-        serverWorldData.updateAllFields(peerEntry, true);
+    protected void handleNotification(RedisMessage.Action action, long entryId) {
+        redisConn.async().hget(HMAP_ALL_KEY, Long.toHexString(entryId)).thenAccept(json -> {
+            if (json == null) return; // Pruned from Redis by host restart?
+            CommentEntry peerEntry = new CommentEntry(JsonParser.parseString(json).getAsJsonObject());
+            serverWorldData.server.execute(() -> {
+                switch (action) {
+                    case INSERT:
+                        if (!peerEntry.deleted && !serverWorldData.comments.containsId(entryId)) {
+                            serverWorldData.insert(peerEntry, true);
+                        }
+                        break;
+                    case UPDATE:
+                        serverWorldData.update(peerEntry, true);
+                        break;
+                    case UPDATE_ALL_FIELDS:
+                        serverWorldData.updateAllFields(peerEntry, true);
+                        break;
+                }
+            });
+        }).exceptionally(ex -> {
+            Main.LOGGER.error("Failed to fetch synced comment {}", Long.toHexString(entryId), ex);
+            return null;
+        });
     }
 
     @Override
     public ServerWorldMeta kvReadAllInto(CommentStore comments) throws IOException {
-        Map<String, ByteBuf> data = redisConn.sync().hgetall(HMAP_ALL_KEY);
-        for (ByteBuf entry : data.values()) {
-            comments.insert(CommentEntry.fromBinaryBuffer(entry));
+        Map<String, String> data = redisConn.sync().hgetall(HMAP_ALL_KEY);
+        for (String json : data.values()) {
+            CommentEntry entry = new CommentEntry(JsonParser.parseString(json).getAsJsonObject());
+            // Notifications may have applied some entries already; and tombstones are skipped
+            if (entry.deleted || comments.containsId(entry.id)) continue;
+            comments.insert(entry);
         }
 
-        JsonObject serializedMetadata = JsonParser.parseString(
-                redisConn.sync().get(META_KEY).toString(StandardCharsets.UTF_8)).getAsJsonObject();
-        return new ServerWorldMeta(serializedMetadata);
+        // The host may not be up yet
+        while (true) {
+            String metaJson = redisConn.sync().get(META_KEY);
+            if (metaJson != null) {
+                return new ServerWorldMeta(JsonParser.parseString(metaJson).getAsJsonObject());
+            }
+            Main.LOGGER.info("Waiting for the host server to publish world metadata to Redis...");
+            try {
+                // Keep waiting indefinitely
+                // If a subordinate server starts without a working host, user might experience data loss
+                Thread.sleep(META_RETRY_INTERVAL_MS);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Interrupted while waiting for world metadata from Redis", ex);
+            }
+        }
     }
 
     @Override
     public void close() {
         redisSub.close();
         redisConn.close();
+        redisClient.shutdown();
     }
 
-    public class Listener implements RedisPubSubListener<String, ByteBuf> {
+    private static <T> void checkRedisFuture(RedisFuture<T> future, String operation) {
+        future.whenComplete((result, ex) -> {
+            if (ex != null) Main.LOGGER.error("Redis operation {} failed", operation, ex);
+        });
+    }
+
+    public class Listener implements RedisPubSubListener<String, String> {
         @Override
-        public void message(String channel, ByteBuf rawMessage) {
+        public void message(String channel, String rawMessage) {
             RedisMessage message = new RedisMessage(rawMessage);
             message.handle(RedisSynchronizer.this);
         }
 
         @Override
-        public void message(String pattern, String channel, ByteBuf message) { }
+        public void message(String pattern, String channel, String message) { }
 
         @Override
         public void subscribed(String channel, long count) { }
@@ -128,32 +164,5 @@ public class RedisSynchronizer implements Synchronizer {
 
         @Override
         public void punsubscribed(String pattern, long count) { }
-    }
-
-    private static class ByteBufCodec implements RedisCodec<String, ByteBuf> {
-
-        public static ByteBufCodec INSTANCE = new ByteBufCodec();
-
-        @Override
-        public String decodeKey(ByteBuffer bytes) {
-            return StringCodec.UTF8.decodeKey(bytes);
-        }
-
-        @Override
-        public ByteBuf decodeValue(ByteBuffer bytes) {
-            ByteBuf result = Unpooled.buffer(bytes.remaining());
-            result.writeBytes(bytes);
-            return result;
-        }
-
-        @Override
-        public ByteBuffer encodeKey(String key) {
-            return StringCodec.UTF8.encodeKey(key);
-        }
-
-        @Override
-        public ByteBuffer encodeValue(ByteBuf value) {
-            return value.nioBuffer();
-        }
     }
 }

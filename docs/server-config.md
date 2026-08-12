@@ -32,12 +32,13 @@ SUBNOTEICA_IMAGE_UPLOAD_CONFIG__0__CDN_BASE_URL=https://img.example.com
 
 ## 基础配置
 
-| 字段 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `syncRole` | string | `"host"` | 多服同步角色。`host` 为主服务器，`subordinate` 为从服务器 |
-| `redisUrl` | string | `""` | Redis 连接地址。留空则不启用多服同步 |
-| `uplinkUrl` | string | `""` | Uplink 同步目标 URL。留空则不启用 |
-| `uplinkAuthKey` | string | `""` | Uplink 认证密钥 |
+| 字段 | 类型 | 默认值 | 说明                                                                                              |
+|------|------|--------|-------------------------------------------------------------------------------------------------|
+| `syncRole` | string | `"host"` | 多服同步角色。`host` 为主服务器，`subordinate` 为从服务器                                                         |
+| `redisUrl` | string | `""` | Redis 连接地址。留空则不启用多服同步                                                                           |
+| `syncNodeId` | int | `-1` | 多服同步时的节点 ID（0–1023），用于生成评论 Snowflake ID。网络内每台服务器必须配置为互不相同的值；`-1` 表示根据网卡 MAC 自动生成 |
+| `uplinkUrl` | string | `""` | Uplink 同步目标 URL。留空则不启用                                                                          |
+| `uplinkAuthKey` | string | `""` | Uplink 认证密钥                                                                                     |
 
 ---
 

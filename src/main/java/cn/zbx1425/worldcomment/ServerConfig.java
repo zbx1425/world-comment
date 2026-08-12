@@ -83,6 +83,7 @@ public class ServerConfig {
 
     public ConfigItem<SyncRole> syncRole;
     public ConfigItem<String> redisUrl;
+    public ConfigItem<Integer> syncNodeId;
     public ConfigItem<String> uplinkUrl;
     public ConfigItem<String> uplinkAuthKey;
     public ConfigItem<ImageVariantConfig> imageVariants;
@@ -108,6 +109,7 @@ public class ServerConfig {
 
         redisUrl = new ConfigItem<>(fileJson, json, "redisUrl", "", JsonElement::getAsString);
         syncRole = new ConfigItem<>(fileJson, json, "syncRole", SyncRole.HOST, el -> parseEnum(el.getAsString(), SyncRole.class));
+        syncNodeId = new ConfigItem<>(fileJson, json, "syncNodeId", -1, JsonElement::getAsInt);
         uplinkUrl = new ConfigItem<>(fileJson, json, "uplinkUrl", "", JsonElement::getAsString);
         uplinkAuthKey = new ConfigItem<>(fileJson, json, "uplinkAuthKey", "", JsonElement::getAsString);
         imageVariants = new ConfigItem<>(fileJson, json, "imageVariants",
@@ -137,6 +139,7 @@ public class ServerConfig {
         JsonObject json = new JsonObject();
         redisUrl.writeJson(json);
         syncRole.writeJson(json);
+        syncNodeId.writeJson(json);
         uplinkUrl.writeJson(json);
         uplinkAuthKey.writeJson(json);
         imageVariants.writeJson(json);

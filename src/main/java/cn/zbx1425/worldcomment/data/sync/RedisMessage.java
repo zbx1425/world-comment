@@ -1,69 +1,52 @@
 package cn.zbx1425.worldcomment.data.sync;
 
-import cn.zbx1425.worldcomment.data.CommentEntry;
-import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.Main;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.lettuce.core.api.StatefulRedisConnection;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+
+import java.security.SecureRandom;
 
 public class RedisMessage {
 
     public static final String COMMAND_CHANNEL = "WORLD_COMMENT_COMMAND_CHANNEL";
 
-    private static final long INSTANCE_ID = ServerWorldData.SNOWFLAKE.nextId();
+    private static final long INSTANCE_ID = new SecureRandom().nextLong();
 
     public long initiator;
     public Action action;
-    public ByteBuf content;
+    public long entryId;
 
-    public RedisMessage(Action action, ByteBuf content) {
+    public RedisMessage(Action action, long entryId) {
         this.initiator = INSTANCE_ID;
         this.action = action;
-        this.content = content;
+        this.entryId = entryId;
     }
 
-    public RedisMessage(ByteBuf src) {
-        this.action = Action.values()[src.readByte()];
-        this.initiator = src.readLong();
-        int length = src.readInt();
-        this.content = src.readBytes(length);
+    public RedisMessage(String src) {
+        JsonObject json = JsonParser.parseString(src).getAsJsonObject();
+        this.action = Action.valueOf(json.get("action").getAsString());
+        this.initiator = json.get("initiator").getAsLong();
+        this.entryId = json.get("entryId").getAsLong();
     }
 
-    public static RedisMessage insert(CommentEntry entry) {
-        return new RedisMessage(Action.INSERT, entry.toBinaryBuffer());
+    public String serialize() {
+        JsonObject json = new JsonObject();
+        json.addProperty("action", action.name());
+        json.addProperty("initiator", initiator);
+        json.addProperty("entryId", entryId);
+        return json.toString();
     }
 
-    public static RedisMessage update(CommentEntry entry) {
-        return new RedisMessage(Action.UPDATE, entry.toBinaryBuffer());
-    }
-
-    public static RedisMessage updateAllFields(CommentEntry entry) {
-        return new RedisMessage(Action.UPDATE_ALL_FIELDS, entry.toBinaryBuffer());
-    }
-
-    public void publishAsync(StatefulRedisConnection<String, ByteBuf> connection) {
-        ByteBuf buffer = Unpooled.buffer(content.readableBytes() + 16);
-        buffer.writeByte(action.ordinal());
-        buffer.writeLong(initiator);
-        buffer.writeInt(content.readableBytes());
-        buffer.writeBytes(content);
-        connection.async().publish(COMMAND_CHANNEL, buffer);
+    public void publishAsync(StatefulRedisConnection<String, String> connection) {
+        connection.async().publish(COMMAND_CHANNEL, serialize()).whenComplete((receivers, ex) -> {
+            if (ex != null) Main.LOGGER.error("Failed to publish sync notification", ex);
+        });
     }
 
     public void handle(RedisSynchronizer synchronizer) {
         if (isFromSelf()) return;
-        switch (action) {
-            case INSERT:
-                synchronizer.handleInsert(CommentEntry.fromBinaryBuffer(content));
-                break;
-            case UPDATE:
-                synchronizer.handleUpdate(CommentEntry.fromBinaryBuffer(content));
-                break;
-            case UPDATE_ALL_FIELDS:
-                synchronizer.handleUpdateAllFields(CommentEntry.fromBinaryBuffer(content));
-                break;
-        }
+        synchronizer.handleNotification(action, entryId);
     }
 
     public boolean isFromSelf() {

@@ -14,7 +14,7 @@ import java.nio.file.Path;
 
 public class ServerWorldData {
 
-    public static final Snowflake SNOWFLAKE = new Snowflake();
+    public static Snowflake SNOWFLAKE = new Snowflake();
 
     public final MinecraftServer server;
     public final Path basePath;
@@ -62,9 +62,9 @@ public class ServerWorldData {
         comments.insert(newEntry);
         if (isHost) {
             uplinkDispatcher.insert(newEntry);
-            peerChannel.kvWriteEntry(newEntry);
         }
         if (!fromPeer) {
+            peerChannel.kvWriteEntry(newEntry);
             peerChannel.notifyInsert(newEntry);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -77,9 +77,9 @@ public class ServerWorldData {
         if (trustedEntry == null) return;
         if (isHost) {
             uplinkDispatcher.update(trustedEntry);
-            peerChannel.kvWriteEntry(trustedEntry);
         }
         if (!fromPeer) {
+            peerChannel.kvWriteEntry(trustedEntry);
             peerChannel.notifyUpdate(trustedEntry);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -91,9 +91,9 @@ public class ServerWorldData {
         comments.updateAllFields(newEntry);
         if (isHost) {
             uplinkDispatcher.update(newEntry);
-            peerChannel.kvWriteEntry(newEntry);
         }
         if (!fromPeer) {
+            peerChannel.kvWriteEntry(newEntry);
             peerChannel.notifyUpdateAllFields(newEntry);
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {

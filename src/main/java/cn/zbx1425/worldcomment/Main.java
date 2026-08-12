@@ -1,6 +1,7 @@
 package cn.zbx1425.worldcomment;
 
 import cn.zbx1425.worldcomment.data.ServerWorldData;
+import cn.zbx1425.worldcomment.data.Snowflake;
 import cn.zbx1425.worldcomment.data.network.RequestContext;
 import cn.zbx1425.worldcomment.data.sync.RedisSynchronizer;
 import cn.zbx1425.worldcomment.item.CommentToolItem;
@@ -86,6 +87,9 @@ public class Main {
 						.resolve("config").resolve("world-comment.json"));
 
 				DATABASE = new ServerWorldData(server, SERVER_CONFIG.syncRole.value == ServerConfig.SyncRole.HOST);
+				if (SERVER_CONFIG.syncNodeId.value >= 0) {
+					ServerWorldData.SNOWFLAKE = new Snowflake(SERVER_CONFIG.syncNodeId.value);
+				}
 				if (!SERVER_CONFIG.redisUrl.value.isEmpty()) {
 					DATABASE.peerChannel = new RedisSynchronizer(SERVER_CONFIG.redisUrl.value, DATABASE);
 				}

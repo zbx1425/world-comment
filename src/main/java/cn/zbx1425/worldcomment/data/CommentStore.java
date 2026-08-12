@@ -12,6 +12,7 @@ public class CommentStore {
 
     Map<Identifier, Long2ObjectMap<CommentChunk>> regionIndex = new HashMap<>();
     Map<UUID, List<CommentEntry>> playerIndex = new HashMap<>();
+    // Keys are snowflake IDs
     Long2ObjectSortedMap<CommentEntry> timeIndex = new Long2ObjectAVLTreeMap<>(Comparator.reverseOrder());
 
     public void acceptLoadedChunk(Identifier dimension, long region, CommentChunk chunk) {
@@ -22,8 +23,14 @@ public class CommentStore {
                 if (entry.deleted) continue;
                 playerIndex.computeIfAbsent(entry.initiator, ignored -> new ArrayList<>())
                         .add(entry);
-                timeIndex.put(entry.timestamp, entry);
+                timeIndex.put(entry.id, entry);
             }
+        }
+    }
+
+    public boolean containsId(long id) {
+        synchronized (this) {
+            return timeIndex.containsKey(id);
         }
     }
 
@@ -69,7 +76,7 @@ public class CommentStore {
             chunk.add(newEntry);
             playerIndex.computeIfAbsent(newEntry.initiator, ignored -> new ArrayList<>())
                     .add(newEntry);
-            timeIndex.put(newEntry.timestamp, newEntry);
+            timeIndex.put(newEntry.id, newEntry);
         }
     }
 
