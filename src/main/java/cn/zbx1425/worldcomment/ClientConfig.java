@@ -149,6 +149,11 @@ public class ClientConfig {
 
     public void load(UUID serverKey, String serverIp) {
         Path configPath = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve("world-comment-client.json");
+        if (!Files.exists(configPath)) {
+            perServerPreference = new PerServerPreference(serverKey, serverIp, serverIssuedConfig);
+            save();
+            return;
+        }
         try {
             JsonObject root = JsonParser.parseString(Files.readString(configPath)).getAsJsonObject();
             if (root.has("perServerPreferences")) {

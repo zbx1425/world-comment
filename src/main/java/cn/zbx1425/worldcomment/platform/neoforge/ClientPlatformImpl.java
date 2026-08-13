@@ -11,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
@@ -53,24 +54,21 @@ public class ClientPlatformImpl {
 
 
         @SubscribeEvent
-        public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-            if (!event.getEntity().level().isClientSide()) return;
+        public static void onPlayerLoggedIn(ClientPlayerNetworkEvent.LoggingIn event) {
             for (Consumer<LocalPlayer> consumer : PLAYER_JOIN_EVENT) {
-                consumer.accept((LocalPlayer) event.getEntity());
+                consumer.accept(event.getPlayer());
             }
         }
 
         @SubscribeEvent
-        public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-            if (!event.getEntity().level().isClientSide()) return;
+        public static void onPlayerChangedDimension(ClientPlayerNetworkEvent.Clone event) {
             for (Consumer<LocalPlayer> consumer : PLAYER_JOIN_EVENT) {
-                consumer.accept((LocalPlayer) event.getEntity());
+                consumer.accept(event.getPlayer());
             }
         }
 
         @SubscribeEvent
-        public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-            if (event.getEntity().level().isClientSide()) return;
+        public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
             for (Runnable consumer : PLAYER_QUIT_EVENT) {
                 consumer.run();
             }
