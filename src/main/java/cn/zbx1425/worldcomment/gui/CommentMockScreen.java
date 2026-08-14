@@ -6,6 +6,7 @@ import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.util.OffHeapAllocator;
 import com.mojang.blaze3d.platform.NativeImage;
 import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.gui.controllers.string.IStringController;
@@ -56,6 +57,13 @@ public class CommentMockScreen {
                 "The Block Position of the player who took this screenshot, at the time when it was taken.")))
             .binding(prefill.imageLocation, () -> prefill.imageLocation, v -> prefill.imageLocation = v)
             .customController(BlockPosController::new)
+            .build();
+        Option<Boolean> optUnlisted = Option.<Boolean>createBuilder()
+            .name(Component.literal("Unlisted"))
+            .description(OptionDescription.of(Component.literal(
+                "If true, this comment will not appear in Nearby/Recent lists.")))
+            .binding(false, () -> prefill.unlisted, v -> prefill.unlisted = v)
+            .controller(option -> BooleanControllerBuilder.create(option).yesNoFormatter())
             .build();
 
         OptionGroup.Builder groupImage = OptionGroup.createBuilder()
@@ -116,6 +124,7 @@ public class CommentMockScreen {
                     .option(optInitiator)
                     .option(optInitiatorName)
                     .option(optImagePosition)
+                    .option(optUnlisted)
                     .build()
                 )
                 .group(groupImage.build())

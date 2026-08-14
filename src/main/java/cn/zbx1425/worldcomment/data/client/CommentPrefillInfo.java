@@ -10,6 +10,7 @@ public class CommentPrefillInfo {
     public UUID initiator;
     public String initiatorName;
 
+    public boolean unlisted;
     public BlockPos imageLocation;
     public byte[] imagePngBytes;
 

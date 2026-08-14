@@ -54,6 +54,7 @@ public class CommentStore {
             List<CommentEntry> result = new ArrayList<>();
             for (CommentEntry comment : timeIndex.values()) {
                 if (comment.deleted) continue;
+                if (comment.unlisted) continue;
                 if (offset > 0) {
                     offset--;
                     continue;

@@ -42,6 +42,7 @@ public class CommentEntry {
     public @NonNull CommentImage image;
 
     public boolean deleted;
+    public boolean unlisted;
     public int like;
 
     public CommentEntry(CommentPrefillInfo prefill, boolean isAnonymous, int messageType, String message) {
@@ -56,6 +57,7 @@ public class CommentEntry {
         this.messageType = messageType;
         this.message = message;
         deleted = false;
+        this.unlisted = prefill.unlisted;
         this.imageLocation = prefill.imageLocation;
         this.image = CommentImage.NONE;
     }
@@ -63,6 +65,7 @@ public class CommentEntry {
     // From packet
     public CommentEntry(Identifier level, FriendlyByteBuf src) {
         deleted = src.readBoolean();
+        unlisted = src.readBoolean();
         like = src.readInt();
         id = src.readLong();
         timestamp = src.readLong();
@@ -106,6 +109,7 @@ public class CommentEntry {
             image = CommentImage.NONE;
         }
         deleted = json.has("deleted") && json.get("deleted").getAsBoolean();
+        unlisted = json.has("unlisted") && json.get("unlisted").getAsBoolean();
         like = json.has("like") ? json.get("like").getAsInt() : 0;
     }
 
@@ -140,6 +144,7 @@ public class CommentEntry {
 
     public void streamWrite(FriendlyByteBuf dst) {
         dst.writeBoolean(deleted);
+        dst.writeBoolean(unlisted);
         dst.writeInt(like);
         dst.writeLong(id);
         dst.writeLong(timestamp);
@@ -184,6 +189,7 @@ public class CommentEntry {
             json.add("image", image.toJson());
         }
         json.addProperty("deleted", deleted);
+        json.addProperty("unlisted", unlisted);
         json.addProperty("like", like);
         return json;
     }

@@ -420,6 +420,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                         for (Map.Entry<BlockPos, List<CommentEntry>> blockData : region.entrySet()) {
                             for (CommentEntry comment : blockData.getValue()) {
                                 if (comment.deleted) continue;
+                                if (comment.unlisted) continue;
                                 commentList.add(comment);
                             }
                         }
