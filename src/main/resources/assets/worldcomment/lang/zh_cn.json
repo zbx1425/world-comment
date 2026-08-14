@@ -59,6 +59,9 @@
   "gui.worldcomment.list.no_more": "没有更多内容",
   "gui.worldcomment.list.like": "点赞",
   "gui.worldcomment.detail.click_to_view": "点击查看大图",
+  "gui.worldcomment.detail.label.author": "作者",
+  "gui.worldcomment.detail.label.time": "时间",
+  "gui.worldcomment.detail.label.location": "位置",
   "gui.worldcomment.imageview.hints": "滚轮缩放 | 拖动平移 | Esc 返回",
   "gui.worldcomment.anonymous": "匿名",
 

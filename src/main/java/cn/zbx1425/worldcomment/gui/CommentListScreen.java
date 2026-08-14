@@ -594,7 +594,31 @@ public class CommentListScreen extends Screen implements IGuiCommon {
         private int cachedDeleteBtnX, cachedDeleteBtnY;
         private boolean hasDeleteBtn = false;
 
-        private static final int PADDING = 12;
+        private static final int CARD_MARGIN = 8;
+        private static final int CARD_PADDING = 10;
+        private static final int CARD_GAP = 10;
+        private static final int HEADER_H = 22;
+        private static final int SHADOW_OFFSET = 2;
+
+        private static final int COLOR_CARD_BODY = 0xAA2d2d3d;
+        private static final int COLOR_CARD_HEADER = 0xBB222233;
+        private static final int COLOR_SHADOW = 0x66000000;
+        private static final int COLOR_LABEL = 0xFFAAAAAA;
+        private static final int COLOR_VALUE = 0xFFFFFFFF;
+        private static final int COLOR_UUID = 0xFF888888;
+        private static final int COLOR_SECONDARY = 0xFFBBBBBB;
+        private static final int COLOR_HINT = 0xFF8888FF;
+
+        private void drawCard(ISnGuiCanvas g, int x, int y, int w, int h, boolean hasHeader) {
+            g.fill(x + SHADOW_OFFSET, y + SHADOW_OFFSET,
+                    x + w + SHADOW_OFFSET, y + h + SHADOW_OFFSET, COLOR_SHADOW);
+            if (hasHeader) {
+                g.fill(x, y + HEADER_H, x + w, y + h, COLOR_CARD_BODY);
+                g.fill(x, y, x + w, y + HEADER_H, COLOR_CARD_HEADER);
+            } else {
+                g.fill(x, y, x + w, y + h, COLOR_CARD_BODY);
+            }
+        }
 
         @Override
         public void onEnter() {
@@ -613,8 +637,11 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
             int dLeft = xListL;
             int dWidth = (xAsideRightL + ASIDE_R_WIDTH) - xListL;
-            int contentWidth = dWidth - 2 * PADDING;
-            int contentLeft = dLeft + PADDING;
+
+            int cardX = dLeft + CARD_MARGIN;
+            int cardW = dWidth - 2 * CARD_MARGIN;
+            int contentX = cardX + CARD_PADDING;
+            int contentW = cardW - 2 * CARD_PADDING;
 
             detailScrollCurrent = animateScroll(
                     detailScrollAnimStart, detailScrollTarget,
@@ -630,73 +657,117 @@ public class CommentListScreen extends Screen implements IGuiCommon {
 
             guiGraphics.enableScissor(dLeft, viewportTop, dLeft + dWidth, viewportBottom);
 
-            int y = viewportTop - (int) detailScrollCurrent;
+            int y = viewportTop + CARD_MARGIN - (int) detailScrollCurrent;
             int startY = y;
 
-            // --- Metadata ---
+            // ======== Card 1: Metadata ========
+            boolean isAdmin = minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN);
+            int metaRows = isAdmin ? 4 : 3;
+            int metaBodyH = CARD_PADDING + (metaRows - 1) * (font.lineHeight + 4) + font.lineHeight + CARD_PADDING;
+            int card1H = HEADER_H + metaBodyH;
+
+            drawCard(guiGraphics, cardX, y, cardW, card1H, true);
+
+            // Header: type icon + type name
             TextureAtlasSprite iconSprite = EmojiRegistry.INSTANCE.getSprite(comment.messageType);
             guiGraphics.enableBlend();
             guiParam.pose().pushMatrix();
             guiParam.pose().translate(0.5f, 0.5f);
-            guiParam.blitSprite(RenderPipelines.GUI_TEXTURED, iconSprite, contentLeft, y + 1, 14, 14);
+            guiParam.blitSprite(RenderPipelines.GUI_TEXTURED, iconSprite,
+                    contentX, y + (HEADER_H - 14) / 2, 14, 14);
             guiParam.pose().popMatrix();
             guiGraphics.disableBlend();
+
             Component typeName = Component.translatable("gui.worldcomment.comment_type." + comment.messageType)
-                    .setStyle(Style.EMPTY.withBold(true) /* .withColor(
-                            CommentTypeButton.COMMENT_TYPE_COLOR[comment.messageType - 1] & 0xFFFFFF) */);
-            guiGraphics.text(font, typeName, contentLeft + 18, y + 3, 0xFFFFFFFF, true);
-            y += 25;
+                    .setStyle(Style.EMPTY.withBold(true));
+            guiGraphics.text(font, typeName, contentX + 18, y + (HEADER_H - font.lineHeight) / 2, COLOR_VALUE, true);
+
+            // Header: delete button (right side)
+            hasDeleteBtn = false;
+            if (canDelete(comment)) {
+                cachedDeleteBtnX = cardX + cardW - CARD_PADDING - 16;
+                cachedDeleteBtnY = y + (HEADER_H - 16) / 2;
+                hasDeleteBtn = true;
+                renderIcon(guiGraphics, cachedDeleteBtnX, cachedDeleteBtnY, 16, 216, 60, mouseX, mouseY);
+                if (hitTest(mouseX, mouseY, cachedDeleteBtnX, cachedDeleteBtnY, 16) && commentToDelete == comment) {
+                    guiGraphics.renderTooltip(font,
+                            Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
+                }
+            }
+
+            // Body: two-column metadata
+            int labelColW = Math.max(
+                    Math.max(font.width(Component.translatable("gui.worldcomment.detail.label.author")),
+                             font.width(Component.translatable("gui.worldcomment.detail.label.time"))),
+                    Math.max(font.width(Component.translatable("gui.worldcomment.detail.label.location")),
+                             font.width("UUID"))
+            );
+            int valueX = contentX + labelColW + 6;
+            int rowY = y + HEADER_H + CARD_PADDING;
 
             Component nameComponent = comment.initiatorName.isEmpty()
                     ? Component.translatable("gui.worldcomment.anonymous")
                     : Component.literal(comment.initiatorName);
-            guiGraphics.text(font, nameComponent, contentLeft, y, 0xFFFFFFFF, true);
-            if (minecraft.player.permissions().hasPermission(Permissions.COMMANDS_ADMIN)) {
-                y += 14;
-                String uuid = comment.initiator.toString();
-                guiGraphics.text(font, uuid,
-                        contentLeft, y, 0xFF888888, true);
+            guiGraphics.text(font, Component.translatable("gui.worldcomment.detail.label.author"),
+                    contentX, rowY, COLOR_LABEL, true);
+            guiGraphics.text(font, nameComponent, valueX, rowY, COLOR_VALUE, true);
+            rowY += font.lineHeight + 4;
+
+            if (isAdmin) {
+                guiGraphics.text(font, "UUID", contentX, rowY, COLOR_LABEL, true);
+                guiGraphics.text(font, comment.initiator.toString(), valueX, rowY, COLOR_UUID, true);
+                rowY += font.lineHeight + 4;
             }
-            y += 14;
 
             String timeStr = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ROOT)
                     .format(Instant.ofEpochMilli(comment.timestamp)
                             .atZone(ZoneId.systemDefault()).toLocalDateTime());
-            guiGraphics.text(font, timeStr, contentLeft, y, 0xFFBBBBBB, true);
-            y += 14;
+            guiGraphics.text(font, Component.translatable("gui.worldcomment.detail.label.time"),
+                    contentX, rowY, COLOR_LABEL, true);
+            guiGraphics.text(font, timeStr, valueX, rowY, COLOR_SECONDARY, true);
+            rowY += font.lineHeight + 4;
 
             String locStr = comment.level.toString() + "  " + comment.location.toShortString();
-            guiGraphics.text(font, locStr, contentLeft, y, 0xFFBBBBBB, true);
-            y += 14;
+            guiGraphics.text(font, Component.translatable("gui.worldcomment.detail.label.location"),
+                    contentX, rowY, COLOR_LABEL, true);
+            guiGraphics.text(font, locStr, valueX, rowY, COLOR_SECONDARY, true);
 
-            y += 6;
-            guiGraphics.fill(contentLeft, y, contentLeft + contentWidth, y + 1, 0x44FFFFFF);
-            y += 7;
+            y += card1H + CARD_GAP;
 
-            // --- Comment text ---
+            // ======== Card 2: Text (hidden if empty) ========
             if (!comment.message.isEmpty()) {
-                List<SizedFormattedText> lines = SizedFormattedText.splitLines(comment.message, font, contentWidth, Style.EMPTY,
+                List<SizedFormattedText> lines = SizedFormattedText.splitLines(comment.message, font, contentW, Style.EMPTY,
                     CommentEntry.isMarkerType(comment.messageType), true);
+                int textH = 0;
+                for (SizedFormattedText line : lines) {
+                    textH += (int)(font.lineHeight * line.sizeModifier) + 1;
+                }
+                int card2H = CARD_PADDING + textH + CARD_PADDING;
+
+                drawCard(guiGraphics, cardX, y, cardW, card2H, false);
+
+                int textY = y + CARD_PADDING;
                 for (SizedFormattedText line : lines) {
                     guiGraphics.pushPose();
-                    guiGraphics.translate(contentLeft, y, 0);
+                    guiGraphics.translate(contentX, textY, 0);
                     guiGraphics.scale(line.sizeModifier, line.sizeModifier);
                     guiGraphics.text(font, line.ordered, 0, 0, 0xFFDDDDDD, true);
                     guiGraphics.popPose();
-                    y += (int)(font.lineHeight * line.sizeModifier) + 1;
+                    textY += (int)(font.lineHeight * line.sizeModifier) + 1;
                 }
-                y += 6;
+
+                y += card2H + CARD_GAP;
             }
 
-            // --- Image ---
+            // ======== Card 3: Image (hidden if no image) ========
             hasImage = false;
             if (!comment.image.sourceUrl.isEmpty()) {
                 String detailUrl = ImageUrlResolver.resolve(comment.image, ImageUrlResolver.ImageUsagePurpose.DETAIL,
                         MainClient.CLIENT_CONFIG.serverIssuedConfig.imageVariants,
                         MainClient.CLIENT_CONFIG.serverIssuedConfig.uploaderCdnConfigs);
                 ImageDownload.ImageState imageState = ImageDownload.getTexture(detailUrl);
-                int maxImgW = (int) (contentWidth * 0.8);
-                int maxImgH = height / 2;
+                int maxImgW = contentW;
+                int maxImgH = viewportHeight / 2;
                 int imgW, imgH;
                 if (imageState.width * maxImgH > imageState.height * maxImgW) {
                     imgW = maxImgW;
@@ -705,41 +776,34 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                     imgH = maxImgH;
                     imgW = Math.max(1, maxImgH * imageState.width / imageState.height);
                 }
-                int imgX = contentLeft + (contentWidth - imgW) / 2;
 
-                guiGraphics.fill(imgX + 2, y + 2, imgX + imgW + 2, y + imgH + 2, 0xFF000000);
+                int footerH = font.lineHeight + 4;
+                int card3H = CARD_PADDING + imgH + 4 + footerH + CARD_PADDING;
+
+                drawCard(guiGraphics, cardX, y, cardW, card3H, false);
+
+                int imgX = contentX + (contentW - imgW) / 2;
+                int imgY = y + CARD_PADDING;
+
                 guiGraphics.blit(imageState.getFriendlyTexture(minecraft.getTextureManager()),
-                        imgX, y, imgX + imgW, y + imgH);
+                        imgX, imgY, imgX + imgW, imgY + imgH);
 
                 cachedImgX = imgX;
-                cachedImgY = y;
+                cachedImgY = imgY;
                 cachedImgW = imgW;
                 cachedImgH = imgH;
                 hasImage = true;
 
-                y += imgH + 4;
-
                 Component hint = Component.translatable("gui.worldcomment.detail.click_to_view");
                 int hintWidth = font.width(hint);
                 guiGraphics.text(font, hint,
-                        contentLeft + (contentWidth - hintWidth) / 2, y, 0xFF8888FF, true);
-                y += font.lineHeight + 4;
+                        contentX + (contentW - hintWidth) / 2,
+                        imgY + imgH + 4, COLOR_HINT, true);
+
+                y += card3H + CARD_GAP;
             }
 
-            // --- Delete button ---
-            hasDeleteBtn = false;
-            if (canDelete(comment)) {
-                y += 4;
-                cachedDeleteBtnX = contentLeft + contentWidth - 30;
-                cachedDeleteBtnY = y;
-                hasDeleteBtn = true;
-                renderIcon(guiGraphics, contentLeft + contentWidth - 30, y, 20, 216, 60, mouseX, mouseY);
-                if (hitTest(mouseX, mouseY, contentLeft + contentWidth - 30, y, 20) && commentToDelete == comment) {
-                    guiGraphics.renderTooltip(font,
-                            Component.translatable("gui.worldcomment.list.remove.confirm"), mouseX, mouseY);
-                }
-                y += 24;
-            }
+            y += CARD_MARGIN;
 
             guiGraphics.disableScissor();
 
@@ -762,7 +826,7 @@ public class CommentListScreen extends Screen implements IGuiCommon {
                 return true;
             }
 
-            if (hasDeleteBtn && hitTest(mouseX, mouseY, cachedDeleteBtnX, cachedDeleteBtnY, 20)) {
+            if (hasDeleteBtn && hitTest(mouseX, mouseY, cachedDeleteBtnX, cachedDeleteBtnY, 16)) {
                 AbstractWidget.playButtonClickSound(Minecraft.getInstance().getSoundManager());
                 if (tryDelete(comment)) {
                     onClose();
