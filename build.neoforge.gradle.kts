@@ -37,9 +37,9 @@ dependencies {
     jarJar(implementation("org.reactivestreams:reactive-streams:1.0.4") { version { prefer("1.0.4") } })
 //    if (sc.current.parsed < "1.21.9") additionalRuntimeClasspath("io.lettuce:lettuce-core:7.6.0.RELEASE")
 
-    jarJar(implementation("dev.matrixlab.webp4j:webp4j-core:2.5.0") {
+    jarJar(implementation("dev.matrixlab.webp4j:webp4j-core:2.1.0") {
         version {
-            prefer("2.5.0")
+            prefer("2.1.0")
         }
     })
 //    if (sc.current.parsed < "1.21.9") additionalRuntimeClasspath("dev.matrixlab.webp4j:webp4j-core:2.5.0")

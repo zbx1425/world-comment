@@ -10,8 +10,10 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.Permission;
 import net.minecraft.server.permissions.PermissionCheck;
@@ -23,9 +25,9 @@ import java.util.function.Function;
 
 public class ClientCommand {
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher,
-                                    Function<String, LiteralArgumentBuilder<CommandSourceStack>> literal,
-                                    BiFunction<String, ArgumentType<?>, RequiredArgumentBuilder<CommandSourceStack, ?>> argument) {
+    public static <T extends SharedSuggestionProvider> void register(CommandDispatcher<T> dispatcher,
+                 Function<String, LiteralArgumentBuilder<T>> literal,
+                 BiFunction<String, ArgumentType<?>, RequiredArgumentBuilder<T, ?>> argument) {
         dispatcher.register(literal.apply("wc")
             .executes(context -> {
                 CommentToolItem.Client.triggerCommentSend(true);
@@ -47,7 +49,8 @@ public class ClientCommand {
                     if (isYaclAvailable()) {
                         Minecraft.getInstance().setScreen(CommentMockScreen.create(Minecraft.getInstance().screen));
                     } else {
-                        context.getSource().sendSystemMessage(Component.literal("YetAnotherConfigLib is needed for this function."));
+                        LocalPlayer player = Minecraft.getInstance().player;
+                        if (player != null) player.sendSystemMessage(Component.literal("YetAnotherConfigLib is needed for this function."));
                     }
                     return 1;
                 })

@@ -65,7 +65,7 @@ dependencies {
     implementation(include("io.projectreactor:reactor-core:3.4.27")!!)
     implementation(include("org.reactivestreams:reactive-streams:1.0.4")!!)
 
-    implementation(include("dev.matrixlab.webp4j:webp4j-core:2.5.0")!!)
+    implementation(include("dev.matrixlab.webp4j:webp4j-core:2.1.0")!!)
 }
 
 loom {
