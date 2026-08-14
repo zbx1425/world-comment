@@ -119,7 +119,7 @@ public class PlaceableCommentItem extends Item implements GroupedItem {
                         player.sendSystemMessage(
                             Component.translatable("gui.worldcomment.send_in_air"));
                     }
-                    SubmitDispatcher.placeJobAt(meta.clientJobId(), facePos);
+                    SubmitDispatcher.placeJobAt(meta.clientJobId(), facePos, level);
                     PacketRequestPlacementC2S.ClientLogics.sendEndPlacement();
                     return true;
                 }

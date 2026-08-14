@@ -1,5 +1,6 @@
 package cn.zbx1425.worldcomment.data;
 
+import cn.zbx1425.worldcomment.data.client.CommentPrefillInfo;
 import cn.zbx1425.worldcomment.data.network.CommentImage;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -8,12 +9,11 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -31,7 +31,7 @@ public class CommentEntry {
 
     public long id;
     public long timestamp;
-    public @NonNull Identifier level;
+    public @Nullable Identifier level;
     public @Nullable ChunkPos region;
     public @Nullable BlockPos location;
     public @Nullable BlockPos imageLocation;
@@ -44,24 +44,20 @@ public class CommentEntry {
     public boolean deleted;
     public int like;
 
-    public CommentEntry(Player initiator, boolean isAnonymous, int messageType, String message, BlockPos imageLocation) {
+    public CommentEntry(CommentPrefillInfo prefill, boolean isAnonymous, int messageType, String message) {
         id = ServerWorldData.SNOWFLAKE.nextId();
         timestamp = System.currentTimeMillis();
-        //? if >=1.20 {
-        level = initiator.level().dimension().identifier();
-        //?} else {
-        /*level = initiator.level.dimension().identifier();
-        *///?}
-        this.initiator = initiator.getGameProfile().id();
+        this.initiator = prefill.initiator;
         if (isAnonymous) {
             initiatorName = "";
         } else {
-            initiatorName = initiator.getGameProfile().name();
+            initiatorName = prefill.initiatorName;
         }
         this.messageType = messageType;
         this.message = message;
         deleted = false;
-        this.imageLocation = imageLocation;
+        this.imageLocation = prefill.imageLocation;
+        this.image = CommentImage.NONE;
     }
 
     // From packet
@@ -88,13 +84,13 @@ public class CommentEntry {
         id = json.get("id").getAsLong();
         timestamp = json.get("timestamp").getAsLong();
 //? if >=1.21 {
-        level = Identifier.parse(json.get("level").getAsString());
+        Identifier level = Identifier.parse(json.get("level").getAsString());
 //? } else {
-        /*level = new Identifier(json.get("level").getAsString());
+        /*Identifier level = new Identifier(json.get("level").getAsString());
 *///? }
         if (json.has("location")) {
             JsonArray loc = json.getAsJsonArray("location");
-            setLocation(new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt()));
+            setLocation(level, new BlockPos(loc.get(0).getAsInt(), loc.get(1).getAsInt(), loc.get(2).getAsInt()));
         }
         if (json.has("imageLocation")) {
             JsonArray loc = json.getAsJsonArray("imageLocation");
@@ -124,16 +120,17 @@ public class CommentEntry {
         this.message = message;
         deleted = false;
         this.image = CommentImage.NONE;
-        this.setLocation(BlockPos.ZERO);
+        this.setLocation(Level.OVERWORLD.identifier(), BlockPos.ZERO);
         this.imageLocation = BlockPos.ZERO;
     }
 
-    public void setLocation(BlockPos location) {
+    public void setLocation(Identifier level, BlockPos location) {
+        this.level = level;
         this.location = location;
         this.region = new ChunkPos(location.getX() >> (4 + REGION_SHIFT), location.getZ() >> (4 + REGION_SHIFT));
     }
 
-    public void copyFrom(CommentEntry other) {
+    public void copyUpdateableFrom(CommentEntry other) {
         this.messageType = other.messageType;
         this.message = other.message;
         this.image = other.image;
@@ -141,7 +138,7 @@ public class CommentEntry {
         this.like = other.like;
     }
 
-    public void writeBuffer(FriendlyByteBuf dst) {
+    public void streamWrite(FriendlyByteBuf dst) {
         dst.writeBoolean(deleted);
         dst.writeInt(like);
         dst.writeLong(id);
@@ -189,19 +186,6 @@ public class CommentEntry {
         json.addProperty("deleted", deleted);
         json.addProperty("like", like);
         return json;
-    }
-
-    public ByteBuf toBinaryBuffer() {
-        FriendlyByteBuf dest = new FriendlyByteBuf(Unpooled.buffer(512));
-        dest.writeIdentifier(level);
-        writeBuffer(dest);
-        return dest;
-    }
-
-    public static CommentEntry fromBinaryBuffer(ByteBuf buf) {
-        FriendlyByteBuf src = new FriendlyByteBuf(buf);
-        Identifier level = src.readIdentifier();
-        return new CommentEntry(level, src);
     }
 
     public static CommentEntry createSystemMessage(int messageType, String message, String title) {

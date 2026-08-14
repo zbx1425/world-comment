@@ -8,10 +8,15 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionCheck;
+import net.minecraft.server.permissions.PermissionLevel;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -21,7 +26,9 @@ public class ServerCommand {
                                     Function<String, LiteralArgumentBuilder<CommandSourceStack>> literal,
                                     BiFunction<String, ArgumentType<?>, RequiredArgumentBuilder<CommandSourceStack, ?>> argument) {
         dispatcher.register(literal.apply("wcs")
-                .then(literal.apply("imageGlobalKill").then(argument.apply("kill", BoolArgumentType.bool())
+                .then(literal.apply("imageGlobalKill")
+                    .requires(Commands.hasPermission(new PermissionCheck.Require(new Permission.HasCommandLevel(PermissionLevel.byId(4)))))
+                    .then(argument.apply("kill", BoolArgumentType.bool())
                         .executes(context -> {
                             boolean kill = BoolArgumentType.getBool(context, "kill");
                             Main.SERVER_CONFIG.imageGlobalKill = Main.SERVER_CONFIG.imageGlobalKill.withNewValueToPersist(

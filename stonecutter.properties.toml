@@ -15,8 +15,10 @@ mod.mc_releases = ["26.1"]
 [fabric."26.1"]
 mod.mc_compat = "~26.1"
 deps.fabric_api = "0.150.0+26.1.2"
+deps.yacl="3.9.3+26.1-fabric"
 
 
 [neoforge."26.1"]
 mod.mc_compat = "[26.1, 26.2)"
 deps.neo_loader = "26.1.2.87"
+deps.yacl="3.9.3+26.1-neoforge"

@@ -20,7 +20,7 @@ public class PacketEntryCreateC2S {
         public static void send(CommentEntry comment) {
             FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
             buffer.writeIdentifier(comment.level);
-            comment.writeBuffer(buffer);
+            comment.streamWrite(buffer);
             if (CommentCommand.isCommand(comment)) {
                 CommentCommand.executeCommandClient(comment);
             }

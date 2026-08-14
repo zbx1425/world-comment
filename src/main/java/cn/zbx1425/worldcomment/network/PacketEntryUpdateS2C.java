@@ -17,7 +17,7 @@ public class PacketEntryUpdateS2C {
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeBoolean(update);
         buffer.writeIdentifier(comment.level);
-        comment.writeBuffer(buffer);
+        comment.streamWrite(buffer);
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
     }
 

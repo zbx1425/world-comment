@@ -2,7 +2,6 @@ package cn.zbx1425.worldcomment.data.client;
 
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
-import cn.zbx1425.worldcomment.gui.CommentToolScreen;
 import cn.zbx1425.worldcomment.mixin.NativeImageAccessor;
 import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.pipeline.RenderTarget;

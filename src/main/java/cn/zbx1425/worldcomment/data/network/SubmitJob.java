@@ -5,6 +5,7 @@ import cn.zbx1425.worldcomment.data.CommentEntry;
 import cn.zbx1425.worldcomment.data.network.upload.ImageUploader;
 import cn.zbx1425.worldcomment.data.network.upload.UploadOutcome;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +45,8 @@ public class SubmitJob {
         return Collections.unmodifiableList(uploadWarnings);
     }
 
-    public void setLocation(BlockPos blockPos) {
-        comment.setLocation(blockPos);
+    public void setLocation(Identifier level, BlockPos blockPos) {
+        comment.setLocation(level, blockPos);
         blockPosReady = true;
     }
 

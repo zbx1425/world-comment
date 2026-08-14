@@ -24,7 +24,7 @@ public class PacketCollectionDataS2C {
         buffer.writeInt(data.size());
         for (CommentEntry comment : data) {
             buffer.writeIdentifier(comment.level);
-            comment.writeBuffer(buffer);
+            comment.streamWrite(buffer);
         }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);
     }

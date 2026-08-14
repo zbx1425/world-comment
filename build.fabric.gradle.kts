@@ -31,6 +31,7 @@ repositories {
     }
     strictMaven("https://www.cursemaven.com", "CurseForge", "curse.maven")
     strictMaven("https://api.modrinth.com/maven", "Modrinth", "maven.modrinth")
+    maven("https://maven.isxander.dev/releases") { name = "Xander Maven" }
 }
 
 dependencies {
@@ -57,6 +58,8 @@ dependencies {
     } else {
         fapi("fabric-key-binding-api-v1", "fabric-item-group-api-v1")
     }
+
+    modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")}")
 
     implementation(include("io.lettuce:lettuce-core:6.2.3.RELEASE")!!)
     implementation(include("io.projectreactor:reactor-core:3.4.27")!!)

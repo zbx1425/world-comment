@@ -3,6 +3,7 @@ package cn.zbx1425.worldcomment.gui;
 import cn.zbx1425.worldcomment.Main;
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.client.CommentPrefillInfo;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
 import cn.zbx1425.worldcomment.data.network.SubmitDispatcher;
 import cn.zbx1425.worldcomment.data.network.SubmitStageEvent;
@@ -33,9 +34,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public class CommentToolScreen extends Screen implements IGuiCommon {
+public class CommentSendScreen extends Screen implements IGuiCommon {
 
-    private final byte[] imageBytes;
+    private final CommentPrefillInfo prefill;
     private final boolean withPlacingDown;
 
     private final WidgetUnmanagedImage widgetImage;
@@ -59,14 +60,14 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
 
     private int rootOffX, rootOffY, asideHeight;
 
-    public CommentToolScreen(byte[] imageBytes, boolean withPlacingDown) {
+    public CommentSendScreen(CommentPrefillInfo prefill, boolean withPlacingDown) {
         super(Component.literal("Comment Tool"));
-        this.imageBytes = imageBytes;
+        this.prefill = prefill;
         this.withPlacingDown = withPlacingDown;
         this.screenshotSaved = false;
-        ByteBuffer offHeapBuffer = OffHeapAllocator.allocate(imageBytes.length);
+        ByteBuffer offHeapBuffer = OffHeapAllocator.allocate(prefill.imagePngBytes.length);
         try {
-            offHeapBuffer.put(imageBytes);
+            offHeapBuffer.put(prefill.imagePngBytes);
             offHeapBuffer.rewind();
 //? if >=1.21.6 {
             this.widgetImage = new WidgetUnmanagedImage(new DynamicTexture(
@@ -223,12 +224,11 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
         Minecraft.getInstance().execute(() -> {
             Player player = Minecraft.getInstance().player;
             CommentEntry comment = new CommentEntry(
-                    player, checkBoxAnonymous.selected(),
-                    emojiPanel.getSelectedId(), textBoxMessage.getValue(),
-                    player.blockPosition()
+                    prefill, checkBoxAnonymous.selected(),
+                    emojiPanel.getSelectedId(), textBoxMessage.getValue()
             );
             long jobId = SubmitDispatcher.addJob(
-                    comment, checkBoxNoImage.selected() ? null : imageBytes,
+                    comment, checkBoxNoImage.selected() ? null : prefill.imagePngBytes,
                     event -> Minecraft.getInstance().execute(() -> {
                         switch (event) {
                             case SubmitStageEvent.Sent(var warnings) -> {
@@ -275,7 +275,7 @@ public class CommentToolScreen extends Screen implements IGuiCommon {
     private void saveScreenshot() {
         Path persistentPath = Screenshot.getAvailableFile().toPath();
         try {
-            Files.write(persistentPath, imageBytes);
+            Files.write(persistentPath, prefill.imagePngBytes);
             screenshotSaved = true;
             btnSaveScreenshot.active = false;
 

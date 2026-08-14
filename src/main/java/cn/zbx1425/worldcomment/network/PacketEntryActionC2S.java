@@ -30,7 +30,7 @@ public class PacketEntryActionC2S {
                     comment.like++;
                 }
             }
-            comment.writeBuffer(buffer);
+            comment.streamWrite(buffer);
             ClientPlatform.sendPacketToServer(IDENTIFIER, buffer);
         }
     }

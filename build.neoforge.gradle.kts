@@ -26,9 +26,11 @@ repositories {
     }
     strictMaven("https://www.cursemaven.com", "CurseForge", "curse.maven")
     strictMaven("https://api.modrinth.com/maven", "Modrinth", "maven.modrinth")
+    maven("https://maven.isxander.dev/releases") { name = "Xander Maven" }
 }
 
 dependencies {
+    implementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")}")
 
     jarJar(implementation("io.lettuce:lettuce-core:6.2.3.RELEASE") { version { prefer("6.2.3") } })
     jarJar(implementation("io.projectreactor:reactor-core:3.4.27") { version { prefer("3.4.27") } })

@@ -28,7 +28,7 @@ public class PacketRegionDataS2C {
             buffer.writeChunkPos(entry.getKey());
             buffer.writeInt(entry.getValue().size());
             for (CommentEntry comment : entry.getValue()) {
-                comment.writeBuffer(buffer);
+                comment.streamWrite(buffer);
             }
         }
         ServerPlatform.sendPacketToPlayer(target, IDENTIFIER, buffer);

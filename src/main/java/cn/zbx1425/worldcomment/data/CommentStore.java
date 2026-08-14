@@ -3,10 +3,8 @@ package cn.zbx1425.worldcomment.data;
 import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.commons.lang3.function.TriConsumer;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 public class CommentStore {
 
@@ -104,7 +102,7 @@ public class CommentStore {
             if (chunk == null) return;
             for (CommentEntry existingEntry : chunk.getEntries()) {
                 if (existingEntry.id == newEntry.id) {
-                    existingEntry.copyFrom(newEntry);
+                    existingEntry.copyUpdateableFrom(newEntry);
                     chunk.markDirty();
                     return;
                 }

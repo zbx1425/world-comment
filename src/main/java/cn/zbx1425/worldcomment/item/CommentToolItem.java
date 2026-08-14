@@ -4,10 +4,10 @@ import cn.zbx1425.worldcomment.Main;
 //? if >=1.20 {
 import cn.zbx1425.worldcomment.MainClient;
 import cn.zbx1425.worldcomment.data.CommentEntry;
+import cn.zbx1425.worldcomment.data.client.CommentPrefillInfo;
 import cn.zbx1425.worldcomment.data.client.Screenshot;
-import cn.zbx1425.worldcomment.gui.CommentToolScreen;
+import cn.zbx1425.worldcomment.gui.CommentSendScreen;
 import cn.zbx1425.worldcomment.mixin.KeyMappingAccessor;
-import cn.zbx1425.worldcomment.util.FrameTask;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.core.registries.Registries;
@@ -121,7 +121,8 @@ public class CommentToolItem extends Item implements GroupedItem {
             minecraft.player.playSound(shutterSoundEvent);
 
             Screenshot.grabScreenshot(imageBytes -> {
-                Minecraft.getInstance().setScreen(new CommentToolScreen(imageBytes, withPlacingDown));
+                CommentPrefillInfo prefill = new CommentPrefillInfo(minecraft.player, minecraft.player.blockPosition(), imageBytes);
+                Minecraft.getInstance().setScreen(new CommentSendScreen(prefill, withPlacingDown));
             });
             return true;
         }

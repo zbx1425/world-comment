@@ -55,10 +55,10 @@ public class SubmitDispatcher {
         }
     }
 
-    public static void placeJobAt(long jobId, BlockPos blockPos) {
+    public static void placeJobAt(long jobId, BlockPos blockPos, Level level) {
         synchronized (pendingJobs) {
             if (!pendingJobs.containsKey(jobId)) return;
-            pendingJobs.get(jobId).setLocation(blockPos);
+            pendingJobs.get(jobId).setLocation(level.dimension().identifier(), blockPos);
             trySendPackage(jobId);
         }
     }
@@ -76,9 +76,9 @@ public class SubmitDispatcher {
         synchronized (pendingJobs) {
             if (!pendingJobs.containsKey(jobId)) return true;
             if (groundPos != null) {
-                pendingJobs.get(jobId).setLocation(groundPos.above());
+                pendingJobs.get(jobId).setLocation(level.dimension().identifier(), groundPos.above());
             } else {
-                pendingJobs.get(jobId).setLocation(blockPos);
+                pendingJobs.get(jobId).setLocation(level.dimension().identifier(), blockPos);
             }
             trySendPackage(jobId);
         }
