@@ -101,7 +101,10 @@ public class S3PreSignedUploader extends ImageUploader {
                 .thenApply(response -> {
                     if (response.statusCode() < 200 || response.statusCode() >= 300) {
                         throw new CompletionException(new IOException(
-                                "S3 upload failed: " + response.statusCode() + " " + response.body()));
+                            "S3 upload failed: " + response.statusCode()
+                            + "; tried to POST " + webpData.length + " bytes; "
+                            + response.body()
+                        ));
                     }
 
                     List<UploadOutcome.Warning> warnings = new ArrayList<>();
