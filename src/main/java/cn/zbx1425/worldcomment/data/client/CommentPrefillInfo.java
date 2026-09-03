@@ -13,6 +13,7 @@ public class CommentPrefillInfo {
     public boolean unlisted;
     public BlockPos imageLocation;
     public byte[] imagePngBytes;
+    public long overrideTimestamp = -1;
 
     public CommentPrefillInfo(Player initiator, BlockPos imageLocation, byte[] imagePngBytes) {
         this.initiator = initiator.getGameProfile().id();

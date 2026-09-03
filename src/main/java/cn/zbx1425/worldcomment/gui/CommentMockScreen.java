@@ -26,6 +26,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -57,6 +61,14 @@ public class CommentMockScreen {
                 "The Block Position of the player who took this screenshot, at the time when it was taken.")))
             .binding(prefill.imageLocation, () -> prefill.imageLocation, v -> prefill.imageLocation = v)
             .customController(BlockPosController::new)
+            .build();
+        final String[] timestampStr = { "" };
+        Option<String> optTimestamp = Option.<String>createBuilder()
+            .name(Component.literal("Timestamp"))
+            .description(OptionDescription.of(Component.literal(
+                "The send time of this comment. Format: yyyy-MM-dd HH:mm:ss or yyyy-MM-ddTHH:mm:ss. Leave empty to use current time.")))
+            .binding("", () -> timestampStr[0], v -> timestampStr[0] = v)
+            .customController(TimestampController::new)
             .build();
         Option<Boolean> optUnlisted = Option.<Boolean>createBuilder()
             .name(Component.literal("Unlisted"))
@@ -123,6 +135,7 @@ public class CommentMockScreen {
                     .name(Component.literal("Metadata"))
                     .option(optInitiator)
                     .option(optInitiatorName)
+                    .option(optTimestamp)
                     .option(optImagePosition)
                     .option(optUnlisted)
                     .build()
@@ -133,6 +146,9 @@ public class CommentMockScreen {
             .save(() -> {
                 try {
                     if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) return;
+                    if (!timestampStr[0].isEmpty()) {
+                        prefill.overrideTimestamp = parseTimestamp(timestampStr[0]);
+                    }
                     prefill.imagePngBytes = Files.readAllBytes(getInputImageDir().resolve(imagePath[0]));
                     ByteBuffer offHeapBuffer = OffHeapAllocator.allocate(prefill.imagePngBytes.length);
                     try {
@@ -201,6 +217,33 @@ public class CommentMockScreen {
             } catch (NumberFormatException ignored) {
                 return null;
             }
+        }
+    }
+
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private static long parseTimestamp(String input) {
+        String normalized = input.trim().replace('T', ' ');
+        LocalDateTime ldt = LocalDateTime.parse(normalized, TIMESTAMP_FORMATTER);
+        return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    private record TimestampController(Option<String> option) implements IStringController<String> {
+        @Override
+        public String getString() {
+            return option.pendingValue();
+        }
+
+        @Override
+        public void setFromString(String value) {
+            if (value.isEmpty()) {
+                option.requestSet("");
+                return;
+            }
+            try {
+                parseTimestamp(value);
+                option.requestSet(value);
+            } catch (DateTimeParseException ignored) { }
         }
     }
 

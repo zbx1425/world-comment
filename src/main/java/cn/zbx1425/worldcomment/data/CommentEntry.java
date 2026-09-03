@@ -47,7 +47,7 @@ public class CommentEntry {
 
     public CommentEntry(CommentPrefillInfo prefill, boolean isAnonymous, int messageType, String message) {
         id = ServerWorldData.SNOWFLAKE.nextId();
-        timestamp = System.currentTimeMillis();
+        timestamp = prefill.overrideTimestamp > 0 ? prefill.overrideTimestamp : System.currentTimeMillis();
         this.initiator = prefill.initiator;
         if (isAnonymous) {
             initiatorName = "";
