@@ -73,6 +73,7 @@
   "gui.worldcomment.instruction.hide_content": "使用物品栏界面或暂停菜单上的切换按钮",
   "gui.worldcomment.instruction.list_header": "#### 查看评论列表",
   "gui.worldcomment.instruction.list_content": "使用 /wc list 指令",
+  "gui.worldcomment.instruction.key.tilde": "~ 键 (在 1 键左边)",
 
   "gui.worldcomment.send_pending": "§6§l请选择一个喜欢的位置，然后放下评论！",
   "gui.worldcomment.send_upload_incomplete": "§b您的评论图片还没有完成上传，请您稍等。",

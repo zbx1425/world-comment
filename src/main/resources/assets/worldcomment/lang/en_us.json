@@ -73,6 +73,7 @@
   "gui.worldcomment.instruction.hide_content": "Use the toggle button on inventory screen or pause menu",
   "gui.worldcomment.instruction.list_header": "###### §lViewing Comment List",
   "gui.worldcomment.instruction.list_content": "Use the command '/wc list'",
+  "gui.worldcomment.instruction.key.tilde": "~ Key (Left of the 1 key)",
 
   "gui.worldcomment.send_pending": "§6§lPlease place your message down!",
   "gui.worldcomment.send_upload_incomplete": "§bYour image is still being uploaded. Please wait.",

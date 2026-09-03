@@ -14,7 +14,7 @@ public class MainClient {
 	public static ClientConfig CLIENT_CONFIG = new ClientConfig();
 
 	public static RegistryObject<KeyMapping> KEY_SEND_COMMENT_MODIFIER = new RegistryObject<>(() ->
-		new KeyMapping("key.worldcomment.send_comment_modifier", GLFW.GLFW_KEY_LEFT_ALT, KeyMapping.Category.MISC));
+		new KeyMapping("key.worldcomment.send_comment_modifier", GLFW.GLFW_KEY_GRAVE_ACCENT, KeyMapping.Category.MISC));
 
 	public static void init() {
 		ClientWorldData.INSTANCE.proximityCommentSet.onCommentApproach = (comment -> {

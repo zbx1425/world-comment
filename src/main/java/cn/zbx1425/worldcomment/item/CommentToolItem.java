@@ -73,11 +73,13 @@ public class CommentToolItem extends Item implements GroupedItem {
             GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT, GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT,
             GLFW.GLFW_KEY_LEFT_SUPER, GLFW.GLFW_KEY_RIGHT_SUPER, GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL
         };
-        private static final Function<InputConstants.Key, Boolean> HOTKEY_IS_MODIFIER_SUPPLIER = Util.memoize(_ ->
-            Arrays.stream(MODIFIER_SYMS).anyMatch(it -> ((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey().getValue() == it)
+        private static final Function<InputConstants.Key, Boolean> HOTKEY_IS_MODIFIER_SUPPLIER = Util.memoize(sendCommentOrModifier ->
+            Arrays.stream(MODIFIER_SYMS).anyMatch(it -> sendCommentOrModifier.getValue() == it)
         );
-        private static final Function<InputConstants.Key, Component> HOTKEY_DESCRIPTION_SUPPLIER = Util.memoize(_ -> {
-            if (HOTKEY_IS_MODIFIER_SUPPLIER.apply(((KeyMappingAccessor)MainClient.KEY_SEND_COMMENT_MODIFIER.get()).getKey())) {
+        private static final Function<InputConstants.Key, Component> HOTKEY_DESCRIPTION_SUPPLIER = Util.memoize(sendCommentOrModifier -> {
+            if (sendCommentOrModifier.equals(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_GRAVE))) {
+                return Component.translatable("gui.worldcomment.instruction.key.tilde");
+            } else if (HOTKEY_IS_MODIFIER_SUPPLIER.apply(sendCommentOrModifier)) {
                 return MainClient.KEY_SEND_COMMENT_MODIFIER.get().getTranslatedKeyMessage().copy()
                     .append(" + ")
                     .append(Minecraft.getInstance().options.keyScreenshot.getTranslatedKeyMessage());
