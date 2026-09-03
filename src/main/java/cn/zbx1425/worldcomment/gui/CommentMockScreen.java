@@ -9,7 +9,6 @@ import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
-import dev.isxander.yacl3.gui.controllers.string.IStringController;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -42,34 +41,40 @@ public class CommentMockScreen {
         LocalPlayer player = Minecraft.getInstance().player;
         CommentPrefillInfo prefill = new CommentPrefillInfo(player, player.blockPosition(), null);
 
-        Option<UUID> optInitiator = Option.<UUID>createBuilder()
+        final String[] initiatorStr = { prefill.initiator != null ? prefill.initiator.toString() : "" };
+        Option<String> optInitiator = Option.<String>createBuilder()
             .name(Component.literal("Initiator"))
             .description(OptionDescription.of(Component.literal("UUID of the player who sent this comment.")))
-            .binding(prefill.initiator, () -> prefill.initiator,v -> prefill.initiator = v)
-            .customController(UUIDController::new)
+            .binding(initiatorStr[0], () -> initiatorStr[0], v -> initiatorStr[0] = v)
+            .controller(StringControllerBuilder::create)
             .available(false)
             .build();
+
         Option<String> optInitiatorName = Option.<String>createBuilder()
             .name(Component.literal("Initiator Name"))
             .description(OptionDescription.of(Component.literal("Name of the player who sent this comment.")))
             .binding(prefill.initiatorName, () -> prefill.initiatorName, v -> prefill.initiatorName = v)
             .controller(StringControllerBuilder::create)
             .build();
-        Option<BlockPos> optImagePosition = Option.<BlockPos>createBuilder()
+
+        final String[] imageLocationStr = { String.format("(%d, %d, %d)", prefill.imageLocation.getX(), prefill.imageLocation.getY(), prefill.imageLocation.getZ()) };
+        Option<String> optImagePosition = Option.<String>createBuilder()
             .name(Component.literal("Image Location"))
             .description(OptionDescription.of(Component.literal(
                 "The Block Position of the player who took this screenshot, at the time when it was taken.")))
-            .binding(prefill.imageLocation, () -> prefill.imageLocation, v -> prefill.imageLocation = v)
-            .customController(BlockPosController::new)
+            .binding(imageLocationStr[0], () -> imageLocationStr[0], v -> imageLocationStr[0] = v)
+            .controller(StringControllerBuilder::create)
             .build();
+
         final String[] timestampStr = { "" };
         Option<String> optTimestamp = Option.<String>createBuilder()
             .name(Component.literal("Timestamp"))
             .description(OptionDescription.of(Component.literal(
                 "The send time of this comment. Format: yyyy-MM-dd HH:mm:ss or yyyy-MM-ddTHH:mm:ss. Leave empty to use current time.")))
             .binding("", () -> timestampStr[0], v -> timestampStr[0] = v)
-            .customController(TimestampController::new)
+            .controller(StringControllerBuilder::create)
             .build();
+
         Option<Boolean> optUnlisted = Option.<Boolean>createBuilder()
             .name(Component.literal("Unlisted"))
             .description(OptionDescription.of(Component.literal(
@@ -81,18 +86,20 @@ public class CommentMockScreen {
         OptionGroup.Builder groupImage = OptionGroup.createBuilder()
             .name(Component.literal("Image"))
             .description(OptionDescription.of(Component.literal("The image file to use for mocking.")));
+
         final String[] imagePath = { "" };
         Map<String, ButtonOption> imageButtons = new HashMap<>();
         Option<String> optImage = Option.<String>createBuilder()
             .name(Component.literal("Image"))
             .binding("", () -> imagePath[0], v -> imagePath[0] = v)
-            .customController(InputImageController::new)
+            .controller(StringControllerBuilder::create)
             .addListener((option, value) -> {
                 for (Map.Entry<String, ButtonOption> entry1 : imageButtons.entrySet()) {
                     entry1.getValue().setAvailable(!entry1.getKey().equals(option.pendingValue()));
                 }
             })
             .build();
+
         groupImage.option(optImage);
         groupImage.option(ButtonOption.createBuilder()
             .name(Component.literal("[Open Folder]"))
@@ -106,6 +113,7 @@ public class CommentMockScreen {
                 Minecraft.getInstance().setScreen(CommentMockScreen.create(parent));
             })
             .build());
+
         try {
             Files.createDirectories(getInputImageDir());
             try (Stream<Path> stream = Files.list(getInputImageDir())) {
@@ -127,7 +135,8 @@ public class CommentMockScreen {
             groupImage.option(LabelOption.create(Component.literal(ex.toString())));
         }
 
-        return YetAnotherConfigLib.createBuilder()
+        Screen[] mockScreen = new Screen[] { null };
+        mockScreen[0] = YetAnotherConfigLib.createBuilder()
             .title(Component.literal("Mock a Comment"))
             .category(ConfigCategory.createBuilder()
                 .name(Component.literal("Mock a Comment"))
@@ -146,10 +155,30 @@ public class CommentMockScreen {
             .save(() -> {
                 try {
                     if (!player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) return;
+
+                    if (!initiatorStr[0].isEmpty()) {
+                        prefill.initiator = UUID.fromString(initiatorStr[0]);
+                    }
+
+                    BlockPos parsedPos = parseBlockPos(imageLocationStr[0]);
+                    if (parsedPos == null) {
+                        throw new IllegalArgumentException("Invalid BlockPos format: " + imageLocationStr[0]);
+                    }
+                    prefill.imageLocation = parsedPos;
+
                     if (!timestampStr[0].isEmpty()) {
                         prefill.overrideTimestamp = parseTimestamp(timestampStr[0]);
                     }
-                    prefill.imagePngBytes = Files.readAllBytes(getInputImageDir().resolve(imagePath[0]));
+
+                    if (imagePath[0].isEmpty() || imagePath[0].contains("..") || !imagePath[0].toLowerCase(Locale.ROOT).endsWith(".png")) {
+                        throw new IllegalArgumentException("Invalid image file path: " + imagePath[0]);
+                    }
+                    Path imageFilePath = getInputImageDir().resolve(imagePath[0]);
+                    if (!Files.isRegularFile(imageFilePath)) {
+                        throw new IOException("Image file does not exist: " + imagePath[0]);
+                    }
+
+                    prefill.imagePngBytes = Files.readAllBytes(imageFilePath);
                     ByteBuffer offHeapBuffer = OffHeapAllocator.allocate(prefill.imagePngBytes.length);
                     try {
                         offHeapBuffer.put(prefill.imagePngBytes);
@@ -160,63 +189,38 @@ public class CommentMockScreen {
                     } finally {
                         OffHeapAllocator.free(offHeapBuffer);
                     }
+
                     Minecraft.getInstance().setScreen(new CommentSendScreen(prefill, true));
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     Minecraft.getInstance().setScreen(YetAnotherConfigLib.createBuilder()
+                        .title(Component.literal("Error"))
                         .category(ConfigCategory.createBuilder()
                             .name(Component.literal("Error"))
                             .option(LabelOption.create(Component.literal(ex.toString())))
                             .build())
                         .build()
-                        .generateScreen(parent)
+                        .generateScreen(mockScreen[0])
                     );
                 }
             })
             .build()
             .generateScreen(parent);
+        return mockScreen[0];
     }
 
-    private record UUIDController(Option<UUID> option) implements IStringController<UUID> {
-        @Override
-        public String getString() {
-            return option.pendingValue().toString();
-        }
-
-        @Override
-        public void setFromString(String value) {
-            try {
-                option.requestSet(UUID.fromString(value));
-            } catch (IllegalArgumentException ignored) { }
-        }
-    }
-
-    private record BlockPosController(Option<BlockPos> option) implements IStringController<BlockPos> {
-        @Override
-        public String getString() {
-            BlockPos blockPos = option.pendingValue();
-            return String.format("(%d, %d, %d)", blockPos.getX(), blockPos.getY(), blockPos.getZ());
-        }
-
-        @Override
-        public void setFromString(String value) {
-            BlockPos parsed = parseBlockPos(value);
-            if (parsed != null) option.requestSet(parsed);
-        }
-
-        private static @Nullable BlockPos parseBlockPos(String input) {
-            input = StringUtils.stripStart(input, " ([");
-            input = StringUtils.stripEnd(input, " )]");
-            String[] split = input.split(",");
-            if (split.length != 3) return null;
-            try {
-                return new BlockPos(
-                    Integer.parseInt(split[0].trim()),
-                    Integer.parseInt(split[1].trim()),
-                    Integer.parseInt(split[2].trim())
-                );
-            } catch (NumberFormatException ignored) {
-                return null;
-            }
+    private static @Nullable BlockPos parseBlockPos(String input) {
+        input = StringUtils.stripStart(input, " ([");
+        input = StringUtils.stripEnd(input, " )]");
+        String[] split = input.split(",");
+        if (split.length != 3) return null;
+        try {
+            return new BlockPos(
+                Integer.parseInt(split[0].trim()),
+                Integer.parseInt(split[1].trim()),
+                Integer.parseInt(split[2].trim())
+            );
+        } catch (NumberFormatException ignored) {
+            return null;
         }
     }
 
@@ -226,41 +230,6 @@ public class CommentMockScreen {
         String normalized = input.trim().replace('T', ' ');
         LocalDateTime ldt = LocalDateTime.parse(normalized, TIMESTAMP_FORMATTER);
         return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
-
-    private record TimestampController(Option<String> option) implements IStringController<String> {
-        @Override
-        public String getString() {
-            return option.pendingValue();
-        }
-
-        @Override
-        public void setFromString(String value) {
-            if (value.isEmpty()) {
-                option.requestSet("");
-                return;
-            }
-            try {
-                parseTimestamp(value);
-                option.requestSet(value);
-            } catch (DateTimeParseException ignored) { }
-        }
-    }
-
-    private record InputImageController(Option<String> option) implements IStringController<String> {
-        @Override
-        public String getString() {
-            return option.pendingValue();
-        }
-
-        @Override
-        public void setFromString(String value) {
-            if (!value.contains("..")
-                && value.toLowerCase(Locale.ROOT).endsWith(".png")
-                && Files.isRegularFile(getInputImageDir().resolve(value))) {
-                option.requestSet(value);
-            }
-        }
     }
 
     private static Path getInputImageDir() {
